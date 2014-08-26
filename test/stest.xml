@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<scripts>
+     <item>
+         <action type="hotkey">ctrl,49</action> <!-- 49 is the key value for decide -->
+         <file>c:\xxx\xxx\test.cxx</file>
+         <desc>
+             test for the xml parser
+         </desc>
+         <interp>0</interp>
+     </item>
+     <item>
+         <action type="netcmd">working</action>
+         <file>c:\xfdsf\sfddsfd\qq.cxx</file>
+         <desc>
+             qkqkqkqqkqk
+         </desc>
+         <interp>0</interp>
+     </item>
+</scripts>

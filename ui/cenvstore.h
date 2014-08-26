@@ -6,6 +6,7 @@
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 #include <QVariant>
+#include <QFile>
 
 class CEnvStore : public QObject
 {
@@ -17,8 +18,11 @@ public:
     CEnvStore(QObject *parent = 0);
     virtual ~CEnvStore();
 
-private:
+protected:
     QString m_szXmlFile;
+    QFile m_file;
+    QXmlStreamReader m_xmlReader;
+    QXmlStreamWriter m_xmlWriter;
 
 protected:
     virtual bool parser();

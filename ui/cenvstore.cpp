@@ -1,4 +1,5 @@
 #include "cenvstore.h"
+#include "debug.h"
 
 CEnvStore::CEnvStore(QObject *parent) :
     QObject(parent)
@@ -31,6 +32,7 @@ bool CEnvStore::parser() {
 
 void CEnvStore::slotSetFile(QString szName) {
     m_szXmlFile=szName;
+    _DMSG("xml name: %s", m_szXmlFile.toUtf8().data());
 }
 
 QString CEnvStore::slotGetFile() {

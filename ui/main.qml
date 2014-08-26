@@ -2,6 +2,7 @@ import QtQuick 2.2
 import QtQuick.Controls 1.1
 import QtQuick.Window 2.0
 import QtQuick.Layouts 1.0
+import ScriptStore 1.0
 
 ApplicationWindow {
     visible: true
@@ -9,6 +10,13 @@ ApplicationWindow {
     width: Screen.width * 2/3
     height: Screen.height * 2/3
     title: qsTr("Hello World")
+
+    // invisOX's classes
+    ScriptStore {
+        id: invisScripts
+        xmlName: "test/stest.xml"
+
+    }
 
     menuBar: MenuBar {
         Menu {
@@ -25,7 +33,7 @@ ApplicationWindow {
             ToolButton {
                 text: qsTr("add script")
                 tooltip: qsTr("add a new script file to invisOX")
-
+                onClicked: invisScripts.slotParser();
 
             }
             ToolButton {

@@ -35,12 +35,17 @@ public:
 
 private:
     std::map<QString, CScriptStore::SScriptInfo> m_mapScriptInfos;
+    bool getItems();
+    bool getItem(CScriptStore::SScriptInfo &info);
+
+protected:
     virtual bool parser();
 
 signals:
 
 public slots:
     virtual bool slotStore();
+    bool slotParser();
 
 };
 
