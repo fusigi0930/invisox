@@ -15,6 +15,7 @@ ApplicationWindow {
     ScriptStore {
         id: invisScripts
         xmlName: "test/stest.xml"
+        onSigAddListItem: listScriptItems.addItem();
 
     }
 
@@ -79,14 +80,19 @@ ApplicationWindow {
             TableViewColumn{role: "actions" ; title: qsTr("Actions") ; width: 150}
             TableViewColumn{role: "script" ; title: qsTr("Script Path") ; width: 350}
             TableViewColumn{role: "desc" ; title: qsTr("Descriptiton") ; width: 350}
-            TableViewColumn{role: "lang" ; title: qsTr("Type") ; width: 150}
+            TableViewColumn{role: "lang" ; title: qsTr("Language") ; width: 150}
 
         }
 
         // content for listScript TableView
         ListModel {
             id: listScriptItems
-            ListElement{ actions: "A" ; script: "b" }
+
+            function addItem() {
+                console.log(invisScripts.item)
+                append(invisScripts.item)
+            }
+
         }
 
     }

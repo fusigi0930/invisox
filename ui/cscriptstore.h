@@ -6,6 +6,8 @@
 class CScriptStore : public CEnvStore
 {
     Q_OBJECT
+    Q_PROPERTY(QVariant item READ getCurItem NOTIFY sigAddListItem)
+
 public:
     CScriptStore(QObject *parent = 0);
     virtual ~CScriptStore();
@@ -34,14 +36,19 @@ public:
 
 
 private:
+    QVariantMap m_currentItem;
     std::map<QString, CScriptStore::SScriptInfo> m_mapScriptInfos;
     bool getItems();
     bool getItem(CScriptStore::SScriptInfo &info);
+
+public:
+    QVariant getCurItem();
 
 protected:
     virtual bool parser();
 
 signals:
+    void sigAddListItem();
 
 public slots:
     virtual bool slotStore();

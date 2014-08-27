@@ -30,6 +30,14 @@ bool CEnvStore::parser() {
     return true;
 }
 
+bool CEnvStore::closeParserWrite() {
+    m_xmlReader.clear();
+    if (m_file.isOpen())
+        m_file.close();
+
+    return true;
+}
+
 void CEnvStore::slotSetFile(QString szName) {
     m_szXmlFile=szName;
     _DMSG("xml name: %s", m_szXmlFile.toUtf8().data());

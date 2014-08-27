@@ -26,10 +26,11 @@ protected:
 
 protected:
     virtual bool parser();
+    virtual bool closeParserWrite();
 
 
 signals:
-    void sigInit(QVariant attributes);
+    void sigInit();
 
 public slots:
     void slotSetFile(QString szName);
