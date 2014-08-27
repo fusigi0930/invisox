@@ -1,4 +1,5 @@
 TEMPLATE = app
+TARGET = invisox
 
 QT += qml quick widgets xml
 

@@ -34,7 +34,12 @@ ApplicationWindow {
             ToolButton {
                 text: qsTr("add script")
                 tooltip: qsTr("add a new script file to invisOX")
-                onClicked: invisScripts.slotParser();
+                onClicked: {
+                    var dialogComponent=Qt.createComponent("new_script.qml");
+                    var dialog=dialogComponent.createObject(mainWindow);
+
+                    //invisScripts.slotParser();
+                }
 
             }
             ToolButton {
@@ -67,6 +72,24 @@ ApplicationWindow {
         width: mainWindow.width-2*x
         height: mainWindow.contentItem.height-2*y
 
+        Menu {
+            id: menuScriptList
+            MenuItem {
+                text: qsTr("remove")
+                onTriggered: listScriptItems.remove(listScript.currentRow);
+            }
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            onReleased: {
+                if (mouse.button == Qt.RightButton) {
+                    menuScriptList.popup()
+                }
+            }
+        }
+
         TableView {
             id: listScript
             x: 0
@@ -81,6 +104,8 @@ ApplicationWindow {
             TableViewColumn{role: "script" ; title: qsTr("Script Path") ; width: 350}
             TableViewColumn{role: "desc" ; title: qsTr("Descriptiton") ; width: 350}
             TableViewColumn{role: "lang" ; title: qsTr("Language") ; width: 150}
+
+
 
         }
 

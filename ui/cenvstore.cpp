@@ -63,3 +63,32 @@ bool CEnvStore::slotStore() {
     return true;
 }
 
+QString CEnvStore::slotActionToUi(QString szOri) {
+    /*
+     * the original action text should be nc:xxxxxxx,
+     * ctrl,<keycode>
+     * ctrl,alt,<keycode>
+     * ctrl,alt,shift,<keycode>
+     *
+     * it should be formatted to the human format like:
+     * nc:xxxxxxxx
+     * ctrl+<keychar>
+     * ctrl+alt+<keychar>
+     * ctrl+alt+shift+<keychar>
+     *
+     * and the human's
+     *
+     */
+
+    return szOri;
+}
+
+QString CEnvStore::slotActionToXml(QString szOri) {
+    /*
+     * convert from the Ui to XML type
+     *
+     */
+
+     return szOri;
+}
+

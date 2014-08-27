@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
+        <file>new_script.qml</file>
     </qresource>
 </RCC>
