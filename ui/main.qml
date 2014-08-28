@@ -11,6 +11,15 @@ ApplicationWindow {
     height: Screen.height * 2/3
     title: qsTr("Hello World")
 
+    Component.onCompleted: {
+        invisScripts.slotParser();
+    }
+
+    onClosing: {
+
+    }
+
+
     // invisOX's classes
     ScriptStore {
         id: invisScripts
@@ -29,6 +38,7 @@ ApplicationWindow {
         }
     }
 
+
     toolBar: ToolBar {
         RowLayout {
             ToolButton {
@@ -37,8 +47,6 @@ ApplicationWindow {
                 onClicked: {
                     var dialogComponent=Qt.createComponent("new_script.qml");
                     var dialog=dialogComponent.createObject(mainWindow);
-
-                    //invisScripts.slotParser();
                 }
 
             }
@@ -61,6 +69,7 @@ ApplicationWindow {
         }
     }
 
+    // child controls
     Rectangle {
         id: rectScriptList
         x: 5
@@ -72,24 +81,6 @@ ApplicationWindow {
         width: mainWindow.width-2*x
         height: mainWindow.contentItem.height-2*y
 
-        Menu {
-            id: menuScriptList
-            MenuItem {
-                text: qsTr("remove")
-                onTriggered: listScriptItems.remove(listScript.currentRow);
-            }
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            acceptedButtons: Qt.LeftButton | Qt.RightButton
-            onReleased: {
-                if (mouse.button == Qt.RightButton) {
-                    menuScriptList.popup()
-                }
-            }
-        }
-
         TableView {
             id: listScript
             x: 0
@@ -99,23 +90,50 @@ ApplicationWindow {
 
             model: listScriptItems
 
+            property int n_scriptListRightClickPos: -1;
+
+            // initial the header bar
             TableViewColumn{role: "status" ; title: qsTr("Status") ; width: 50}
             TableViewColumn{role: "actions" ; title: qsTr("Actions") ; width: 150}
             TableViewColumn{role: "script" ; title: qsTr("Script Path") ; width: 350}
             TableViewColumn{role: "desc" ; title: qsTr("Descriptiton") ; width: 350}
             TableViewColumn{role: "lang" ; title: qsTr("Language") ; width: 150}
 
+            // context menu
+            Menu {
+                id: menuScriptList
 
+                MenuItem {
+                    text: qsTr("remove")
+                    onTriggered: {
+                        listScriptItems.remove(mainWindow.n_scriptListRightClickPos);
+                    }
+                }
+            }
 
-        }
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.RightButton
+                onClicked: {
+                    if (mouse.button == Qt.RightButton) {
+                        console.log("mouse x: "+ mouse.x + " y: " + mouse.y + " row: " + listScript.rowAt(mouse.x, mouse.y))
+                        if (listScript.rowAt(mouse.x, mouse.y) !== -1) {
+                            console.log("good! popup menu")
+                            n_scriptListRightClickPos: listScript.rowAt(mouse.x, mouse.y)
+                            menuScriptList.popup()
+                        }
+                    }
+                }
+            }
 
-        // content for listScript TableView
-        ListModel {
-            id: listScriptItems
+            // content for listScript TableView
+            ListModel {
+                id: listScriptItems
 
-            function addItem() {
-                console.log(invisScripts.item)
-                append(invisScripts.item)
+                function addItem() {
+                    append(invisScripts.item)
+                }
+
             }
 
         }
