@@ -57,7 +57,7 @@ CScriptStore::~CScriptStore() {
 }
 
 QVariant CScriptStore::getCurItem() {
-    qDebug() << QVariant::fromValue(m_currentItem);
+    //qDebug() << QVariant::fromValue(m_currentItem);
     return QVariant::fromValue(m_currentItem);
 }
 
@@ -187,7 +187,7 @@ bool CScriptStore::parser() {
                 continue;
                 break;
             case QXmlStreamReader::StartElement:
-                _DMSG("element name: %s", m_xmlReader.name().toString().toUtf8().data());
+                //_DMSG("element name: %s", m_xmlReader.name().toString().toUtf8().data());
                 if (0 == m_xmlReader.name().toString().compare(XML_MAIN)) {
                     if (!getItems())
                         continue;

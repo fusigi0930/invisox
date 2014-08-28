@@ -9,7 +9,9 @@ ApplicationWindow {
     id: mainWindow
     width: Screen.width * 2/3
     height: Screen.height * 2/3
-    title: qsTr("Hello World")
+    title: qsTr("invisOX")
+
+    //signal sigInitScriptDlgFocus
 
     Component.onCompleted: {
         invisScripts.slotParser();
@@ -19,6 +21,11 @@ ApplicationWindow {
 
     }
 
+    Loader {
+        id: loader
+        // using the connections to get the dialog result
+
+    }
 
     // invisOX's classes
     ScriptStore {
@@ -38,15 +45,20 @@ ApplicationWindow {
         }
     }
 
-
     toolBar: ToolBar {
         RowLayout {
             ToolButton {
                 text: qsTr("add script")
                 tooltip: qsTr("add a new script file to invisOX")
                 onClicked: {
-                    var dialogComponent=Qt.createComponent("new_script.qml");
-                    var dialog=dialogComponent.createObject(mainWindow);
+                    var dlg=loader.setSource("new_script.qml", {
+                                    visible: true,
+                                    title: text,
+                                    width: mainWindow.width/2,
+                                    height: mainWindow.height/2,
+                                    focus: false
+                                    } )
+                    loader.item.onSigInitFocus();
                 }
 
             }
