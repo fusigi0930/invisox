@@ -10,11 +10,26 @@ Dialog {
         initFoucs();
     }
 
+
     Text {
         id: labelAction
         x: 5
         y: 2
         text: qsTr("Action:")
+    }
+
+    Text {
+        id: labelFile
+        x: labelAction.x
+        y: labelAction.paintedHeight+labelAction.y+15
+        text: qsTr("File:")
+    }
+
+    Text {
+        id: labelInterp
+        x: labelFile.x
+        y: labelFile.paintedHeight+labelFile.y+15
+        text: qsTr("Interpreter:")
     }
 
     Rectangle {
@@ -32,9 +47,48 @@ Dialog {
             focus: true
             enabled: true
             Keys.onPressed: {
-                console.log(event.text);
-                detectAction.text=event.text;
+                var szAction="";
+                console.log("key: " + event.key + " f1: " + Qt.Key_F1);
+                if ((event.key >= Qt.Key_F1) && (event.key <= Qt.Key_F12)) {
+                    szAction="";
+                    if (event.modifiers & Qt.ControlModifier) {
+                        szAction += "ctrl + "
+                    }
+                    if (event.modifiers & Qt.AltModifier) {
+                        szAction += "alt + "
+                    }
+                    if (event.modifiers & Qt.ShiftModifier) {
+                        szAction += "shift + "
+                    }
+                    if (event.modifiers !== Qt.NoModifier) {
+                        szAction += "F" + (event.key-Qt.Key_F1+1)
+                        detectAction.text=szAction
+                        event.accepted=true
+                    }
+
+                }
+                else if (((event.key >= Qt.Key_0) && (event.key <= Qt.Key_9)) ||
+                         ((event.key >= Qt.Key_A) && (event.key <= Qt.Key_Z))) {
+                    szAction="";
+                    if (event.modifiers & Qt.ControlModifier) {
+                        szAction += "ctrl+"
+                    }
+                    if (event.modifiers & Qt.AltModifier) {
+                        szAction += "alt+"
+                    }
+                    if (event.modifiers & Qt.ShiftModifier) {
+                        szAction += "shift+"
+                    }
+                    console.log("modified: " + event.modifiers + " no: " + Qt.NoModifier)
+                    if (event.modifiers !== Qt.NoModifier) {
+                        szAction += String.fromCharCode(event.key)
+                        detectAction.text=szAction
+                        event.accepted=true
+                    }
+
+                }
             }
+
         }
 
         TextInput {
@@ -51,6 +105,112 @@ Dialog {
         }
     }
 
+    Rectangle {
+        id: rectFile
+        x: labelFile.paintedWidth+labelFile.x+3
+        y: labelFile.y-3
+        width: scriptDialog.width/1.5
+        height: labelFile.paintedHeight+6
+
+        border.width: 1
+        border.color: "#8080FF"
+
+        TextInput {
+            id: editFile
+            anchors.fill:parent
+            visible: true
+            focus: false
+        }
+
+    }
+
+    Rectangle {
+        id: rectDesc
+        x: labelInterp.x
+        y: labelInterp.paintedHeight+labelInterp.y+15
+        width: scriptDialog.width-28
+        height: scriptDialog.height-y-30
+
+        border.width: 1
+        border.color: "#8080FF"
+
+        Flickable {
+            id: flickDesc
+            anchors.fill: parent
+            width: rectDesc.width
+            height: rectDesc.height
+
+            contentWidth: editDesc.width
+            contentHeight: editDesc.height
+
+            function ensureVisible(rect) {
+                 if (contentX >= rect.x)
+                     contentX = rect.x;
+                 else if (contentX+width <= rect.x+rect.width)
+                     contentX = rect.x+rect.width-width;
+                 if (contentY >= rect.y)
+                     contentY = rect.y;
+                 else if (contentY+height <= rect.y+rect.height)
+                     contentY = rect.y+rect.height-height;
+            }
+
+
+            TextEdit {
+                id: editDesc
+                x: 2
+                y: 1
+                width: flickDesc.width-4
+                transformOrigin: Item.TopLeft
+                horizontalAlignment: Text.AlignLeft
+                verticalAlignment: Text.AlignTop
+                wrapMode: Text.WordWrap
+
+                onCursorRectangleChanged: flickDesc.ensureVisible(cursorRectangle)
+            }
+        }
+    }
+
+
+    ComboBox {
+        id: comboInterp
+        x: labelInterp.x+labelInterp.paintedWidth +3
+        y: labelInterp.y-3
+        currentIndex: 0
+
+        model: [qsTr("C/C++"), qsTr("PHP"), qsTr("Basic"), qsTr("Java script")]
+        onCurrentIndexChanged: {
+            initFoucs();
+        }
+    }
+
+    Button {
+        id: buttonBrowse
+        x: rectFile.x+rectFile.width +3
+        y: rectFile.y
+        text: qsTr("Browse")
+
+        FileDialog {
+            id: fileDlg
+            selectMultiple: false
+            selectFolder: false
+            selectExisting: true
+            title: qsTr("Select a script file...")
+
+            nameFilters: [ "Cpp files (*.cpp)", "php files (*.php)", "basic files (*.bas)", "js file (*.js)", "All files (*)" ]
+
+            onAccepted: {
+                editFile.text=fileDlg.fileUrl.toString();
+                initFoucs();
+            }
+            onRejected: {
+                initFoucs();
+            }
+        }
+
+        onClicked: {
+            fileDlg.open();
+        }
+    }
 
     ComboBox {
         id: comboAction
@@ -63,6 +223,8 @@ Dialog {
             initFoucs();
         }
     }
+
+
 
     function initFoucs() {
         switch (comboAction.currentIndex) {
