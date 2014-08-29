@@ -28,14 +28,14 @@ protected:
     virtual bool parser();
     virtual bool closeParserWrite();
 
+    virtual bool store();
+
 
 signals:
     void sigInit();
 
 public slots:
     void slotSetFile(QString szName);
-    QString slotActionToUi(QString szOri);
-    QString slotActionToXml(QString szOri);
     QString slotGetFile();
     virtual bool slotStore();
 

@@ -38,6 +38,24 @@ bool CEnvStore::closeParserWrite() {
     return true;
 }
 
+bool CEnvStore::store() {
+    if (m_szXmlFile.isEmpty())
+        return false;
+
+    closeParserWrite();
+
+    if (!m_file.isOpen()) {
+        m_file.setFileName(m_szXmlFile);
+        if (!m_file.open(QFile::ReadWrite)) {
+            return false;
+        }
+    }
+
+    //m_xmlWriter.clear();
+    //m_xmlWriter.setDevice(&m_file);
+    return true;
+}
+
 void CEnvStore::slotSetFile(QString szName) {
     m_szXmlFile=szName;
     _DMSG("xml name: %s", m_szXmlFile.toUtf8().data());
@@ -61,34 +79,5 @@ bool CEnvStore::slotStore() {
     m_xmlWriter.setDevice(&m_file);
 
     return true;
-}
-
-QString CEnvStore::slotActionToUi(QString szOri) {
-    /*
-     * the original action text should be nc:xxxxxxx,
-     * ctrl,<keycode>
-     * ctrl,alt,<keycode>
-     * ctrl,alt,shift,<keycode>
-     *
-     * it should be formatted to the human format like:
-     * nc:xxxxxxxx
-     * ctrl+<keychar>
-     * ctrl+alt+<keychar>
-     * ctrl+alt+shift+<keychar>
-     *
-     * and the human's
-     *
-     */
-
-    return szOri;
-}
-
-QString CEnvStore::slotActionToXml(QString szOri) {
-    /*
-     * convert from the Ui to XML type
-     *
-     */
-
-     return szOri;
 }
 

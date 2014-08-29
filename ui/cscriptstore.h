@@ -34,6 +34,11 @@ public:
         EScriptInterp interp;
     };
 
+    struct SKeyMap {
+        int nKey;
+        QString szKey;
+    };
+
 
 private:
     QVariantMap m_currentItem;
@@ -46,6 +51,7 @@ public:
 
 protected:
     virtual bool parser();
+    virtual bool store();
 
 signals:
     void sigAddListItem();
@@ -53,6 +59,8 @@ signals:
 public slots:
     virtual bool slotStore();
     bool slotParser();
+    QString slotActionToUi(QString szOri);
+    QString slotActionToXml(QString szOri);
 
 };
 

@@ -12,7 +12,6 @@ Dialog {
         initFoucs();
     }
 
-
     Text {
         id: labelAction
         x: 5
@@ -198,6 +197,8 @@ Dialog {
             contentWidth: editDesc.width
             contentHeight: editDesc.height
 
+            clip: true
+
             function ensureVisible(rect) {
                  if (contentX >= rect.x)
                      contentX = rect.x;
@@ -215,6 +216,7 @@ Dialog {
                 x: 2
                 y: 1
                 width: flickDesc.width-4
+                height: flickDesc.hehgit-4
                 transformOrigin: Item.TopLeft
                 horizontalAlignment: Text.AlignLeft
                 verticalAlignment: Text.AlignTop

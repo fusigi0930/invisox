@@ -46,6 +46,37 @@
 #define LIST_INTERPRETER                        "lang"
 
 
+static CScriptStore::SKeyMap g_keymap[] ={
+#ifdef _WIN32
+        { 0x70, "F1" },
+        { 0x71, "F2" },
+        { 0x72, "F3" },
+        { 0x73, "F4" },
+        { 0x74, "F5" },
+        { 0x75, "F6" },
+        { 0x76, "F7" },
+        { 0x77, "F8" },
+        { 0x78, "F9" },
+        { 0x79, "F10" },
+        { 0x7a, "F11" },
+        { 0x7b, "F12" },
+#else
+        { 0x70, "F1" },
+        { 0x71, "F2" },
+        { 0x72, "F3" },
+        { 0x73, "F4" },
+        { 0x74, "F5" },
+        { 0x75, "F6" },
+        { 0x76, "F7" },
+        { 0x77, "F8" },
+        { 0x78, "F9" },
+        { 0x79, "F10" },
+        { 0x7a, "F11" },
+        { 0x7b, "F12" },
+#endif
+        { -1, "UNKNOW" }
+    };
+
 CScriptStore::CScriptStore(QObject *parent) :
     CEnvStore(parent)
 {
@@ -131,6 +162,7 @@ bool CScriptStore::getItems() {
                         default:
                         case _CMD_TYPE_HOTKEY:
                             m_mapScriptInfos[info.action]=info;
+                            info.action=slotActionToUi(info.action);
                             m_currentItem.insert(LIST_ACTION, info.action);
                             break;
                         case _CMD_TYPE_NETCMD:
@@ -200,6 +232,12 @@ bool CScriptStore::parser() {
     return true;
 }
 
+bool CScriptStore::store() {
+    if (!CEnvStore::store())
+        return false;
+    return true;
+}
+
 bool CScriptStore::slotStore() {
     if (!CEnvStore::slotStore())
         return false;
@@ -210,4 +248,72 @@ bool CScriptStore::slotStore() {
 
 bool CScriptStore::slotParser() {
     return parser();
+}
+
+
+QString CScriptStore::slotActionToUi(QString szOri) {
+    /*
+     * the original action text should be nc:xxxxxxx,
+     * ctrl,<keycode>
+     * ctrl,alt,<keycode>
+     * ctrl,alt,shift,<keycode>
+     *
+     * it should be formatted to the human format like:
+     * nc:xxxxxxxx
+     * ctrl+<keychar>
+     * ctrl+alt+<keychar>
+     * ctrl+alt+shift+<keychar>
+     *
+     * and the human's
+     *
+     */
+    QString szRet;
+    int nSep=szOri.indexOf(",", 0);
+    while (-1 != nSep) {
+        szRet+=szOri.left(nSep)+"+";
+        szOri=szOri.mid(nSep+1);
+        nSep=szOri.indexOf(",", 0);
+    }
+
+    int nKey=szOri.mid(-1 == nSep ? 0 : nSep+1).toInt();
+    if ((0x30 <= nKey && 0x39 >= nKey) || ('A' <= nKey && 'Z' >= nKey)) {
+        szRet+=QChar(nKey);
+    }
+    else if (0x70 <= nKey && 0x7b >= nKey) {
+        szRet.sprintf("F%d", nKey-0x70+1);
+    }
+
+    return szRet;
+}
+
+QString CScriptStore::slotActionToXml(QString szOri) {
+    /*
+     * convert from the Ui to XML type
+     *
+     */
+    QString szRet;
+    // is the action network command?
+    if (0 == szOri.left(3).compare("nc:")) {
+        return szOri.mid(4);
+    }
+
+    int nSep=szOri.indexOf("+", 0);
+    while (-1 != nSep) {
+        szRet+=szOri.left(nSep)+",";
+        szOri=szOri.mid(nSep+1);
+        nSep=szOri.indexOf("+", 0);
+    }
+
+    if (1 == szOri.length()) {
+        szRet+=static_cast<int>(szOri.at(0).toLatin1());
+    }
+    else {
+        for (int i=0; -1 != g_keymap[i].nKey; ++i) {
+            if (0 == g_keymap[i].szKey.compare(szOri)) {
+                szRet+=g_keymap[i].nKey;
+                break;
+            }
+        }
+    }
+    return szRet;
 }
