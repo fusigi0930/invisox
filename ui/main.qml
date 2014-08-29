@@ -24,8 +24,18 @@ ApplicationWindow {
     Loader {
         id: loader
         // using the connections to get the dialog result
-
+        source: "new_script.qml"
     }
+
+    Connections {
+        target: loader.item
+        onSigUpdateInfo: doAddScript(info);
+    }
+
+    function doAddScript(addInfo) {
+        listScriptItems.addItemFromDialog(addInfo);
+    }
+
 
     // invisOX's classes
     ScriptStore {
@@ -120,6 +130,12 @@ ApplicationWindow {
                         listScriptItems.remove(mainWindow.n_scriptListRightClickPos);
                     }
                 }
+                MenuItem {
+                    text: qsTr("edit")
+                    onTriggered: {
+
+                    }
+                }
             }
 
             MouseArea {
@@ -141,8 +157,15 @@ ApplicationWindow {
             ListModel {
                 id: listScriptItems
 
+
                 function addItem() {
-                    append(invisScripts.item)
+                    console.log(invisScripts.item)
+                    append(invisScripts.item);
+                }
+
+                function addItemFromDialog(addInfo) {
+                    console.log(addInfo);
+                    append(addInfo);
                 }
 
             }
