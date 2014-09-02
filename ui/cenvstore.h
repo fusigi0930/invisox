@@ -37,7 +37,6 @@ signals:
 public slots:
     void slotSetFile(QString szName);
     QString slotGetFile();
-    virtual bool slotStore();
 
 };
 

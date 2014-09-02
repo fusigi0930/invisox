@@ -18,7 +18,7 @@ ApplicationWindow {
     }
 
     onClosing: {
-
+        invisScripts.slotStore();
     }
 
     Loader {

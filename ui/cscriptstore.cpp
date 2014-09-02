@@ -232,18 +232,60 @@ bool CScriptStore::parser() {
     return true;
 }
 
+bool CScriptStore::writeItems() {
+    for (std::map<QString, CScriptStore::SScriptInfo>::iterator p=m_mapScriptInfos.begin(); p!=m_mapScriptInfos.end(); p++) {
+        m_xmlWriter.writeStartElement(XML_ITEM);
+        if (!writeItem(p->second))
+            return false;
+
+        m_xmlWriter.writeEndElement();
+    }
+    return true;
+}
+
+bool CScriptStore::writeItem(CScriptStore::SScriptInfo &info) {
+    // action
+    m_xmlWriter.writeStartElement(XML_ITEM_ACTION);
+    m_xmlWriter.writeAttribute(XML_ITEM_ACTION_ATTR_TYPE, _CMD_TYPE_NETCMD == info.type ? XML_ITEM_ACTION_ATTR_TYPE_NETCMD : XML_ITEM_ACTION_ATTR_TYPE_HOTKEY);
+    m_xmlWriter.writeCharacters(slotActionToXml(info.action));
+    _DMSG("action: %s", slotActionToXml(info.action).toUtf8().data());
+    m_xmlWriter.writeEndElement();
+
+    // file
+    m_xmlWriter.writeStartElement(XML_ITEM_FILE);
+    m_xmlWriter.writeCharacters(info.scriptFile);
+    _DMSG("file: %s", info.scriptFile.toUtf8().data());
+    m_xmlWriter.writeEndElement();
+
+    // desc
+    m_xmlWriter.writeStartElement(XML_ITEM_DESC);
+    m_xmlWriter.writeCharacters(info.desc);
+    _DMSG("desc: %s", info.desc.toUtf8().data());
+    m_xmlWriter.writeEndElement();
+
+    // interp
+    m_xmlWriter.writeStartElement(XML_ITEM_INTERPRETER);
+    m_xmlWriter.writeCharacters(QString().sprintf("%d", static_cast<int>(info.interp)));
+    _DMSG("interp: %d", static_cast<int>(info.interp));
+    m_xmlWriter.writeEndElement();
+    return true;
+}
+
 bool CScriptStore::store() {
     if (!CEnvStore::store())
         return false;
+    m_xmlWriter.writeStartDocument();
+    m_xmlWriter.writeStartElement(XML_MAIN);
+    if (!writeItems()) {
+        return false;
+    }
+    m_xmlWriter.writeEndElement();
+    m_xmlWriter.writeEndDocument();
     return true;
 }
 
 bool CScriptStore::slotStore() {
-    if (!CEnvStore::slotStore())
-        return false;
-
-    closeParserWrite();
-    return true;
+    return store();
 }
 
 bool CScriptStore::slotParser() {
@@ -291,6 +333,8 @@ QString CScriptStore::slotActionToXml(QString szOri) {
      * convert from the Ui to XML type
      *
      */
+
+    _DMSG("the ori string: %s", szOri.toUtf8().data());
     QString szRet;
     // is the action network command?
     if (0 == szOri.left(3).compare("nc:")) {
@@ -298,6 +342,10 @@ QString CScriptStore::slotActionToXml(QString szOri) {
     }
 
     int nSep=szOri.indexOf("+", 0);
+    if (-1 == nSep) {
+        return szOri;
+    }
+
     while (-1 != nSep) {
         szRet+=szOri.left(nSep)+",";
         szOri=szOri.mid(nSep+1);

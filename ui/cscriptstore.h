@@ -46,6 +46,9 @@ private:
     bool getItems();
     bool getItem(CScriptStore::SScriptInfo &info);
 
+    bool writeItems();
+    bool writeItem(CScriptStore::SScriptInfo &info);
+
 public:
     QVariant getCurItem();
 
@@ -57,7 +60,7 @@ signals:
     void sigAddListItem();
 
 public slots:
-    virtual bool slotStore();
+    bool slotStore();
     bool slotParser();
     QString slotActionToUi(QString szOri);
     QString slotActionToXml(QString szOri);

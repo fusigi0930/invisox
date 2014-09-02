@@ -51,8 +51,8 @@ bool CEnvStore::store() {
         }
     }
 
-    //m_xmlWriter.clear();
-    //m_xmlWriter.setDevice(&m_file);
+    m_xmlWriter.setDevice(&m_file);
+    m_xmlWriter.setAutoFormatting(true);
     return true;
 }
 
@@ -65,19 +65,4 @@ QString CEnvStore::slotGetFile() {
     return m_szXmlFile;
 }
 
-bool CEnvStore::slotStore() {
-    if (m_szXmlFile.isEmpty())
-        return false;
-
-    if (!m_file.isOpen()) {
-        m_file.setFileName(m_szXmlFile);
-        if (!m_file.open(QFile::ReadWrite)) {
-            return false;
-        }
-    }
-
-    m_xmlWriter.setDevice(&m_file);
-
-    return true;
-}
 
