@@ -62,6 +62,8 @@ signals:
 public slots:
     bool slotStore();
     bool slotParser();
+    bool slotAddItem(QVariant item);
+    bool slotEditItem(QVariant item);
     QString slotActionToUi(QString szOri);
     QString slotActionToXml(QString szOri);
 

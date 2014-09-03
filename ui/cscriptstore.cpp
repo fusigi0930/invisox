@@ -248,25 +248,25 @@ bool CScriptStore::writeItem(CScriptStore::SScriptInfo &info) {
     m_xmlWriter.writeStartElement(XML_ITEM_ACTION);
     m_xmlWriter.writeAttribute(XML_ITEM_ACTION_ATTR_TYPE, _CMD_TYPE_NETCMD == info.type ? XML_ITEM_ACTION_ATTR_TYPE_NETCMD : XML_ITEM_ACTION_ATTR_TYPE_HOTKEY);
     m_xmlWriter.writeCharacters(slotActionToXml(info.action));
-    _DMSG("action: %s", slotActionToXml(info.action).toUtf8().data());
+    //_DMSG("action: %s", slotActionToXml(info.action).toUtf8().data());
     m_xmlWriter.writeEndElement();
 
     // file
     m_xmlWriter.writeStartElement(XML_ITEM_FILE);
     m_xmlWriter.writeCharacters(info.scriptFile);
-    _DMSG("file: %s", info.scriptFile.toUtf8().data());
+    //_DMSG("file: %s", info.scriptFile.toUtf8().data());
     m_xmlWriter.writeEndElement();
 
     // desc
     m_xmlWriter.writeStartElement(XML_ITEM_DESC);
     m_xmlWriter.writeCharacters(info.desc);
-    _DMSG("desc: %s", info.desc.toUtf8().data());
+    //_DMSG("desc: %s", info.desc.toUtf8().data());
     m_xmlWriter.writeEndElement();
 
     // interp
     m_xmlWriter.writeStartElement(XML_ITEM_INTERPRETER);
     m_xmlWriter.writeCharacters(QString().sprintf("%d", static_cast<int>(info.interp)));
-    _DMSG("interp: %d", static_cast<int>(info.interp));
+    //_DMSG("interp: %d", static_cast<int>(info.interp));
     m_xmlWriter.writeEndElement();
     return true;
 }
@@ -364,4 +364,12 @@ QString CScriptStore::slotActionToXml(QString szOri) {
         }
     }
     return szRet;
+}
+
+bool CScriptStore::slotAddItem(QVariant item) {
+    return true;
+}
+
+bool CScriptStore::slotEditItem(QVariant item) {
+    return true;
 }

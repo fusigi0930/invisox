@@ -11,10 +11,11 @@ ApplicationWindow {
     height: Screen.height * 2/3
     title: qsTr("invisOX")
 
-    //signal sigInitScriptDlgFocus
+    signal sigEditItemToDialog(variant info);
 
     Component.onCompleted: {
         invisScripts.slotParser();
+
     }
 
     onClosing: {
@@ -24,16 +25,23 @@ ApplicationWindow {
     Loader {
         id: loader
         // using the connections to get the dialog result
-        source: "new_script.qml"
+        //source: "new_script.qml"
     }
 
     Connections {
         target: loader.item
-        onSigUpdateInfo: doAddScript(info);
+        onSigUpdateInfo: doAddScript(info)
+        onSigUpdateEditInfo: doEditScript(editInfo)
     }
+
+    onSigEditItemToDialog: loader.item.sigInitEditInfo(info)
 
     function doAddScript(addInfo) {
         listScriptItems.addItemFromDialog(addInfo);
+    }
+
+    function doEditScript(editInfo) {
+        listScriptItems.editItem(editInfo);
     }
 
 
@@ -127,13 +135,21 @@ ApplicationWindow {
                 MenuItem {
                     text: qsTr("remove")
                     onTriggered: {
-                        listScriptItems.remove(mainWindow.n_scriptListRightClickPos);
+                        listScriptItems.remove(listScript.n_scriptListRightClickPos);
                     }
                 }
                 MenuItem {
                     text: qsTr("edit")
                     onTriggered: {
+                        var dlg=loader.setSource("new_script.qml", {
+                            visible: true,
+                            title: text,
+                            width: mainWindow.width/2,
+                            height: mainWindow.height/2,
+                            focus: false
+                            } )
 
+                        sigEditItemToDialog(listScriptItems.get(listScript.n_scriptListRightClickPos));
                     }
                 }
             }
@@ -145,8 +161,7 @@ ApplicationWindow {
                     if (mouse.button == Qt.RightButton) {
                         console.log("mouse x: "+ mouse.x + " y: " + mouse.y + " row: " + listScript.rowAt(mouse.x, mouse.y))
                         if (listScript.rowAt(mouse.x, mouse.y) !== -1) {
-                            console.log("good! popup menu")
-                            n_scriptListRightClickPos: listScript.rowAt(mouse.x, mouse.y)
+                            listScript.n_scriptListRightClickPos= listScript.rowAt(mouse.x, mouse.y)
                             menuScriptList.popup()
                         }
                     }
@@ -164,8 +179,11 @@ ApplicationWindow {
                 }
 
                 function addItemFromDialog(addInfo) {
-                    console.log(addInfo);
                     append(addInfo);
+                }
+
+                function editItem(editInfo) {
+                    listScriptItems.set(listScript.n_scriptListRightClickPos, editInfo);
                 }
 
             }

@@ -7,6 +7,10 @@ Dialog {
     modality: Qt.ApplicationModal
 
     signal sigUpdateInfo(variant info)
+    signal sigUpdateEditInfo(variant editInfo)
+    signal sigInitEditInfo(variant info)
+
+    property bool m_isEdit: false
 
     Component.onCompleted: {
         initFoucs();
@@ -51,13 +55,13 @@ Dialog {
                 if ((event.key >= Qt.Key_F1) && (event.key <= Qt.Key_F12)) {
                     szAction="";
                     if (event.modifiers & Qt.ControlModifier) {
-                        szAction += "ctrl + "
+                        szAction += "ctrl+"
                     }
                     if (event.modifiers & Qt.AltModifier) {
-                        szAction += "alt + "
+                        szAction += "alt+"
                     }
                     if (event.modifiers & Qt.ShiftModifier) {
-                        szAction += "shift + "
+                        szAction += "shift+"
                     }
                     if (event.modifiers !== Qt.NoModifier) {
                         szAction += "F" + (event.key-Qt.Key_F1+1)
@@ -243,7 +247,6 @@ Dialog {
         x: buttonCancel.x-width-15
         y: comboInterp.y
         text: qsTr("OK")
-        property variant info
 
         onClicked: {
             if (editFile.text.trim() === "") {
@@ -252,6 +255,7 @@ Dialog {
 
             var actionCmd;
             var interpreterCmd;
+            var info;
             switch (comboAction.currentIndex) {
                 default:
                 case 0: // hotkey
@@ -286,13 +290,54 @@ Dialog {
                     break;
             }
 
-            info = [
-               {"actions":actionCmd,"desc":editDesc.text,"script":editFile.text,"lang":interpreterCmd}
-            ]
+            info = {"actions":actionCmd,"desc":editDesc.text,"script":editFile.text,"lang":interpreterCmd};
 
-            sigUpdateInfo(info)
+
+            if(!m_isEdit) {
+                sigUpdateInfo(info);
+            }
+            else {
+                sigUpdateEditInfo(info);
+            }
+
             close();
         }
+    }
+
+    onSigInitEditInfo: {
+        for (var prop in info) {
+            if ("actions" === prop) {
+                if ("nc:" === info[prop].substring(0,3)) {
+                    comboAction.currentIndex=1;
+                    editAction.text=info[prop];
+                }
+                else {
+                    comboAction.currentIndex=0;
+                    detectAction.text=info[prop];
+                }
+            }
+            else if ("desc" === prop) {
+                editDesc.text=info[prop];
+            }
+            else if ("script" === prop) {
+                editFile.text=info[prop];
+            }
+            else if ("lang" === prop) {
+                if ("c/c++" === info[prop]) {
+                    comboInterp.currentIndex=0;
+                }
+                else if ("php" === info[prop]) {
+                    comboInterp.currentIndex=1;
+                }
+                else if ("basic" === info[prop]) {
+                    comboInterp.currentIndex=2;
+                }
+                else if ("javascript" === info[prop]) {
+                    comboInterp.currentIndex=3;
+                }
+            }
+        }
+        scriptDialog.m_isEdit=true;
     }
 
     function initFoucs() {
