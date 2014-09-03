@@ -46,7 +46,7 @@ bool CEnvStore::store() {
 
     if (!m_file.isOpen()) {
         m_file.setFileName(m_szXmlFile);
-        if (!m_file.open(QFile::ReadWrite)) {
+        if (!m_file.open(QFile::ReadWrite | QFile::Truncate)) {
             return false;
         }
     }
