@@ -135,8 +135,10 @@ ApplicationWindow {
                 MenuItem {
                     text: qsTr("remove")
                     onTriggered: {
-                        invisScripts.slotRemoveItem(listScript.n_scriptListRightClickPos);
-                        listScriptItems.remove(listScript.n_scriptListRightClickPos);
+                        var listInfo=listScriptItems.get(listScript.n_scriptListRightClickPos);
+                        var info = {"actions":listInfo["actions"],"desc":listInfo["desc"],"script":listInfo["script"],"lang":listInfo["lang"]};
+                        if (0 ===invisScripts.slotRemoveItem(info))
+                            listScriptItems.remove(listScript.n_scriptListRightClickPos);
                     }
                 }
                 MenuItem {
@@ -175,18 +177,17 @@ ApplicationWindow {
 
 
                 function addItem() {
-                    console.log(invisScripts.item)
                     append(invisScripts.item);
                 }
 
                 function addItemFromDialog(addInfo) {
-                    append(addInfo);
-                    invisScripts.slotAddItem(addInfo);
+                    if (0 === invisScripts.slotAddItem(addInfo))
+                        append(addInfo);
                 }
 
                 function editItem(editInfo) {
-                    listScriptItems.set(listScript.n_scriptListRightClickPos, editInfo);
-                    invisScripts.slotEditItem(editInfo);
+                    if (0 === invisScripts.slotEditItem(editInfo))
+                        listScriptItems.set(listScript.n_scriptListRightClickPos, editInfo);
                 }
 
             }

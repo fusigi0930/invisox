@@ -32,6 +32,9 @@ public:
         QString scriptFile;
         QString desc;
         EScriptInterp interp;
+
+        SScriptInfo& operator=(const CScriptStore::SScriptInfo &info);
+        SScriptInfo& operator=(const QVariant &info);
     };
 
     struct SKeyMap {
@@ -51,6 +54,8 @@ private:
 
 public:
     QVariant getCurItem();
+    static QString actionToUi(QString szOri);
+    static QString actionToXml(QString szOri);
 
 protected:
     virtual bool parser();
@@ -62,9 +67,9 @@ signals:
 public slots:
     bool slotStore();
     bool slotParser();
-    bool slotAddItem(QVariant item);
-    bool slotEditItem(QVariant item);
-    bool slotRemoveItem(QVariant item);
+    int slotAddItem(QVariant item);
+    int slotEditItem(QVariant item);
+    int slotRemoveItem(QVariant item);
     QString slotActionToUi(QString szOri);
     QString slotActionToXml(QString szOri);
 

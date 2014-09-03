@@ -45,6 +45,8 @@
 #define LIST_FILE                               "script"
 #define LIST_INTERPRETER                        "lang"
 
+#define LIST_ORI_KEY                            "ori_key"
+
 
 static CScriptStore::SKeyMap g_keymap[] ={
 #ifdef _WIN32
@@ -75,7 +77,55 @@ static CScriptStore::SKeyMap g_keymap[] ={
         { 0x7b, "F12" },
 #endif
         { -1, "UNKNOW" }
-    };
+};
+
+CScriptStore::SScriptInfo& CScriptStore::SScriptInfo::operator=(const CScriptStore::SScriptInfo &info) {
+    action=info.action;
+    type=info.type;
+    scriptFile=info.scriptFile;
+    desc=info.desc;
+    interp=info.interp;
+    return *this;
+}
+
+CScriptStore::SScriptInfo& CScriptStore::SScriptInfo::operator=(const QVariant &info) {
+    QVariantMap map=info.toMap();
+    for (QVariantMap::iterator pMap=map.begin(); pMap != map.end(); pMap++) {
+        if (0 == pMap.key().compare(LIST_ACTION)) {
+            // is the network command?
+            if (0 == pMap.value().toString().left(3).compare("nc:")) {
+                type=_CMD_TYPE_NETCMD;
+                action=pMap.value().toString().mid(3);
+            }
+            else {
+                type=_CMD_TYPE_HOTKEY;
+                action=CScriptStore::actionToXml(pMap.value().toString());
+            }
+
+        }
+        else if (0 == pMap.key().compare(LIST_FILE)) {
+            scriptFile=pMap.value().toString();
+        }
+        else if (0 == pMap.key().compare(LIST_DESC)) {
+            desc=pMap.value().toString();
+        }
+        else if (0 == pMap.key().compare(LIST_INTERPRETER)) {
+            if (0 == pMap.value().toString().compare(XML_ITEM_INTERPRETER_CLING)) {
+                interp=_INTERP_CPP;
+            }
+            else if (0 == pMap.value().toString().compare(XML_ITEM_INTERPRETER_PHP)) {
+                interp=_INTERP_PHP;
+            }
+            else if (0 == pMap.value().toString().compare(XML_ITEM_INTERPRETER_BASIC)) {
+                interp=_INTERP_BASIC;
+            }
+            else if (0 == pMap.value().toString().compare(XML_ITEM_INTERPRETER_JAVASCRIPT)) {
+                interp=_INTERP_JS;
+            }
+        }
+    }
+    return *this;
+}
 
 CScriptStore::CScriptStore(QObject *parent) :
     CEnvStore(parent)
@@ -292,8 +342,7 @@ bool CScriptStore::slotParser() {
     return parser();
 }
 
-
-QString CScriptStore::slotActionToUi(QString szOri) {
+QString CScriptStore::actionToUi(QString szOri) {
     /*
      * the original action text should be nc:xxxxxxx,
      * ctrl,<keycode>
@@ -324,11 +373,10 @@ QString CScriptStore::slotActionToUi(QString szOri) {
     else if (0x70 <= nKey && 0x7b >= nKey) {
         szRet+=QString().sprintf("F%d", nKey-0x70+1);
     }
-
     return szRet;
 }
 
-QString CScriptStore::slotActionToXml(QString szOri) {
+QString CScriptStore::actionToXml(QString szOri) {
     /*
      * convert from the Ui to XML type
      *
@@ -367,47 +415,22 @@ QString CScriptStore::slotActionToXml(QString szOri) {
     return szRet;
 }
 
-bool CScriptStore::slotAddItem(QVariant item) {
-    QVariantMap map=item.toMap();
-    CScriptStore::SScriptInfo info;
-    for (QVariantMap::iterator pMap=map.begin(); pMap != map.end(); pMap++) {
-        if (0 == pMap.key().compare(LIST_ACTION)) {
-            // is the network command?
-            if (0 == pMap.value().toString().left(3).compare("nc:")) {
-                info.type=_CMD_TYPE_NETCMD;
-                info.action=pMap.value().toString().mid(3);
-            }
-            else {
-                info.type=_CMD_TYPE_HOTKEY;
-                info.action=slotActionToXml(pMap.value().toString());
-            }
+QString CScriptStore::slotActionToUi(QString szOri) {
+    return CScriptStore::actionToUi(szOri);
+}
 
-            std::map<QString, CScriptStore::SScriptInfo>::iterator pFind=m_mapScriptInfos.find(_CMD_TYPE_NETCMD == info.type ? "nc:"+info.action : info.action );
-            if (m_mapScriptInfos.end() != pFind) {
-                _DMSG("the action has been used!");
-                return false;
-            }
-        }
-        else if (0 == pMap.key().compare(LIST_FILE)) {
-            info.scriptFile=pMap.value().toString();
-        }
-        else if (0 == pMap.key().compare(LIST_DESC)) {
-            info.desc=pMap.value().toString();
-        }
-        else if (0 == pMap.key().compare(LIST_INTERPRETER)) {
-            if (0 == pMap.value().toString().compare(XML_ITEM_INTERPRETER_CLING)) {
-                info.interp=_INTERP_CPP;
-            }
-            else if (0 == pMap.value().toString().compare(XML_ITEM_INTERPRETER_PHP)) {
-                info.interp=_INTERP_PHP;
-            }
-            else if (0 == pMap.value().toString().compare(XML_ITEM_INTERPRETER_BASIC)) {
-                info.interp=_INTERP_BASIC;
-            }
-            else if (0 == pMap.value().toString().compare(XML_ITEM_INTERPRETER_JAVASCRIPT)) {
-                info.interp=_INTERP_JS;
-            }
-        }
+QString CScriptStore::slotActionToXml(QString szOri) {
+    return CScriptStore::actionToXml(szOri);
+}
+
+int CScriptStore::slotAddItem(QVariant item) {
+    CScriptStore::SScriptInfo info;
+    info=item;
+
+    std::map<QString, CScriptStore::SScriptInfo>::iterator pFind=m_mapScriptInfos.find(_CMD_TYPE_NETCMD == info.type ? "nc:"+info.action : info.action );
+    if (m_mapScriptInfos.end() != pFind) {
+        _DMSG("the action has been used!");
+        return -1;
     }
 
     switch (info.type) {
@@ -420,13 +443,66 @@ bool CScriptStore::slotAddItem(QVariant item) {
             break;
     }
 
-    return true;
+    return 0;
 }
 
-bool CScriptStore::slotEditItem(QVariant item) {
-    return true;
+int CScriptStore::slotEditItem(QVariant item) {
+    CScriptStore::SScriptInfo info;
+    info=item;
+
+    QVariantMap map=item.toMap();
+    QVariantMap::iterator pOriFind=map.find(LIST_ORI_KEY);
+    if (map.end() == pOriFind) {
+        _DMSG("the ori_key is not found!");
+        return -1;
+    }
+
+    _DMSG("ori_key: %s", pOriFind.value().toString().toUtf8().data());
+
+    std::map<QString, CScriptStore::SScriptInfo>::iterator pFind, pReplace;
+    if (0 == pOriFind.value().toString().left(3).compare("nc:")) {
+        pFind=m_mapScriptInfos.find(pOriFind.value().toString());
+    }
+    else {
+        pFind=m_mapScriptInfos.find(slotActionToXml(pOriFind.value().toString()));
+    }
+    if (m_mapScriptInfos.end() == pFind) {
+        _DMSG("the action is not found!");
+        return -2;
+    }
+
+    pReplace=m_mapScriptInfos.find(_CMD_TYPE_NETCMD == info.type ? "nc:"+info.action : info.action);
+    if (m_mapScriptInfos.end() != pReplace) {
+        _DMSG("the action is duplicated!");
+        return -3;
+    }
+
+    m_mapScriptInfos.erase(pFind);
+
+    switch (info.type) {
+        default:
+        case _CMD_TYPE_HOTKEY:
+            m_mapScriptInfos[info.action]=info;
+            break;
+        case _CMD_TYPE_NETCMD:
+            m_mapScriptInfos["nc:"+info.action]=info;
+            break;
+    }
+
+    return 0;
 }
 
-bool CScriptStore::slotRemoveItem(QVariant item) {
-    return true;
+int CScriptStore::slotRemoveItem(QVariant item) {
+    CScriptStore::SScriptInfo info;
+    info=item;
+
+    std::map<QString, CScriptStore::SScriptInfo>::iterator pFind=m_mapScriptInfos.find(_CMD_TYPE_NETCMD == info.type ? "nc:"+info.action : info.action );
+    if (m_mapScriptInfos.end() == pFind) {
+        _DMSG("the action is not exist!");
+        return -1;
+    }
+
+    m_mapScriptInfos.erase(pFind);
+
+    return 0;
 }

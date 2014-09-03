@@ -11,6 +11,7 @@ Dialog {
     signal sigInitEditInfo(variant info)
 
     property bool m_isEdit: false
+    property string szOriKey: ""
 
     Component.onCompleted: {
         initFoucs();
@@ -290,12 +291,12 @@ Dialog {
                     break;
             }
 
-            info = {"actions":actionCmd,"desc":editDesc.text,"script":editFile.text,"lang":interpreterCmd};
-
             if(!m_isEdit) {
+                info = {"actions":actionCmd,"desc":editDesc.text,"script":editFile.text,"lang":interpreterCmd};
                 sigUpdateInfo(info);
             }
             else {
+                info = {"actions":actionCmd,"desc":editDesc.text,"script":editFile.text,"lang":interpreterCmd,"ori_key":scriptDialog.szOriKey};
                 sigUpdateEditInfo(info);
             }
 
@@ -308,12 +309,13 @@ Dialog {
             if ("actions" === prop) {
                 if ("nc:" === info[prop].substring(0,3)) {
                     comboAction.currentIndex=1;
-                    editAction.text=info[prop];
+                    editAction.text=info[prop].substring(3);
                 }
                 else {
                     comboAction.currentIndex=0;
                     detectAction.text=info[prop];
                 }
+                scriptDialog.szOriKey=info[prop];
             }
             else if ("desc" === prop) {
                 editDesc.text=info[prop];
