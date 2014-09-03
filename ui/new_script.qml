@@ -292,7 +292,6 @@ Dialog {
 
             info = {"actions":actionCmd,"desc":editDesc.text,"script":editFile.text,"lang":interpreterCmd};
 
-
             if(!m_isEdit) {
                 sigUpdateInfo(info);
             }

@@ -23,18 +23,18 @@ ApplicationWindow {
     }
 
     Loader {
-        id: loader
+        id: addDialogloader
         // using the connections to get the dialog result
         //source: "new_script.qml"
     }
 
     Connections {
-        target: loader.item
+        target: addDialogloader.item
         onSigUpdateInfo: doAddScript(info)
         onSigUpdateEditInfo: doEditScript(editInfo)
     }
 
-    onSigEditItemToDialog: loader.item.sigInitEditInfo(info)
+    onSigEditItemToDialog: addDialogloader.item.sigInitEditInfo(info)
 
     function doAddScript(addInfo) {
         listScriptItems.addItemFromDialog(addInfo);
@@ -69,7 +69,7 @@ ApplicationWindow {
                 text: qsTr("add script")
                 tooltip: qsTr("add a new script file to invisOX")
                 onClicked: {
-                    var dlg=loader.setSource("new_script.qml", {
+                    var dlg=addDialogloader.setSource("new_script.qml", {
                                     visible: true,
                                     title: text,
                                     width: mainWindow.width/2,
@@ -135,13 +135,14 @@ ApplicationWindow {
                 MenuItem {
                     text: qsTr("remove")
                     onTriggered: {
+                        invisScripts.slotRemoveItem(listScript.n_scriptListRightClickPos);
                         listScriptItems.remove(listScript.n_scriptListRightClickPos);
                     }
                 }
                 MenuItem {
                     text: qsTr("edit")
                     onTriggered: {
-                        var dlg=loader.setSource("new_script.qml", {
+                        var dlg=addDialogloader.setSource("new_script.qml", {
                             visible: true,
                             title: text,
                             width: mainWindow.width/2,
@@ -180,10 +181,12 @@ ApplicationWindow {
 
                 function addItemFromDialog(addInfo) {
                     append(addInfo);
+                    invisScripts.slotAddItem(addInfo);
                 }
 
                 function editItem(editInfo) {
                     listScriptItems.set(listScript.n_scriptListRightClickPos, editInfo);
+                    invisScripts.slotEditItem(editInfo);
                 }
 
             }

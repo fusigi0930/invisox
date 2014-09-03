@@ -322,7 +322,7 @@ QString CScriptStore::slotActionToUi(QString szOri) {
         szRet+=QChar(nKey);
     }
     else if (0x70 <= nKey && 0x7b >= nKey) {
-        szRet.sprintf("F%d", nKey-0x70+1);
+        szRet+=QString().sprintf("F%d", nKey-0x70+1);
     }
 
     return szRet;
@@ -338,7 +338,7 @@ QString CScriptStore::slotActionToXml(QString szOri) {
     QString szRet;
     // is the action network command?
     if (0 == szOri.left(3).compare("nc:")) {
-        return szOri.mid(4);
+        return szOri.mid(3);
     }
 
     int nSep=szOri.indexOf("+", 0);
@@ -353,12 +353,13 @@ QString CScriptStore::slotActionToXml(QString szOri) {
     }
 
     if (1 == szOri.length()) {
-        szRet+=static_cast<int>(szOri.at(0).toLatin1());
+        _DMSG("char value: %d", szOri.at(0).unicode());
+        szRet+=QString().sprintf("%d",static_cast<int>(szOri.at(0).unicode()));
     }
     else {
         for (int i=0; -1 != g_keymap[i].nKey; ++i) {
             if (0 == g_keymap[i].szKey.compare(szOri)) {
-                szRet+=g_keymap[i].nKey;
+                szRet+=QString().sprintf("%d",g_keymap[i].nKey);
                 break;
             }
         }
@@ -367,9 +368,65 @@ QString CScriptStore::slotActionToXml(QString szOri) {
 }
 
 bool CScriptStore::slotAddItem(QVariant item) {
+    QVariantMap map=item.toMap();
+    CScriptStore::SScriptInfo info;
+    for (QVariantMap::iterator pMap=map.begin(); pMap != map.end(); pMap++) {
+        if (0 == pMap.key().compare(LIST_ACTION)) {
+            // is the network command?
+            if (0 == pMap.value().toString().left(3).compare("nc:")) {
+                info.type=_CMD_TYPE_NETCMD;
+                info.action=pMap.value().toString().mid(3);
+            }
+            else {
+                info.type=_CMD_TYPE_HOTKEY;
+                info.action=slotActionToXml(pMap.value().toString());
+            }
+
+            std::map<QString, CScriptStore::SScriptInfo>::iterator pFind=m_mapScriptInfos.find(_CMD_TYPE_NETCMD == info.type ? "nc:"+info.action : info.action );
+            if (m_mapScriptInfos.end() != pFind) {
+                _DMSG("the action has been used!");
+                return false;
+            }
+        }
+        else if (0 == pMap.key().compare(LIST_FILE)) {
+            info.scriptFile=pMap.value().toString();
+        }
+        else if (0 == pMap.key().compare(LIST_DESC)) {
+            info.desc=pMap.value().toString();
+        }
+        else if (0 == pMap.key().compare(LIST_INTERPRETER)) {
+            if (0 == pMap.value().toString().compare(XML_ITEM_INTERPRETER_CLING)) {
+                info.interp=_INTERP_CPP;
+            }
+            else if (0 == pMap.value().toString().compare(XML_ITEM_INTERPRETER_PHP)) {
+                info.interp=_INTERP_PHP;
+            }
+            else if (0 == pMap.value().toString().compare(XML_ITEM_INTERPRETER_BASIC)) {
+                info.interp=_INTERP_BASIC;
+            }
+            else if (0 == pMap.value().toString().compare(XML_ITEM_INTERPRETER_JAVASCRIPT)) {
+                info.interp=_INTERP_JS;
+            }
+        }
+    }
+
+    switch (info.type) {
+        default:
+        case _CMD_TYPE_HOTKEY:
+            m_mapScriptInfos[info.action]=info;
+            break;
+        case _CMD_TYPE_NETCMD:
+            m_mapScriptInfos["nc:"+info.action]=info;
+            break;
+    }
+
     return true;
 }
 
 bool CScriptStore::slotEditItem(QVariant item) {
+    return true;
+}
+
+bool CScriptStore::slotRemoveItem(QVariant item) {
     return true;
 }

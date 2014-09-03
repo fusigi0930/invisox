@@ -64,6 +64,7 @@ public slots:
     bool slotParser();
     bool slotAddItem(QVariant item);
     bool slotEditItem(QVariant item);
+    bool slotRemoveItem(QVariant item);
     QString slotActionToUi(QString szOri);
     QString slotActionToXml(QString szOri);
 
