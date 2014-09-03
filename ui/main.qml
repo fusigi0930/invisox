@@ -3,6 +3,7 @@ import QtQuick.Controls 1.1
 import QtQuick.Window 2.0
 import QtQuick.Layouts 1.0
 import ScriptStore 1.0
+import SettingStore 1.0
 
 ApplicationWindow {
     visible: true

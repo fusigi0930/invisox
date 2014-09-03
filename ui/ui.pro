@@ -5,7 +5,8 @@ QT += qml quick widgets xml
 
 SOURCES += main.cpp \
     cenvstore.cpp \
-    cscriptstore.cpp
+    cscriptstore.cpp \
+    csettingstore.cpp
 
 RESOURCES += qml.qrc
 
@@ -19,4 +20,5 @@ include(deployment.pri)
 
 HEADERS += \
     cenvstore.h \
-    cscriptstore.h
+    cscriptstore.h \
+    csettingstore.h
