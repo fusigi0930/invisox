@@ -25,7 +25,6 @@ ApplicationWindow {
     Loader {
         id: addDialogloader
         // using the connections to get the dialog result
-        //source: "new_script.qml"
     }
 
     Connections {
@@ -67,9 +66,10 @@ ApplicationWindow {
         RowLayout {
             ToolButton {
                 text: qsTr("add script")
+                iconSource: "/image/res/png/add.png"
                 tooltip: qsTr("add a new script file to invisOX")
                 onClicked: {
-                    var dlg=addDialogloader.setSource("new_script.qml", {
+                    var dlg=addDialogloader.setSource("/qml/new_script.qml", {
                                     visible: true,
                                     title: text,
                                     width: mainWindow.width/2,
@@ -81,6 +81,7 @@ ApplicationWindow {
             }
             ToolButton {
                 text: qsTr("remove script")
+                iconSource: "/image/res/png/delete.png"
                 tooltip: qsTr("remove the selected script from invisOX")
                 onClicked: {
                     var listInfo=listScriptItems.get(listScript.currentRow);
@@ -93,14 +94,17 @@ ApplicationWindow {
             ToolButton {
                 text: qsTr("run script")
                 tooltip: qsTr("run the selected script file")
+                iconSource: "/image/res/png/run.png"
             }
             ToolButton {
                 text: qsTr("stop script")
                 tooltip: qsTr("stop all running scripts")
+                iconSource: "/image/res/png/stop.png"
             }
             ToolButton {
                 text: qsTr("settings")
                 tooltip: qsTr("settings")
+                iconSource: "/image/res/png/setting.png"
             }
         }
     }
@@ -151,7 +155,7 @@ ApplicationWindow {
                 MenuItem {
                     text: qsTr("edit")
                     onTriggered: {
-                        var dlg=addDialogloader.setSource("new_script.qml", {
+                        var dlg=addDialogloader.setSource("/qml/new_script.qml", {
                             visible: true,
                             title: text,
                             width: mainWindow.width/2,

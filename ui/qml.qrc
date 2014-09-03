@@ -1,6 +1,13 @@
 <RCC>
-    <qresource prefix="/">
+    <qresource prefix="/qml">
         <file>main.qml</file>
         <file>new_script.qml</file>
+    </qresource>
+    <qresource prefix="/image">
+        <file>res/png/delete.png</file>
+        <file>res/png/add.png</file>
+        <file>res/png/setting.png</file>
+		<file>res/png/run.png</file>
+		<file>res/png/stop.png</file>
     </qresource>
 </RCC>
