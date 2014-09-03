@@ -82,6 +82,13 @@ ApplicationWindow {
             ToolButton {
                 text: qsTr("remove script")
                 tooltip: qsTr("remove the selected script from invisOX")
+                onClicked: {
+                    var listInfo=listScriptItems.get(listScript.currentRow);
+                    console.log("curr: " + listScript.currentRow + " actions: " + listInfo["actions"]);
+                    var info = {"actions":listInfo["actions"],"desc":listInfo["desc"],"script":listInfo["script"],"lang":listInfo["lang"]};
+                    if (0 ===invisScripts.slotRemoveItem(info))
+                        listScriptItems.remove(listScript.currentRow);
+                }
             }
             ToolButton {
                 text: qsTr("run script")

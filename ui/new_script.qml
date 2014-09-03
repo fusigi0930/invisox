@@ -107,6 +107,13 @@ Dialog {
             anchors.fill:parent
             visible: true
         }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                initFoucs();
+            }
+        }
     }
 
     Text {
@@ -228,6 +235,14 @@ Dialog {
                 wrapMode: Text.WordWrap
 
                 onCursorRectangleChanged: flickDesc.ensureVisible(cursorRectangle)
+            }
+        }
+
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                editDesc.focus=true;
             }
         }
     }
