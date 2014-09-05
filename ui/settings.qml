@@ -6,6 +6,10 @@ Dialog {
     id: settingDialog
     modality: Qt.ApplicationModal
 
+    Component.onCompleted: {
+        initFocus();
+    }
+
     Text {
         id: labelScriptFile
         x: 5
@@ -49,15 +53,199 @@ Dialog {
 
             onAccepted: {
                 editScriptFile.text=fileDlg.fileUrl.toString();
-                initFoucs();
+                initFocus();
             }
             onRejected: {
-                initFoucs();
+                initFocus();
             }
         }
 
         onClicked: {
             fileDlg.open();
         }
+    }
+
+    Text {
+        id: labelMethod
+        x: 5
+        y: labelScriptFile.paintedHeight+labelScriptFile.y+15
+        text: qsTr("Work Method:")
+    }
+
+    ComboBox {
+        id: comboMethod
+        x: labelMethod.x+labelMethod.paintedWidth +3
+        y: labelMethod.y-3
+        currentIndex: 0
+
+        model: [qsTr("Normal"), qsTr("Send Message")]
+        onCurrentIndexChanged: {
+            initFocus();
+        }
+    }
+
+    Text {
+        id: labelSpecProc
+        x: comboMethod.x+comboMethod.width +13
+        y: labelMethod.y
+        text: qsTr("Process:")
+    }
+
+    ComboBox {
+        id: comboSpecProc
+        x: labelSpecProc.x+labelSpecProc.width +3
+        y: labelSpecProc.y-3
+
+        model: ["none"]
+        enabled: comboMethod.currentIndex != 0
+    }
+
+    Text {
+        id: labelHotkey
+        x: 5
+        y: labelMethod.paintedHeight+labelMethod.y+15
+        text: qsTr("Ternimal Key:")
+    }
+
+    Rectangle {
+        id: rectHotkey
+        x: labelHotkey.paintedWidth+labelHotkey.x+3
+        y: labelHotkey.y-3
+        width: settingDialog.width/1.5
+        height: labelMethod.paintedHeight+6
+
+        border.width: 1
+        border.color: "#8080FF"
+
+        Item {
+            id: keyHandleAction
+            focus: true
+            enabled: true
+            Keys.onPressed: {
+                var szAction="";
+                console.log("key: " + event.key + " f1: " + Qt.Key_F1);
+                if ((event.key >= Qt.Key_F1) && (event.key <= Qt.Key_F12)) {
+                    szAction="";
+                    if (event.modifiers & Qt.ControlModifier) {
+                        szAction += "ctrl+"
+                    }
+                    if (event.modifiers & Qt.AltModifier) {
+                        szAction += "alt+"
+                    }
+                    if (event.modifiers & Qt.ShiftModifier) {
+                        szAction += "shift+"
+                    }
+                    if (event.modifiers !== Qt.NoModifier) {
+                        szAction += "F" + (event.key-Qt.Key_F1+1)
+                        detectAction.text=szAction
+                        event.accepted=true
+                    }
+
+                }
+                else if (((event.key >= Qt.Key_0) && (event.key <= Qt.Key_9)) ||
+                         ((event.key >= Qt.Key_A) && (event.key <= Qt.Key_Z)) ||
+                         (event.key === Qt.Key_Equal)) {
+                    szAction="";
+                    if (event.modifiers & Qt.ControlModifier) {
+                        szAction += "ctrl+"
+                    }
+                    if (event.modifiers & Qt.AltModifier) {
+                        szAction += "alt+"
+                    }
+                    if (event.modifiers & Qt.ShiftModifier) {
+                        szAction += "shift+"
+                    }
+                    console.log("modified: " + event.modifiers + " no: " + Qt.NoModifier)
+                    if (event.modifiers !== Qt.NoModifier) {
+                        szAction += String.fromCharCode(event.key)
+                        detectAction.text=szAction
+                        event.accepted=true
+                    }
+
+                }
+            }
+
+        }
+
+        Text {
+            id: detectAction
+            anchors.fill:parent
+            visible: true
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                keyHandleAction.focus=true
+            }
+        }
+    }
+
+    Button {
+        id: buttonCancel
+        x: settingDialog.width-width-25
+        y: buttonOK.y
+        text: qsTr("Cancel")
+
+        onClicked: {
+            close();
+        }
+    }
+
+    Rectangle {
+        id: rectPlugins
+        x: labelHotkey.x
+        y: rectHotkey.y+rectHotkey.height+15
+
+        border.width: 2
+        border.color: "#7070F0"
+
+        width: settingDialog.width-2*x-20
+        height: buttonCancel.y-y-30
+
+        TableView {
+            id: listPlugins
+            x: 0
+            y: 0
+            width: parent.width
+            height: parent.height
+            model: listPluginsItem
+
+            TableViewColumn{ role: "enabled"; title: ("v"); width: 25; delegate: checkEnable }
+            TableViewColumn{ role: "file"; title: qsTr("file name"); width: 500 }
+        }
+
+        ListModel {
+            id: listPluginsItem
+
+            ListElement {
+                enabled: "" ; file: "test"
+            }
+        }
+
+        Component {
+            id: checkEnable
+            CheckBox {
+                id: cboxEnable
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        cboxEnable.checked=!cboxEnable.checked
+                    }
+                }
+            }
+        }
+
+    }
+
+    Button {
+        id: buttonOK
+        x: buttonCancel.x-width-15
+        y: settingDialog.height-buttonOK.height-30
+        text: qsTr("OK")
+    }
+
+    function initFocus() {
+        keyHandleAction.focus=true
     }
 }
