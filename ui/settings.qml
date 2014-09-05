@@ -6,6 +6,9 @@ Dialog {
     id: settingDialog
     modality: Qt.ApplicationModal
 
+    signal sigEditSetting(variant info);
+    signal sigUpdateSetting(variant info);
+
     Component.onCompleted: {
         initFocus();
     }

@@ -288,3 +288,7 @@ bool CSettingStore::slotParser() {
 QString CSettingStore::slotGetScriptFile() {
     return m_settingInfo.szFile;
 }
+
+void CSettingStore::slotSetSettingInfo(QVariant info) {
+
+}

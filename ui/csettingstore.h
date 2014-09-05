@@ -56,6 +56,7 @@ public slots:
     bool slotStore();
     bool slotParser();
     QString slotGetScriptFile();
+    void slotSetSettingInfo(QVariant info);
 };
 
 #endif // CSETTINGSTORE_H

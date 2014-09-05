@@ -15,6 +15,7 @@ ApplicationWindow {
     objectName: "mainWindow"
 
     signal sigEditItemToDialog(variant info);
+    signal sigEditSetting(variant info);
 
     Component.onCompleted: {
         invisSettings.slotParser();
@@ -40,7 +41,13 @@ ApplicationWindow {
         onSigUpdateEditInfo: doEditScript(editInfo)
     }
 
+    Connections {
+        target: settingDialogLoader.item
+        onSigUpdateSetting: invisSettings.slotSetSettingInfo(info)
+    }
+
     onSigEditItemToDialog: addDialogloader.item.sigInitEditInfo(info)
+    onSigEditSetting: settingDialogLoader.item.sigEditSetting(info)
 
     function doAddScript(addInfo) {
         listScriptItems.addItemFromDialog(addInfo);
@@ -49,7 +56,6 @@ ApplicationWindow {
     function doEditScript(editInfo) {
         listScriptItems.editItem(editInfo);
     }
-
 
     // invisOX's classes
     ScriptStore {
