@@ -11,11 +11,13 @@ CEnvStore::~CEnvStore() {
     if (m_file.isOpen()) {
         m_file.close();
     }
-
 }
 
 bool CEnvStore::parser() {
     if (m_szXmlFile.isEmpty())
+        return false;
+
+    if (!QFile::exists(m_szXmlFile))
         return false;
 
     if (!m_file.isOpen()) {
@@ -58,6 +60,7 @@ bool CEnvStore::store() {
 
 void CEnvStore::slotSetFile(QString szName) {
     m_szXmlFile=szName;
+    parser();
     _DMSG("xml name: %s", m_szXmlFile.toUtf8().data());
 }
 

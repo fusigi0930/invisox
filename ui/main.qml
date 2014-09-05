@@ -12,14 +12,16 @@ ApplicationWindow {
     height: Screen.height * 2/3
     title: qsTr("invisOX")
 
+    objectName: "mainWindow"
+
     signal sigEditItemToDialog(variant info);
 
     Component.onCompleted: {
-        invisScripts.slotParser();
-
+        invisSettings.slotParser();
     }
 
     onClosing: {
+        invisSettings.slotStore();
         invisScripts.slotStore();
     }
 
@@ -48,10 +50,17 @@ ApplicationWindow {
     // invisOX's classes
     ScriptStore {
         id: invisScripts
-        xmlName: "test/stest.xml"
+        xmlName: invisSettings.xml_script
         onSigAddListItem: listScriptItems.addItem();
 
     }
+
+    SettingStore {
+        id: invisSettings
+
+    }
+
+    // ui controls
 
     menuBar: MenuBar {
         Menu {
@@ -68,6 +77,7 @@ ApplicationWindow {
             ToolButton {
                 text: qsTr("add script")
                 iconSource: "/image/res/png/add.png"
+                iconName: "Add"
                 tooltip: qsTr("add a new script file to invisOX")
                 onClicked: {
                     var dlg=addDialogloader.setSource("/qml/new_script.qml", {

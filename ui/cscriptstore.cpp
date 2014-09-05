@@ -62,6 +62,7 @@ static CScriptStore::SKeyMap g_keymap[] ={
         { 0x79, "F10" },
         { 0x7a, "F11" },
         { 0x7b, "F12" },
+        { 0x3d, "=" },
 #else
         { 0x70, "F1" },
         { 0x71, "F2" },
@@ -75,6 +76,7 @@ static CScriptStore::SKeyMap g_keymap[] ={
         { 0x79, "F10" },
         { 0x7a, "F11" },
         { 0x7b, "F12" },
+        { 0x3d, "=" },
 #endif
         { -1, "UNKNOW" }
 };
@@ -149,7 +151,6 @@ bool CScriptStore::getItem(CScriptStore::SScriptInfo &info) {
         switch(readToken) {
             default:
                 continue;
-                break;
             case QXmlStreamReader::StartElement:
                 if (0 == m_xmlReader.name().toString().compare(XML_ITEM_ACTION)) {
                     QXmlStreamAttributes attri=m_xmlReader.attributes();
@@ -195,11 +196,8 @@ bool CScriptStore::getItems() {
         QXmlStreamReader::TokenType readToken=m_xmlReader.readNext();
         switch (readToken) {
             default:
-                continue;
-                break;
             case QXmlStreamReader::StartDocument:
                 continue;
-                break;
             case QXmlStreamReader::StartElement:
                 //_DMSG("element name: %s", m_xmlReader.name().toString().toUtf8().data());
                 if (0 == m_xmlReader.name().toString().compare(XML_ITEM)) {
@@ -263,11 +261,8 @@ bool CScriptStore::parser() {
         QXmlStreamReader::TokenType readToken=m_xmlReader.readNext();
         switch (readToken) {
             default:
-                continue;
-                break;
             case QXmlStreamReader::StartDocument:
                 continue;
-                break;
             case QXmlStreamReader::StartElement:
                 //_DMSG("element name: %s", m_xmlReader.name().toString().toUtf8().data());
                 if (0 == m_xmlReader.name().toString().compare(XML_MAIN)) {
@@ -324,13 +319,16 @@ bool CScriptStore::writeItem(CScriptStore::SScriptInfo &info) {
 bool CScriptStore::store() {
     if (!CEnvStore::store())
         return false;
+
     m_xmlWriter.writeStartDocument();
     m_xmlWriter.writeStartElement(XML_MAIN);
     if (!writeItems()) {
         return false;
     }
+
     m_xmlWriter.writeEndElement();
     m_xmlWriter.writeEndDocument();
+
     return true;
 }
 

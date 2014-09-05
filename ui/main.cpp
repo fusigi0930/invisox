@@ -3,6 +3,8 @@
 
 #include <QQmlEngine>
 #include <QQmlComponent>
+#include <QQuickView>
+#include "debug.h"
 
 #include "cscriptstore.h"
 #include "csettingstore.h"
@@ -16,6 +18,8 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:///qml/main.qml")));
+
+    app.setWindowIcon(QIcon("qrc:///image/res/png/mainicon.png"));
 
     return app.exec();
 }

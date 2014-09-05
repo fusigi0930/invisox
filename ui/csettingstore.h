@@ -7,6 +7,9 @@
 
 class CSettingStore : public CEnvStore
 {
+    Q_OBJECT
+    Q_PROPERTY(QString xml_script READ slotGetScriptFile NOTIFY sigChangedScriptFile)
+
 public:
     CSettingStore();
     virtual ~CSettingStore();
@@ -27,9 +30,32 @@ public:
         SSettingInfo& operator=(const QVariant& info);
     };
 
+private:
+    CSettingStore::SSettingInfo m_settingInfo;
+
+    void initGenericDefault();
+    void initAdditionDefault();
+    void initDefault();
+    bool getGeneric();
+    bool getGenericSettings();
+    bool getAddition();
+    bool getAdditionSettings();
+    bool writeGeneric();
+    bool writeGenericSettings();
+    bool writeAddition();
+    bool writeAdditionSettings();
+
 protected:
     virtual bool parser();
     virtual bool store();
+
+signals:
+    void sigChangedScriptFile();
+
+public slots:
+    bool slotStore();
+    bool slotParser();
+    QString slotGetScriptFile();
 };
 
 #endif // CSETTINGSTORE_H

@@ -7,7 +7,8 @@
         <file>res/png/delete.png</file>
         <file>res/png/add.png</file>
         <file>res/png/setting.png</file>
-		<file>res/png/run.png</file>
-		<file>res/png/stop.png</file>
+        <file>res/png/run.png</file>
+        <file>res/png/stop.png</file>
+        <file>res/png/mainicon.png</file>
     </qresource>
 </RCC>
