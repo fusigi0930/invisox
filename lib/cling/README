@@ -1,0 +1,9 @@
+the invisOX uses "Cling" to do the C/C++ interpreter engine,
+download the "Cling" binary from the web site first.
+
+http://root.cern.ch/drupal/content/cling
+
+and replace the folder bin, include, lib, share
+
+then you can try to build the interpreter interface library in the invisOX project.
+
