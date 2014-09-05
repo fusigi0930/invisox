@@ -30,6 +30,10 @@ ApplicationWindow {
         // using the connections to get the dialog result
     }
 
+    Loader {
+        id: settingDialogLoader
+    }
+
     Connections {
         target: addDialogloader.item
         onSigUpdateInfo: doAddScript(info)
@@ -74,48 +78,124 @@ ApplicationWindow {
 
     toolBar: ToolBar {
         RowLayout {
-            ToolButton {
-                text: qsTr("add script")
-                iconSource: "/image/res/png/add.png"
-                iconName: "Add"
-                tooltip: qsTr("add a new script file to invisOX")
-                onClicked: {
-                    var dlg=addDialogloader.setSource("/qml/new_script.qml", {
-                                    visible: true,
-                                    title: text,
-                                    width: mainWindow.width/2,
-                                    height: mainWindow.height/2,
-                                    focus: false
-                                    } )
-                }
+            Rectangle {
+                width:48
+                height:40
+                color: "transparent"
+                ToolButton {
+                    text: qsTr("add")
+                    iconSource: "/image/res/png/add.png"
+                    tooltip: qsTr("add a new script file to invisOX")
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    onClicked: {
+                        var dlg=addDialogloader.setSource("/qml/new_script.qml", {
+                                        visible: true,
+                                        title: text,
+                                        width: mainWindow.width/2,
+                                        height: mainWindow.height/2,
+                                        focus: false
+                                        } )
+                    }
 
-            }
-            ToolButton {
-                text: qsTr("remove script")
-                iconSource: "/image/res/png/delete.png"
-                tooltip: qsTr("remove the selected script from invisOX")
-                onClicked: {
-                    var listInfo=listScriptItems.get(listScript.currentRow);
-                    console.log("curr: " + listScript.currentRow + " actions: " + listInfo["actions"]);
-                    var info = {"actions":listInfo["actions"],"desc":listInfo["desc"],"script":listInfo["script"],"lang":listInfo["lang"]};
-                    if (0 ===invisScripts.slotRemoveItem(info))
-                        listScriptItems.remove(listScript.currentRow);
+                }
+                Text {
+                    text: qsTr("add")
+                    anchors.bottom: parent.bottom
+                    color: "#A0A0FF"
+                    anchors.horizontalCenter: parent.horizontalCenter
                 }
             }
-            ToolButton {
-                text: qsTr("run script")
-                tooltip: qsTr("run the selected script file")
-                iconSource: "/image/res/png/run.png"
+
+            Rectangle {
+                width:48
+                height:40
+                color: "transparent"
+                ToolButton {
+                    text: qsTr("remove")
+                    iconSource: "/image/res/png/delete.png"
+                    tooltip: qsTr("remove the selected script from invisOX")
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    onClicked: {
+                        var listInfo=listScriptItems.get(listScript.currentRow);
+                        console.log("curr: " + listScript.currentRow + " actions: " + listInfo["actions"]);
+                        var info = {"actions":listInfo["actions"],"desc":listInfo["desc"],"script":listInfo["script"],"lang":listInfo["lang"]};
+                        if (0 ===invisScripts.slotRemoveItem(info))
+                            listScriptItems.remove(listScript.currentRow);
+                    }
+                }
+                Text {
+                    text: qsTr("remove")
+                    anchors.bottom: parent.bottom
+                    color: "#A0A0FF"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
             }
-            ToolButton {
-                text: qsTr("stop script")
-                tooltip: qsTr("stop all running scripts")
-                iconSource: "/image/res/png/stop.png"
+
+            Rectangle {
+                width:48
+                height:40
+                color: "transparent"
+
+                ToolButton {
+                    text: qsTr("run")
+                    tooltip: qsTr("run the selected script file")
+                    iconSource: "/image/res/png/run.png"
+                    anchors.horizontalCenter: parent.horizontalCenter
+
+                }
+                Text {
+                    text: qsTr("run")
+                    anchors.bottom: parent.bottom
+                    color: "#A0A0FF"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
             }
-            ToolButton {
-                text: qsTr("settings")
-                tooltip: qsTr("settings")
-                iconSource: "/image/res/png/setting.png"
+
+           Rectangle {
+                width:48
+                height:40
+                color: "transparent"
+
+                ToolButton {
+                    text: qsTr("stop")
+                    tooltip: qsTr("stop all running scripts")
+                    iconSource: "/image/res/png/stop.png"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
+                Text {
+                    text: qsTr("stop")
+                    anchors.bottom: parent.bottom
+                    color: "#A0A0FF"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
+            }
+
+           Rectangle {
+                width:48
+                height:40
+                color: "transparent"
+
+                ToolButton {
+                    text: qsTr("settings")
+                    tooltip: qsTr("settings")
+                    iconSource: "/image/res/png/setting.png"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    onClicked: {
+                        var dlg=settingDialogLoader.setSource("/qml/settings.qml", {
+                                        visible: true,
+                                        title: text,
+                                        width: mainWindow.width/2,
+                                        height: mainWindow.height/2,
+                                        focus: false
+                                        } )
+                    }
+                }
+                Text {
+                    text: qsTr("settings")
+                    anchors.bottom: parent.bottom
+                    color: "#A0A0FF"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
             }
         }
     }
