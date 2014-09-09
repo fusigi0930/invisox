@@ -194,6 +194,8 @@ ApplicationWindow {
                                         height: mainWindow.height/2,
                                         focus: false
                                         } )
+
+                        sigEditSetting(invisSettings.slotGetSettings());
                     }
                 }
                 Text {

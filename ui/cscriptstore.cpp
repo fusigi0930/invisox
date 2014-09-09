@@ -371,6 +371,13 @@ QString CScriptStore::actionToUi(QString szOri) {
     else if (0x70 <= nKey && 0x7b >= nKey) {
         szRet+=QString().sprintf("F%d", nKey-0x70+1);
     }
+    else {
+        for (int i=0; -1 != g_keymap[i].nKey; ++i) {
+            if (g_keymap[i].nKey == nKey) {
+                szRet+= g_keymap[i].szKey;
+            }
+        }
+    }
     return szRet;
 }
 

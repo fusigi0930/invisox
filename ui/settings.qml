@@ -13,6 +13,26 @@ Dialog {
         initFocus();
     }
 
+    onSigEditSetting: {
+        for (var prop in info) {
+            if ("script" === prop) {
+                editScriptFile.text=info[prop];
+            }
+            else if ("stop_key" === prop) {
+                detectAction.text=info[prop];
+            }
+            else if ("method" === prop) {
+                comboMethod.currentIndex=info[prop];
+            }
+            else if ("plug_in" === prop.substr(0,7)) {
+                console.log("plug_in: "+info[prop]);
+                var pluginsFile;
+                pluginsFile={"file":info[prop]};
+                listPluginsItem.append(pluginsFile);
+            }
+        }
+    }
+
     Text {
         id: labelScriptFile
         x: 5
@@ -221,9 +241,9 @@ Dialog {
         ListModel {
             id: listPluginsItem
 
-            ListElement {
-                enabled: "" ; file: "test"
-            }
+            //ListElement {
+            //    enabled: "" ; file: "test"
+            //}
         }
 
         Component {
@@ -246,6 +266,16 @@ Dialog {
         x: buttonCancel.x-width-15
         y: settingDialog.height-buttonOK.height-30
         text: qsTr("OK")
+        onClicked: {
+            var info;
+            info={"script":editScriptFile.text,"stop_key":detectAction.text,"method":comboMethod.currentIndex};
+            for (var i=0; i<listPluginsItem.count; i++) {
+                info["plug_in"+i]=listPluginsItem.get(i)["file"]
+            }
+
+            sigUpdateSetting(info);
+            close();
+        }
     }
 
     function initFocus() {

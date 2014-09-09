@@ -290,5 +290,34 @@ QString CSettingStore::slotGetScriptFile() {
 }
 
 void CSettingStore::slotSetSettingInfo(QVariant info) {
+    QVariantMap infoMap=info.toMap();
+    m_settingInfo.listPlugins.clear();
+    for (QVariantMap::iterator pMap=infoMap.begin(); pMap != infoMap.end(); pMap++) {
+        if (0 == pMap.key().compare(XML_GENERIC_SCRIPT)) {
+            m_settingInfo.szFile=pMap.value().toString();
+        }
+        else if (0 == pMap.key().compare(XML_GENERIC_STOP)) {
+            m_settingInfo.szStopKey=CScriptStore::actionToXml(pMap.value().toString());
+        }
+        else if (0 == pMap.key().compare(XML_GENERIC_METHOD)) {
+            m_settingInfo.actionMethod=static_cast<CSettingStore::EActionMethod>(
+                                        pMap.value().toInt());
+        }
+        else if (0 == pMap.key().left(7).compare(XML_ADD_PLUGINS)) {
+            m_settingInfo.listPlugins.push_back(pMap.value().toString());
+        }
+    }
+}
 
+QVariant CSettingStore::slotGetSettings() {
+    QVariantMap info;
+    info.insert(XML_GENERIC_SCRIPT, m_settingInfo.szFile);
+    info.insert(XML_GENERIC_STOP, CScriptStore::actionToUi(m_settingInfo.szStopKey));
+    info.insert(XML_GENERIC_METHOD, static_cast<int>(m_settingInfo.actionMethod));
+
+    int i=0;
+    for (std::list<QString>::iterator pList=m_settingInfo.listPlugins.begin(); pList != m_settingInfo.listPlugins.end(); pList++) {
+        info.insert(QString().sprintf("%s%d",XML_ADD_PLUGINS, i++), *pList);
+    }
+    return QVariant::fromValue(info);
 }
