@@ -2,6 +2,7 @@
 #include "cscriptstore.h"
 
 #include <QFileInfo>
+#include <algorithm>
 
 /*
  * <?xml version="1.0" encoding="utf-8"?>
@@ -320,4 +321,30 @@ QVariant CSettingStore::slotGetSettings() {
         info.insert(QString().sprintf("%s%d",XML_ADD_PLUGINS, i++), *pList);
     }
     return QVariant::fromValue(info);
+}
+
+bool CSettingStore::slotRemovePlugin(QVariant info) {
+    std::list<QString>::iterator pFind=std::find(m_settingInfo.listPlugins.begin(),
+                                                 m_settingInfo.listPlugins.end(),
+                                                 info.toString());
+
+    if (m_settingInfo.listPlugins.end() == pFind)
+        return false;
+
+    m_settingInfo.listPlugins.remove(info.toString());
+    return true;
+}
+
+bool CSettingStore::slotInsertPlugin(QVariant info) {
+    std::list<QString>::iterator pFind=std::find(m_settingInfo.listPlugins.begin(),
+                                                 m_settingInfo.listPlugins.end(),
+                                                 info.toString());
+
+    if (m_settingInfo.listPlugins.end() != pFind) {
+        return false;
+    }
+
+    qDebug() << "YA: " << info.toString();
+    m_settingInfo.listPlugins.push_back(info.toString());
+    return true;
 }

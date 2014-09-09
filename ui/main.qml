@@ -44,6 +44,16 @@ ApplicationWindow {
     Connections {
         target: settingDialogLoader.item
         onSigUpdateSetting: invisSettings.slotSetSettingInfo(info)
+        onSigRemovePluginReq: {
+            if(invisSettings.slotRemovePlugin(info))
+                settingDialogLoader.item.sigRemovePluginRes(true);
+        }
+        onSigAddPluginReq: {
+            if (invisSettings.slotInsertPlugin(info)) {
+                console.log("filename: "+ info)
+                settingDialogLoader.item.sigAddPluginRes(info);
+            }
+        }
     }
 
     onSigEditItemToDialog: addDialogloader.item.sigInitEditInfo(info)
@@ -273,6 +283,8 @@ ApplicationWindow {
                 onClicked: {
                     if (mouse.button == Qt.RightButton) {
                         console.log("mouse x: "+ mouse.x + " y: " + mouse.y + " row: " + listScript.rowAt(mouse.x, mouse.y))
+                        listScript.selection.clear();
+                        listScript.selection.select(listScript.rowAt(mouse.x, mouse.y));
                         if (listScript.rowAt(mouse.x, mouse.y) !== -1) {
                             listScript.n_scriptListRightClickPos= listScript.rowAt(mouse.x, mouse.y)
                             menuScriptList.popup()

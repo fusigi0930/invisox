@@ -1,6 +1,7 @@
 import QtQuick 2.2
 import QtQuick.Dialogs 1.2
 import QtQuick.Controls 1.2
+import OSSystem 1.0
 
 Dialog {
     id: settingDialog
@@ -8,6 +9,10 @@ Dialog {
 
     signal sigEditSetting(variant info);
     signal sigUpdateSetting(variant info);
+    signal sigRemovePluginReq(variant info);
+    signal sigRemovePluginRes(bool info);
+    signal sigAddPluginReq(variant info);
+    signal sigAddPluginRes(variant info);
 
     Component.onCompleted: {
         initFocus();
@@ -31,6 +36,25 @@ Dialog {
                 listPluginsItem.append(pluginsFile);
             }
         }
+    }
+
+    onSigRemovePluginRes: {
+        if (true === info) {
+            listPluginsItem.remove(listPlugins.currentRow);
+        }
+    }
+
+    onSigAddPluginRes: {
+        console.log("info: ", +info.toString());
+        if ("" !== info.toString()) {
+            var item;
+            //item["file"]=info;
+            //listPluginsItem.append(item);
+        }
+    }
+
+    OSSystem {
+        id: osSysInfo
     }
 
     Text {
@@ -204,17 +228,6 @@ Dialog {
         }
     }
 
-    Button {
-        id: buttonCancel
-        x: settingDialog.width-width-25
-        y: buttonOK.y
-        text: qsTr("Cancel")
-
-        onClicked: {
-            close();
-        }
-    }
-
     Rectangle {
         id: rectPlugins
         x: labelHotkey.x
@@ -236,6 +249,67 @@ Dialog {
 
             TableViewColumn{ role: "enabled"; title: ("v"); width: 25; delegate: checkEnable }
             TableViewColumn{ role: "file"; title: qsTr("file name"); width: 500 }
+
+            FileDialog {
+                id: pluginDlg
+                selectMultiple: false
+                selectFolder: false
+                selectExisting: true
+                title: qsTr("Select a script list file...")
+                nameFilters: [ osSysInfo.dllname, "All files (*)" ]
+                onAccepted: {
+                    console.log("file: "+pluginDlg.fileUrl);
+                    sigAddPluginReq(pluginDlg.fileUrl);
+                }
+                onRejected: {
+                    close();
+                }
+            }
+
+            // context menu
+            Menu {
+                id: menuPlugins
+
+                MenuItem {
+                    text: qsTr("insert")
+                    onTriggered: {
+                        pluginDlg.open();
+
+                    }
+                }
+
+                MenuItem {
+                    text: qsTr("remove")
+                    enabled: listPlugins.currentRow !== -1
+                    onTriggered: {
+                        console.log("current select: " + listPlugins.currentRow);
+                        var listInfo=listPluginsItem.get(listPlugins.currentRow);
+                        console.log(listInfo)
+                        var info = listInfo["file"];
+                        sigRemovePluginReq(info);
+                    }
+                }
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.RightButton
+                onClicked: {
+                    if (mouse.button == Qt.RightButton) {
+                        if (-1 !== listPlugins.rowAt(mouse.x, mouse.y)) {
+                            listPlugins.selection.clear();
+                            listPlugins.selection.select(listPlugins.rowAt(mouse.x, mouse.y));
+                            listPlugins.currentRow=listPlugins.rowAt(mouse.x, mouse.y);
+                            menuPlugins.popup();
+                        }
+                        else {
+                            listPlugins.selection.clear();
+                            listPlugins.currentRow=-1
+                            menuPlugins.popup();
+                        }
+                    }
+                }
+            }
         }
 
         ListModel {
@@ -259,6 +333,17 @@ Dialog {
             }
         }
 
+    }
+
+    Button {
+        id: buttonCancel
+        x: settingDialog.width-width-25
+        y: buttonOK.y
+        text: qsTr("Cancel")
+
+        onClicked: {
+            close();
+        }
     }
 
     Button {

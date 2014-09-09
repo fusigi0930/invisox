@@ -58,6 +58,8 @@ public slots:
     QString slotGetScriptFile();
     void slotSetSettingInfo(QVariant info);
     QVariant slotGetSettings();
+    bool slotRemovePlugin(QVariant info);
+    bool slotInsertPlugin(QVariant info);
 };
 
 #endif // CSETTINGSTORE_H
