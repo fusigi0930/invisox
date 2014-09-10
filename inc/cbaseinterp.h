@@ -7,6 +7,7 @@
 #include <QMap>
 #include <QtConcurrent/QtConcurrent>
 #include <QFuture>
+#include <QFutureWatcher>
 
 class CBasedInterpreter : public QObject {
 	Q_OBJECT
@@ -60,7 +61,7 @@ signals:
 	
 public slots:
 	virtual int slotRun(QString szFile) {
-		if (szFile.isEmpty() {
+        if (szFile.isEmpty()) {
 			return -1;
 		}
 
