@@ -5,15 +5,15 @@
 #include <QString>
 #include <QObject>
 
-class CBasedInterpret : public QObject {
+class CBasedInterpreter : public QObject {
 	Q_OBJECT
 
 public:
-	CBasedInterpret() {
+	CBasedInterpreter() {
 
 	}
 
-	virtual ~CBasedInterpret() {
+	virtual ~CBasedInterpreter() {
 
 	}
 
