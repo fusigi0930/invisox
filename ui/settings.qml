@@ -14,6 +14,8 @@ Dialog {
     signal sigAddPluginReq(variant info);
     signal sigAddPluginRes(variant info);
 
+    property string szPlugname: ""
+
     Component.onCompleted: {
         initFocus();
     }
@@ -45,11 +47,10 @@ Dialog {
     }
 
     onSigAddPluginRes: {
-        console.log("info: ", +info.toString());
-        if ("" !== info.toString()) {
+        if (settingDialog.szPlugname !== "") {
             var item;
-            //item["file"]=info;
-            //listPluginsItem.append(item);
+            item={"file":settingDialog.szPlugname};
+            listPluginsItem.append(item);
         }
     }
 
@@ -259,6 +260,7 @@ Dialog {
                 nameFilters: [ osSysInfo.dllname, "All files (*)" ]
                 onAccepted: {
                     console.log("file: "+pluginDlg.fileUrl);
+                    settingDialog.szPlugname=pluginDlg.fileUrl;
                     sigAddPluginReq(pluginDlg.fileUrl);
                 }
                 onRejected: {
@@ -273,6 +275,7 @@ Dialog {
                 MenuItem {
                     text: qsTr("insert")
                     onTriggered: {
+                        settingDialog.szPlugname="";
                         pluginDlg.open();
 
                     }
@@ -282,6 +285,7 @@ Dialog {
                     text: qsTr("remove")
                     enabled: listPlugins.currentRow !== -1
                     onTriggered: {
+                        settingDialog.szPlugname="";
                         console.log("current select: " + listPlugins.currentRow);
                         var listInfo=listPluginsItem.get(listPlugins.currentRow);
                         console.log(listInfo)
