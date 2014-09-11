@@ -7,7 +7,12 @@ SOURCES += main.cpp \
     cenvstore.cpp \
     cscriptstore.cpp \
     csettingstore.cpp \
-    cossystem.cpp
+	cossystem.cpp
+
+win32 {
+	SOURCES += cinterpenvstore_win.cpp
+}
+
 
 RESOURCES += qml.qrc
 
@@ -23,4 +28,8 @@ HEADERS += \
     cenvstore.h \
     cscriptstore.h \
     csettingstore.h \
-    cossystem.h
+	cossystem.h
+
+win32 {
+	HEADERS += cinterpenvstore_win.h
+}

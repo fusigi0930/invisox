@@ -11,6 +11,11 @@
 
 #include "cossystem.h"
 
+#ifdef Q_OS_WIN
+#	include "cinterpenvstore_win.h"
+#	include <stdlib.h>
+#endif
+
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
@@ -18,6 +23,11 @@ int main(int argc, char *argv[])
     qmlRegisterType<CScriptStore>("ScriptStore", 1, 0, "ScriptStore");
     qmlRegisterType<CSettingStore>("SettingStore", 1, 0, "SettingStore");
     qmlRegisterType<COSSystem>("OSSystem", 1, 0, "OSSystem");
+
+#ifdef Q_OS_WIN
+	CInterpEnvStore envStore;
+	envStore.slotParser();
+#endif
 
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:///qml/main.qml")));
