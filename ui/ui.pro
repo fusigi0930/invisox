@@ -16,7 +16,8 @@ win32 {
 
 RESOURCES += qml.qrc
 
-INCLUDEPATH += ../inc
+INCLUDEPATH += ../inc \
+			   ../interp/cinterp
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =
@@ -32,4 +33,14 @@ HEADERS += \
 
 win32 {
 	HEADERS += cinterpenvstore_win.h
+}
+
+CONFIG(debug, debug|release) {
+	DESTDIR = $$_PRO_FILE_PWD_/../out/debug
+	MOC_DIR = $$_PRO_FILE_PWD_/../out/obj/moc
+	OBJECTS_DIR = $$_PRO_FILE_PWD_/../out/obj/debug
+} else {
+	DESTDIR = $$_PRO_FILE_PWD_/../out/release
+	MOC_DIR = $$_PRO_FILE_PWD_/../out/obj/moc
+	OBJECTS_DIR = $$_PRO_FILE_PWD_/../out/obj/release
 }

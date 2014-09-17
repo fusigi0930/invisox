@@ -63,6 +63,16 @@ win32 {
 
 }
 
+CONFIG(debug, debug|release) {
+	DESTDIR = $$_PRO_FILE_PWD_/../../out/debug
+	MOC_DIR = $$_PRO_FILE_PWD_/../../out/obj/moc
+	OBJECTS_DIR = $$_PRO_FILE_PWD_/../../out/obj/debug
+} else {
+	DESTDIR = $$_PRO_FILE_PWD_/../../out/release
+	MOC_DIR = $$_PRO_FILE_PWD_/../../out/obj/moc
+	OBJECTS_DIR = $$_PRO_FILE_PWD_/../../out/obj/release
+}
+
 INCLUDEPATH += $${CLANG_INC} \
 				$${CLING_INC}
 
