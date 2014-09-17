@@ -15,7 +15,9 @@ int CBasedInterpreter::runThread(CBasedInterpreter *interp, QString szFile) {
 		return -1;
 	}
 
-	interp->run(szFile);
+	if (0 != interp->run(szFile)) {
+		emit interp->sigThreadError(szFile);
+	}
 	return interp->finishRun(szFile);
 }
 

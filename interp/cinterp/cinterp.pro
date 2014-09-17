@@ -52,7 +52,7 @@ LLVM_LIB = $$system($${CLING_BIN}/llvm-config --libs) \
 LLVM_CXXFLAGS = $$system($${CLING_BIN}/llvm-config --cxxflags) -Wno-unused-parameter -Wno-strict-aliasing
 
 # clang environment
-CLANG_INC = $${CLING_LIB}/clang/3.6.0/include
+CLANG_INC = #$${CLING_LIB}/clang/3.6.0/include
 
 unix {
     target.path = /usr/lib
