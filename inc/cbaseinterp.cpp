@@ -7,7 +7,14 @@ CBasedInterpreter::CBasedInterpreter() : QObject(NULL), m_status(_STATUS_NORMAL)
 }
 
 CBasedInterpreter::~CBasedInterpreter() {
+	TInterpThreadMap::iterator pFind;
 
+	for (pFind=m_mapThread.begin(); pFind != m_mapThread.end(); pFind++) {
+		pFind.value().cancel();
+		pFind.value().waitForFinished();
+	}
+
+	m_mapThread.clear();
 }
 
 int CBasedInterpreter::runThread(CBasedInterpreter *interp, QString szFile) {
@@ -15,8 +22,13 @@ int CBasedInterpreter::runThread(CBasedInterpreter *interp, QString szFile) {
 		return -1;
 	}
 
+	interp->m_status = CBasedInterpreter::_STATUS_RUNNING;
 	if (0 != interp->run(szFile)) {
 		emit interp->sigThreadError(szFile);
+		interp->m_status = CBasedInterpreter::_STATUS_STOP;
+	}
+	else {
+		interp->m_status = CBasedInterpreter::_STATUS_STOP;
 	}
 	return interp->finishRun(szFile);
 }

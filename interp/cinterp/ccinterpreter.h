@@ -12,6 +12,9 @@ class CINTERPSHARED_EXPORT CCInterpreter : public CBasedInterpreter
 public:
 	CCInterpreter();
 	virtual ~CCInterpreter();
+
+protected:
+	virtual int run(QString szFile);
 };
 
 #endif // CCINTERPRETER_H
