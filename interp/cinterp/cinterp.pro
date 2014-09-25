@@ -60,7 +60,8 @@ unix {
 
 }
 win32 {
-
+	CONFIG += dll
+	QMAKE_LFLAGS+=-Wl,-e,_DllMainCRTStartup@12
 }
 
 CONFIG(debug, debug|release) {

@@ -12,6 +12,55 @@
 #include <llvm/Support/ManagedStatic.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 
+#include "debug.h"
+#include <iostream>
+#include <sstream>
+
+#ifdef Q_OS_WIN
+#include <windows.h>
+
+static std::streambuf *g_oriStdout=NULL;
+static std::stringstream g_coutBuf;
+
+static void initStdOut(bool bInit) {
+	if (bInit) {
+		g_oriStdout=std::cout.rdbuf();
+		g_coutBuf.str("");
+		std::cout.rdbuf(g_coutBuf.rdbuf());
+	}
+	else {
+		if (g_oriStdout) {
+			std::cout.rdbuf(g_oriStdout);
+		}
+	}
+}
+
+extern "C" BOOL WINAPI DllMain(
+  HANDLE hinstDLL,
+  DWORD fdwReason,
+  LPVOID lpvReserved
+)
+{
+	switch (fdwReason)
+	{
+		case DLL_PROCESS_ATTACH:
+			_DMSG("dll attached");
+			initStdOut(true);
+			break;
+		case DLL_THREAD_ATTACH:
+			break;
+		case DLL_THREAD_DETACH:
+			break;
+		case DLL_PROCESS_DETACH:
+			_DMSG("dll deattached");
+			initStdOut(false);
+			break;
+	}
+	return true;
+}
+
+#endif
+
 CCInterpreter::CCInterpreter()
 {
 }

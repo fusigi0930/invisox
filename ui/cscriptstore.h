@@ -73,6 +73,8 @@ public slots:
     QString slotActionToUi(QString szOri);
     QString slotActionToXml(QString szOri);
 
+	void testcling();
+
 };
 
 #endif // CSCRIPTSTORE_H

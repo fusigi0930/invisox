@@ -25,6 +25,7 @@
  */
 
 #include "debug.h"
+#include "ccinterpreter.h"
 
 #define XML_MAIN                                "scripts"
 #define XML_ITEM                                "item"
@@ -510,4 +511,8 @@ int CScriptStore::slotRemoveItem(QVariant item) {
     m_mapScriptInfos.erase(pFind);
 
     return 0;
+}
+
+void CScriptStore::testcling() {
+	CCInterpreter cinterp;
 }
