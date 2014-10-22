@@ -82,6 +82,8 @@ static CScriptStore::SKeyMap g_keymap[] ={
         { -1, "UNKNOW" }
 };
 
+CCInterpreter g_cinterp;
+
 CScriptStore::SScriptInfo& CScriptStore::SScriptInfo::operator=(const CScriptStore::SScriptInfo &info) {
     action=info.action;
     type=info.type;
@@ -514,8 +516,8 @@ int CScriptStore::slotRemoveItem(QVariant item) {
 }
 
 void CScriptStore::testcling() {
-	CCInterpreter cinterp;
-	cinterp.Run("test.cxx");
 
-	qDebug() << cinterp.getStdout();
+	g_cinterp.slotRun("test.cxx");
+
+	qDebug() << g_cinterp.getStdout();
 }

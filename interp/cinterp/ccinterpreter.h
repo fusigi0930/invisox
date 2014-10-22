@@ -22,7 +22,6 @@ protected:
 	virtual int run(QString szFile);
 
 public:
-	int Run(QString szFile);
 	QString getStdout();
 
 };

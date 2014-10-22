@@ -116,10 +116,6 @@ int CCInterpreter::run(QString szFile) {
 	return 0;
 }
 
-int CCInterpreter::Run(QString szFile) {
-	return run(szFile);
-}
-
 QString CCInterpreter::getStdout() {
 	QString szOut=g_coutBuf.str().c_str();
 	szOut.append(g_cerrBuf.str().c_str());
