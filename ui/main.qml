@@ -215,6 +215,26 @@ ApplicationWindow {
                     anchors.horizontalCenter: parent.horizontalCenter
                 }
             }
+		   Rectangle {
+				width:48
+				height:40
+				color: "transparent"
+
+				ToolButton {
+					text: qsTr("test")
+					tooltip: qsTr("test")
+					anchors.horizontalCenter: parent.horizontalCenter
+					onClicked: {
+						invisScripts.testcling();
+					}
+				}
+				Text {
+					text: qsTr("test")
+					anchors.bottom: parent.bottom
+					color: "#A0A0FF"
+					anchors.horizontalCenter: parent.horizontalCenter
+				}
+			}
         }
     }
 

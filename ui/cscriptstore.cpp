@@ -1,4 +1,5 @@
 #include "cscriptstore.h"
+#include "ccinterpreter.h"
 
 /*
  * <?xml version="1.0" encoding="utf-8"?>
@@ -25,7 +26,6 @@
  */
 
 #include "debug.h"
-#include "ccinterpreter.h"
 
 #define XML_MAIN                                "scripts"
 #define XML_ITEM                                "item"
@@ -515,4 +515,7 @@ int CScriptStore::slotRemoveItem(QVariant item) {
 
 void CScriptStore::testcling() {
 	CCInterpreter cinterp;
+	cinterp.Run("test.cxx");
+
+	qDebug() << cinterp.getStdout();
 }

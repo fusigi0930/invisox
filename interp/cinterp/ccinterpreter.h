@@ -9,12 +9,22 @@
 class CINTERPSHARED_EXPORT CCInterpreter : public CBasedInterpreter
 {
 	Q_OBJECT
+
+private:
+
 public:
 	CCInterpreter();
 	virtual ~CCInterpreter();
 
+
+
 protected:
 	virtual int run(QString szFile);
+
+public:
+	int Run(QString szFile);
+	QString getStdout();
+
 };
 
 #endif // CCINTERPRETER_H

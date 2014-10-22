@@ -1,5 +1,9 @@
 #include "ccinterpreter.h"
 
+#include "debug.h"
+#include <iostream>
+#include <sstream>
+
 #include <cling/Interpreter/Interpreter.h>
 #include <cling/MetaProcessor/MetaProcessor.h>
 #include <cling/UserInterface/UserInterface.h>
@@ -12,25 +16,31 @@
 #include <llvm/Support/ManagedStatic.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 
-#include "debug.h"
-#include <iostream>
-#include <sstream>
-
 #ifdef Q_OS_WIN
 #include <windows.h>
 
 static std::streambuf *g_oriStdout=NULL;
+static std::streambuf *g_oriStderr=NULL;
 static std::stringstream g_coutBuf;
+static std::stringstream g_cerrBuf;
 
 static void initStdOut(bool bInit) {
 	if (bInit) {
 		g_oriStdout=std::cout.rdbuf();
+		g_oriStderr=std::cerr.rdbuf();
 		g_coutBuf.str("");
+		g_cerrBuf.str("");
 		std::cout.rdbuf(g_coutBuf.rdbuf());
+		std::cerr.rdbuf(g_cerrBuf.rdbuf());
 	}
 	else {
 		if (g_oriStdout) {
 			std::cout.rdbuf(g_oriStdout);
+			g_oriStderr=NULL;
+		}
+		if (g_oriStderr) {
+			std::cerr.rdbuf(g_oriStderr);
+			g_oriStderr=NULL;
 		}
 	}
 }
@@ -61,6 +71,10 @@ extern "C" BOOL WINAPI DllMain(
 
 #endif
 
+char *g_value[]={
+	"go",
+};
+
 CCInterpreter::CCInterpreter()
 {
 }
@@ -73,26 +87,41 @@ int CCInterpreter::run(QString szFile) {
 	if (szFile.isEmpty()) {
 		return -3;
 	}
-	char *value[]={
-		"go",
-	};
-	cling::Interpreter cinterp(1,value);
-	clang::CompilerInstance *compiler=cinterp.getCI();
+
+	cling::Interpreter interp(1, g_value);
+	clang::CompilerInstance *compiler;
+	clang::DiagnosticConsumer *client;
+
+	compiler=interp.getCI();
 
 	if (NULL == compiler) {
-		return -1;
+		_DMSG("get compiler failed");
+		return -3;
 	}
 
-	cinterp.AddIncludePath(".");
-	if (cling::Interpreter::kSuccess != cinterp.loadFile(szFile.toLocal8Bit().data())) {
+	interp.AddIncludePath(".");
+	client=compiler->getDiagnostics().getClient();
+
+	if (cling::Interpreter::kSuccess != interp.loadFile(szFile.toLocal8Bit().data())) {
 		return -2;
 	}
 
-	clang::DiagnosticConsumer *client=compiler->getDiagnostics().getClient();
-
 	cling::Interpreter::CompilationResult compResult;
-
-	compResult=cinterp.execute("main(0, 0)");
+	// for the windows version isssue;
+#ifdef Q_OS_WIN
+	compResult=interp.execute("printf(\"%d\\n\", 100);");
+#endif
+	compResult=interp.execute("main(0, 0)");
 
 	return 0;
+}
+
+int CCInterpreter::Run(QString szFile) {
+	return run(szFile);
+}
+
+QString CCInterpreter::getStdout() {
+	QString szOut=g_coutBuf.str().c_str();
+	szOut.append(g_cerrBuf.str().c_str());
+	return szOut;
 }
