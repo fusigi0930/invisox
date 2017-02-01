@@ -1,7 +1,8 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    ui \
-    interp/cinterp
+#	ui
+	ui \
+	interp/luainterp
 
-ui.depends = interp/cinterp
+ui.depends = interp/luainterp

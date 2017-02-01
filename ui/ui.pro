@@ -50,4 +50,4 @@ CONFIG(debug, debug|release) {
 	INTERP_LIB = -L$$_PRO_FILE_PWD_/../out/release
 }
 
-LIBS += $${INTERP_LIB} -lcinterp
+LIBS += $${INTERP_LIB}
