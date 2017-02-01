@@ -74,4 +74,6 @@ win32 {
 lua_src.target = lua_src
 lua_inst.target = lua_inst
 
+QMAKE_EXTRA_TARGETS += lua_src
+PRE_TARGETDEPS = lua_src
 
