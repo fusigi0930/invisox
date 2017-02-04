@@ -2,19 +2,73 @@
 #include "debug.h"
 #include <QtConcurrent/QtConcurrent>
 
-CBasedInterpreter::CBasedInterpreter() : QObject(NULL), m_status(_STATUS_NORMAL) {
+CBasedRunThread::CBasedRunThread() {
+	m_interp = NULL;
+#ifdef Q_OS_WIN
+	m_hThread = NULL;
+#endif
+}
+
+CBasedRunThread::CBasedRunThread(CBasedInterpreter *p) {
+	m_interp = p;
+#ifdef Q_OS_WIN
+	m_hThread = NULL;
+#endif
+}
+
+CBasedRunThread::~CBasedRunThread() {
+	stop();
+}
+
+void CBasedRunThread::stop() {
+#ifdef Q_OS_WIN
+	if (m_hThread) {
+		DWORD ddExitCode=0;
+		::GetExitCodeProcess(m_hThread, &ddExitCode);
+		::TerminateThread(m_hThread, ddExitCode);
+		m_hThread=NULL;
+	}
+#endif
+}
+
+void CBasedRunThread::pause() {
+#ifdef Q_OS_WIN
+	if (m_hThread) {
+		::SuspendThread(m_hThread);
+	}
+#endif
+}
+
+void CBasedRunThread::resume() {
+#ifdef Q_OS_WIN
+	if (m_hThread) {
+		::ResumeThread(m_hThread);
+	}
+#endif
+}
+
+void CBasedRunThread::run() {
+#ifdef Q_OS_WIN
+	m_hThread = ::GetCurrentThread();
+	if (m_interp) {
+		CBasedInterpreter::runThread(m_interp, m_interp->m_szFile);
+	}
+#endif
+	m_hThread=NULL;
+}
+
+////////////////////////////////////////////////
+/// \brief CBasedInterpreter::CBasedInterpreter
+///
+
+CBasedInterpreter::CBasedInterpreter() : QObject(NULL), m_status(_STATUS_NORMAL), m_thread(this) {
 
 }
 
 CBasedInterpreter::~CBasedInterpreter() {
-	TInterpThreadMap::iterator pFind;
-
-	for (pFind=m_mapThread.begin(); pFind != m_mapThread.end(); pFind++) {
-		pFind.value().cancel();
-		pFind.value().waitForFinished();
+	if (m_thread.isRunning()) {
+		m_thread.stop();
 	}
-
-	m_mapThread.clear();
 }
 
 int CBasedInterpreter::runThread(CBasedInterpreter *interp, QString szFile) {
@@ -49,13 +103,18 @@ int CBasedInterpreter::slotRun(QString szFile) {
 	}
 
 	// is the file already running?
-	TInterpThreadMap::iterator pFind=m_mapThread.find(szFile);
-	if (m_mapThread.end() != pFind) {
-		return -2;
+	if (!m_thread.isRunning()) {
+		m_thread.start();
 	}
-	QFuture<int> thread=QtConcurrent::run(
-			CBasedInterpreter::runThread, this, szFile);
-
-	m_mapThread[szFile]=thread;
 	return 0;
+}
+
+void CBasedInterpreter::slotPause() {
+	if (m_thread.isRunning()) {
+		m_thread.pause();
+	}
+}
+
+void CBasedInterpreter::slotResume() {
+	m_thread.resume();
 }

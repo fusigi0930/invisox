@@ -6,10 +6,39 @@
 #include <QMap>
 #include <QFuture>
 #include <QFutureWatcher>
+#include <QThread>
+
+#ifdef Q_OS_WIN
+#include <windows.h>
+#endif
+
+class CBasedInterpreter;
+
+class CBasedRunThread : public QThread {
+	Q_OBJECT
+
+protected:
+	CBasedInterpreter *m_interp;
+
+#ifdef Q_OS_WIN
+	HANDLE m_hThread;
+#endif
+public:
+	CBasedRunThread();
+	CBasedRunThread(CBasedInterpreter *p);
+	virtual ~CBasedRunThread();
+
+	void pause();
+	void resume();
+	void stop();
+
+protected:
+	virtual void run();
+};
 
 class CBasedInterpreter : public QObject {
 	Q_OBJECT
-
+	friend class CBasedRunThread;
 public:
 	CBasedInterpreter();
 
@@ -27,6 +56,8 @@ protected:
 	EInterpStatus m_status;
 	typedef QMap<QString, QFuture<int> > TInterpThreadMap;
 	TInterpThreadMap m_mapThread;
+	QString m_szFile;
+	CBasedRunThread m_thread;
 
 	static int runThread(CBasedInterpreter *interp, QString szFile);
 
@@ -41,6 +72,8 @@ signals:
 	
 public slots:
 	virtual int slotRun(QString szFile);
+	virtual void slotPause();
+	virtual void slotResume();
 
 };
 
