@@ -20,12 +20,16 @@ DEFINES += LUAINTERP_LIBRARY
 SOURCES += cluainterpreter.cpp \
     ../../inc/cbaseinterp.cpp \
     clua.cpp \
-    cluafunc.cpp
+    cluafunc.cpp \
+    crunluathread.cpp \
+    copencv.cpp
 
 HEADERS += cluainterpreter.h\
         luainterp_global.h \
     ../../inc/cbaseinterp.h \
-    clua.h
+    clua.h \
+    crunluathread.h \
+    copencv.h
 
 CONFIG(debug, debug|release) {
 	DESTDIR = $$_PRO_FILE_PWD_/../../out/debug

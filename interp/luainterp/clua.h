@@ -4,8 +4,12 @@
 #include "lualib.h"
 #include "lauxlib.h"
 #include <QString>
+#include <map>
+#include <vector>
 
 #define GLOBAL_LUAOBJ "__LUA_OBJECT__"
+
+class QThread;
 
 class CLua
 {
@@ -14,9 +18,13 @@ private:
 	void registerFunc();
 	void registerConst();
 
+	static void sendInputFuncEvent(std::vector<int> *vt);
+	static void sendInputWmEvent(std::vector<int> *vt);
+
 protected:
 	lua_State *mLua;
 	QString m_szPrintOut;
+	std::map<QString, QThread*> m_mapLuaThread;
 
 public:
 	CLua();
