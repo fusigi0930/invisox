@@ -18,11 +18,14 @@ INCLUDEPATH += ../../inc \
 DEFINES += LUAINTERP_LIBRARY
 
 SOURCES += cluainterpreter.cpp \
-    ../../inc/cbaseinterp.cpp
+    ../../inc/cbaseinterp.cpp \
+    clua.cpp \
+    cluafunc.cpp
 
 HEADERS += cluainterpreter.h\
         luainterp_global.h \
-    ../../inc/cbaseinterp.h
+    ../../inc/cbaseinterp.h \
+    clua.h
 
 CONFIG(debug, debug|release) {
 	DESTDIR = $$_PRO_FILE_PWD_/../../out/debug

@@ -1,7 +1,6 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-#	ui
 	ui \
 	interp/luainterp
 
