@@ -17,6 +17,7 @@ private:
 	void registerOverrideFunc();
 	void registerFunc();
 	void registerConst();
+	void adjustLuaPath();
 
 	static void sendInputFuncEvent(std::vector<int> *vt);
 	static void sendInputWmEvent(std::vector<int> *vt);
@@ -24,6 +25,7 @@ private:
 protected:
 	lua_State *mLua;
 	QString m_szPrintOut;
+	QString m_szFile;
 	std::map<QString, QThread*> m_mapLuaThread;
 
 public:
@@ -33,6 +35,9 @@ public:
 	void init();
 	void close();
 	void setResult(QString szResult);
+
+	void runString(QString szScript);
+	void runFile(QString szFile);
 
 	// override original Lua function
 	static int luaPrint(lua_State* L);

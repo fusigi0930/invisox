@@ -40,18 +40,20 @@ extern "C" BOOL WINAPI DllMain(
 #endif
 
 
-CLuaInterpreter::CLuaInterpreter()
+CLuaInterpreter::CLuaInterpreter() : CBasedInterpreter(), mLua()
 {
 }
 
 CLuaInterpreter::~CLuaInterpreter() {
-
+	mLua.close();
 }
 
 int CLuaInterpreter::run(QString szFile) {
 	if (szFile.isEmpty()) {
 		return -3;
 	}
+
+	mLua.runFile(szFile);
 
 	return 0;
 }

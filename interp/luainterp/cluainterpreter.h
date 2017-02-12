@@ -3,6 +3,7 @@
 
 #include "luainterp_global.h"
 #include "cbaseinterp.h"
+#include "clua.h"
 #include "debug.h"
 #include <QObject>
 
@@ -11,6 +12,7 @@ class LUAINTERPSHARED_EXPORT CLuaInterpreter : public CBasedInterpreter
 	Q_OBJECT
 
 private:
+	CLua mLua;
 
 public:
 	CLuaInterpreter();

@@ -24,7 +24,8 @@
 #define MODE_EVENT_WM	1
 #define MODE_EVENT_FUNC	0
 
-#define VAR_EVENT_MODE "__var_event_mode"
+#define VAR_EVENT_MODE "__var_event_mode__"
+#define VAR_TERMINATE_LUA "__var_terminate_lua__"
 
 static const struct luaL_Reg override_func[] = {
 	{ "print", CLua::luaPrint },
