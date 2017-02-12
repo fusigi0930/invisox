@@ -2,6 +2,9 @@
 #include "debug.h"
 #include "crunluathread.h"
 #include <typeinfo>
+#include "copencv.h"
+#include "luna_four_code.h"
+
 #ifdef Q_OS_WIN
 #	include <windows.h>
 #endif
@@ -242,6 +245,8 @@ void CLua::registerFunc() {
 		lua_pushcfunction(mLua, additional_func[i].func);
 		lua_setglobal(mLua, additional_func[i].name);
 	}
+
+	Luna<COpenCV>::Register(mLua);
 }
 
 void CLua::registerOverrideFunc() {
