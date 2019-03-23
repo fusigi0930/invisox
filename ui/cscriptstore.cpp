@@ -40,6 +40,7 @@
 #define XML_ITEM_INTERPRETER_PHP                "php"
 #define XML_ITEM_INTERPRETER_BASIC              "basic"
 #define XML_ITEM_INTERPRETER_JAVASCRIPT         "javascript"
+#define XML_ITEM_INTERPRETER_LUA                "lua"
 
 #define LIST_ACTION                             "actions"
 #define LIST_DESC                               "desc"
@@ -127,6 +128,9 @@ CScriptStore::SScriptInfo& CScriptStore::SScriptInfo::operator=(const QVariant &
             else if (0 == pMap.value().toString().compare(XML_ITEM_INTERPRETER_JAVASCRIPT)) {
                 interp=_INTERP_JS;
             }
+			else if (0 == pMap.value().toString().compare(XML_ITEM_INTERPRETER_LUA)) {
+				interp=_INTERP_LUA;
+			}
         }
     }
     return *this;

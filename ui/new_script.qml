@@ -157,7 +157,7 @@ Dialog {
             selectExisting: true
             title: qsTr("Select a script file...")
 
-            nameFilters: [ "Cpp files (*.cpp)", "php files (*.php)", "basic files (*.bas)", "js file (*.js)", "All files (*)" ]
+			nameFilters: [ "lua file (*.lua)", "All files (*)" ]
 
             onAccepted: {
                 editFile.text=fileDlg.fileUrl.toString();
@@ -184,9 +184,9 @@ Dialog {
         id: comboInterp
         x: labelInterp.x+labelInterp.paintedWidth +3
         y: labelInterp.y-3
-        currentIndex: 0
+		currentIndex: 0
 
-        model: [qsTr("C/C++"), qsTr("PHP"), qsTr("Basic"), qsTr("Java script")]
+		model: [qsTr("Lua")]
         onCurrentIndexChanged: {
             initFoucs();
         }
@@ -295,17 +295,8 @@ Dialog {
 
             switch (comboInterp.currentIndex) {
                 default:
-                case 0: // c/c++
-                    interpreterCmd="c/c++";
-                    break;
-                case 1: // php
-                    interpreterCmd="php";
-                    break;
-                case 2: // basic
-                    interpreterCmd="basic";
-                    break;
-                case 3: // javascript
-                    interpreterCmd="javascript";
+				case 0: // lua
+					interpreterCmd="lua";
                     break;
             }
 

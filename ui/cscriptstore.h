@@ -23,6 +23,7 @@ public:
         _INTERP_PHP,
         _INTERP_JS,
         _INTERP_BASIC,
+		_INTERP_LUA,
         _INTERP_UNKNOW
     };
 
