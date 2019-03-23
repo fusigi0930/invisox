@@ -4,6 +4,11 @@
         <file>new_script.qml</file>
         <file>settings.qml</file>
     </qresource>
+    <qresource prefix="/modules">
+        <file>invi_toolbar.qml</file>
+        <file>invi_toolbutton.qml</file>
+		<file>qmldir</file>
+	</qresource>
     <qresource prefix="/image">
         <file>res/png/delete.png</file>
         <file>res/png/add.png</file>

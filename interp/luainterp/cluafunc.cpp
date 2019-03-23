@@ -41,7 +41,7 @@ static const struct luaL_Reg additional_func[] = {
 };
 
 struct SConst {
-	char *name;
+    const char *name;
 	int value;
 };
 

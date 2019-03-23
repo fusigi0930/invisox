@@ -4,6 +4,7 @@ import QtQuick.Window 2.0
 import QtQuick.Layouts 1.0
 import ScriptStore 1.0
 import SettingStore 1.0
+import "qrc:/modules/"
 
 ApplicationWindow {
     visible: true
@@ -36,14 +37,16 @@ ApplicationWindow {
     }
 
     Connections {
-        target: addDialogloader.item
+		target: addDialogloader.item
         onSigUpdateInfo: doAddScript(info)
         onSigUpdateEditInfo: doEditScript(editInfo)
     }
 
     Connections {
         target: settingDialogLoader.item
-        onSigUpdateSetting: invisSettings.slotSetSettingInfo(info)
+		onSigUpdateSetting: {
+			invisSettings.slotSetSettingInfo(info)
+		}
         onSigRemovePluginReq: {
             if(invisSettings.slotRemovePlugin(info))
                 settingDialogLoader.item.sigRemovePluginRes(true);
@@ -60,10 +63,12 @@ ApplicationWindow {
     onSigEditSetting: settingDialogLoader.item.sigEditSetting(info)
 
     function doAddScript(addInfo) {
+		console.log("add new script");
         listScriptItems.addItemFromDialog(addInfo);
     }
 
     function doEditScript(editInfo) {
+		console.log("do edit script");
         listScriptItems.editItem(editInfo);
     }
 
@@ -92,151 +97,45 @@ ApplicationWindow {
         }
     }
 
-    toolBar: ToolBar {
-        RowLayout {
-            Rectangle {
-                width:48
-                height:40
-                color: "transparent"
-                ToolButton {
-                    text: qsTr("add")
-                    iconSource: "/image/res/png/add.png"
-                    tooltip: qsTr("add a new script file to invisOX")
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    onClicked: {
-                        var dlg=addDialogloader.setSource("/qml/new_script.qml", {
-                                        visible: true,
-                                        title: text,
-                                        width: mainWindow.width/2,
-                                        height: mainWindow.height/2,
-                                        focus: false
-                                        } )
-                    }
+	toolBar: InviToolBar {
+		id: inviToolBar
+		height: 52
 
-                }
-                Text {
-                    text: qsTr("add")
-                    anchors.bottom: parent.bottom
-                    color: "#A0A0FF"
-                    anchors.horizontalCenter: parent.horizontalCenter
-                }
-            }
+		onSigClickRemove: {
+			var listInfo=listScriptItems.get(listScript.currentRow);
+			console.log("curr: " + listScript.currentRow + " actions: " + listInfo["actions"]);
+			var info = {"actions":listInfo["actions"],"desc":listInfo["desc"],"script":listInfo["script"],"lang":listInfo["lang"]};
+			if (0 ===invisScripts.slotRemoveItem(info))
+				listScriptItems.remove(listScript.currentRow);
+		}
 
-            Rectangle {
-                width:48
-                height:40
-                color: "transparent"
-                ToolButton {
-                    text: qsTr("remove")
-                    iconSource: "/image/res/png/delete.png"
-                    tooltip: qsTr("remove the selected script from invisOX")
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    onClicked: {
-                        var listInfo=listScriptItems.get(listScript.currentRow);
-                        console.log("curr: " + listScript.currentRow + " actions: " + listInfo["actions"]);
-                        var info = {"actions":listInfo["actions"],"desc":listInfo["desc"],"script":listInfo["script"],"lang":listInfo["lang"]};
-                        if (0 ===invisScripts.slotRemoveItem(info))
-                            listScriptItems.remove(listScript.currentRow);
-                    }
-                }
-                Text {
-                    text: qsTr("remove")
-                    anchors.bottom: parent.bottom
-                    color: "#A0A0FF"
-                    anchors.horizontalCenter: parent.horizontalCenter
-                }
-            }
+		onSigClickAdd: {
+			console.log("text: " + text);
+			var dlg=addDialogloader.setSource("/qml/new_script.qml", {
+							visible: true,
+							title: text,
+							width: mainWindow.width / 2,
+							height: mainWindow.height / 2,
+							focus: false
+							} )
+		}
 
-            Rectangle {
-                width:48
-                height:40
-                color: "transparent"
+		onSigClickSettings: {
+			var dlg=settingDialogLoader.setSource("/qml/settings.qml", {
+							visible: true,
+							title: text,
+							width: mainWindow.width/2,
+							height: mainWindow.height/2,
+							focus: false
+							} )
 
-                ToolButton {
-                    text: qsTr("run")
-                    tooltip: qsTr("run the selected script file")
-                    iconSource: "/image/res/png/run.png"
-                    anchors.horizontalCenter: parent.horizontalCenter
+			sigEditSetting(invisSettings.slotGetSettings());
+		}
 
-                }
-                Text {
-                    text: qsTr("run")
-                    anchors.bottom: parent.bottom
-                    color: "#A0A0FF"
-                    anchors.horizontalCenter: parent.horizontalCenter
-                }
-            }
-
-           Rectangle {
-                width:48
-                height:40
-                color: "transparent"
-
-                ToolButton {
-                    text: qsTr("stop")
-                    tooltip: qsTr("stop all running scripts")
-                    iconSource: "/image/res/png/stop.png"
-                    anchors.horizontalCenter: parent.horizontalCenter
-                }
-                Text {
-                    text: qsTr("stop")
-                    anchors.bottom: parent.bottom
-                    color: "#A0A0FF"
-                    anchors.horizontalCenter: parent.horizontalCenter
-                }
-            }
-
-           Rectangle {
-                width:48
-                height:40
-                color: "transparent"
-
-                ToolButton {
-                    text: qsTr("settings")
-                    tooltip: qsTr("settings")
-                    iconSource: "/image/res/png/setting.png"
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    onClicked: {
-                        var dlg=settingDialogLoader.setSource("/qml/settings.qml", {
-                                        visible: true,
-                                        title: text,
-                                        width: mainWindow.width/2,
-                                        height: mainWindow.height/2,
-                                        focus: false
-                                        } )
-
-                        sigEditSetting(invisSettings.slotGetSettings());
-                    }
-                }
-                Text {
-                    text: qsTr("settings")
-                    anchors.bottom: parent.bottom
-                    color: "#A0A0FF"
-                    anchors.horizontalCenter: parent.horizontalCenter
-                }
-            }
-		   Rectangle {
-				width:48
-				height:40
-				color: "transparent"
-
-				ToolButton {
-					text: qsTr("test")
-					tooltip: qsTr("test")
-					anchors.horizontalCenter: parent.horizontalCenter
-					onClicked: {
-						invisScripts.testcling();
-					}
-				}
-				Text {
-					text: qsTr("test")
-					anchors.bottom: parent.bottom
-					color: "#A0A0FF"
-					anchors.horizontalCenter: parent.horizontalCenter
-				}
-			}
-        }
-    }
+		onSigClickTest: {
+			invisScripts.testcling();
+		}
+	}
 
     // child controls
     Rectangle {

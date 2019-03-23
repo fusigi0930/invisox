@@ -479,11 +479,14 @@ int CScriptStore::slotEditItem(QVariant item) {
         return -2;
     }
 
+	// it has only update filename scenario
+#if 0
     pReplace=m_mapScriptInfos.find(_CMD_TYPE_NETCMD == info.type ? "nc:"+info.action : info.action);
     if (m_mapScriptInfos.end() != pReplace) {
         _DMSG("the action is duplicated!");
         return -3;
     }
+#endif
 
     m_mapScriptInfos.erase(pFind);
 
@@ -497,6 +500,7 @@ int CScriptStore::slotEditItem(QVariant item) {
             break;
     }
 
+	_DMSG("update success!");
     return 0;
 }
 

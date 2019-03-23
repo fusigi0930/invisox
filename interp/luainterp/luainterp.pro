@@ -21,8 +21,7 @@ SOURCES += cluainterpreter.cpp \
     ../../inc/cbaseinterp.cpp \
     clua.cpp \
     cluafunc.cpp \
-    crunluathread.cpp \
-    copencv.cpp
+    crunluathread.cpp
 
 HEADERS += cluainterpreter.h\
         luainterp_global.h \

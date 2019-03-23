@@ -13,6 +13,8 @@ Dialog {
     property bool m_isEdit: false
     property string szOriKey: ""
 
+	standardButtons: Dialog.Close
+
     Component.onCompleted: {
         initFoucs();
     }
@@ -265,6 +267,7 @@ Dialog {
         text: qsTr("OK")
 
         onClicked: {
+			console.log("press ok");
             if (editFile.text.trim() === "") {
                 return;
             }
@@ -308,10 +311,12 @@ Dialog {
 
             if(!m_isEdit) {
                 info = {"actions":actionCmd,"desc":editDesc.text,"script":editFile.text,"lang":interpreterCmd};
+				console.log("testtest");
                 sigUpdateInfo(info);
             }
             else {
-                info = {"actions":actionCmd,"desc":editDesc.text,"script":editFile.text,"lang":interpreterCmd,"ori_key":scriptDialog.szOriKey};
+				info = {"actions":actionCmd,"desc":editDesc.text,"script":editFile.text,"lang":interpreterCmd,"ori_key":scriptDialog.szOriKey};
+				console.log("update list");
                 sigUpdateEditInfo(info);
             }
 
