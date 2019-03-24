@@ -145,6 +145,7 @@ public:
 
 
 
+#ifdef HAVE_OPENCV_GPU
 class PlaneWarperGpu: public WarperCreator
 {
 public:
@@ -164,6 +165,7 @@ class SphericalWarperGpu: public WarperCreator
 public:
     Ptr<detail::RotationWarper> create(float scale) const { return new detail::SphericalWarperGpu(scale); }
 };
+#endif
 
 } // namespace cv
 

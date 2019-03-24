@@ -44,8 +44,11 @@
 #define __OPENCV_STITCHING_WARPERS_HPP__
 
 #include "opencv2/core/core.hpp"
-#include "opencv2/core/gpumat.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/opencv_modules.hpp"
+#ifdef HAVE_OPENCV_GPU
+# include "opencv2/gpu/gpu.hpp"
+#endif
 
 namespace cv {
 namespace detail {
@@ -328,6 +331,7 @@ public:
 };
 
 
+#ifdef HAVE_OPENCV_GPU
 class CV_EXPORTS PlaneWarperGpu : public PlaneWarper
 {
 public:
@@ -444,6 +448,7 @@ public:
 private:
     gpu::GpuMat d_xmap_, d_ymap_, d_src_, d_dst_;
 };
+#endif
 
 
 struct SphericalPortraitProjector : ProjectorBase
@@ -455,7 +460,7 @@ struct SphericalPortraitProjector : ProjectorBase
 
 // Projects image onto unit sphere with origin at (0, 0, 0).
 // Poles are located NOT at (0, -1, 0) and (0, 1, 0) points, BUT at (1, 0, 0) and (-1, 0, 0) points.
-class CV_EXPORTS SphericalPortraitWarper : public RotationWarperBase<SphericalPortraitProjector>
+class SphericalPortraitWarper : public RotationWarperBase<SphericalPortraitProjector>
 {
 public:
     SphericalPortraitWarper(float scale) { projector_.scale = scale; }
@@ -471,7 +476,7 @@ struct CylindricalPortraitProjector : ProjectorBase
 };
 
 
-class CV_EXPORTS CylindricalPortraitWarper : public RotationWarperBase<CylindricalPortraitProjector>
+class CylindricalPortraitWarper : public RotationWarperBase<CylindricalPortraitProjector>
 {
 public:
     CylindricalPortraitWarper(float scale) { projector_.scale = scale; }
@@ -490,7 +495,7 @@ struct PlanePortraitProjector : ProjectorBase
 };
 
 
-class CV_EXPORTS PlanePortraitWarper : public RotationWarperBase<PlanePortraitProjector>
+class PlanePortraitWarper : public RotationWarperBase<PlanePortraitProjector>
 {
 public:
     PlanePortraitWarper(float scale) { projector_.scale = scale; }

@@ -1,4 +1,6 @@
-/*  For iOS video I/O
+/*
+ *  cap_ios.h
+ *  For iOS video I/O
  *  by Eduard Feicho on 29/07/12
  *  Copyright 2012. All rights reserved.
  *
@@ -68,7 +70,6 @@
 @property (nonatomic, readonly) BOOL captureSessionLoaded;
 
 @property (nonatomic, assign) int defaultFPS;
-@property (nonatomic, readonly) AVCaptureVideoPreviewLayer *captureVideoPreviewLayer;
 @property (nonatomic, assign) AVCaptureDevicePosition defaultAVCaptureDevicePosition;
 @property (nonatomic, assign) AVCaptureVideoOrientation defaultAVCaptureVideoOrientation;
 @property (nonatomic, assign) BOOL useAVCaptureVideoPreviewLayer;
@@ -89,12 +90,6 @@
 - (void)createVideoPreviewLayer;
 - (void)updateOrientation;
 
-- (void)lockFocus;
-- (void)unlockFocus;
-- (void)lockExposure;
-- (void)unlockExposure;
-- (void)lockBalance;
-- (void)unlockBalance;
 
 @end
 
@@ -121,7 +116,6 @@
     BOOL grayscaleMode;
 
     BOOL recordVideo;
-    BOOL rotateVideo;
     AVAssetWriterInput* recordAssetWriterInput;
     AVAssetWriterInputPixelBufferAdaptor* recordPixelBufferAdaptor;
     AVAssetWriter* recordAssetWriter;
@@ -134,7 +128,6 @@
 @property (nonatomic, assign) BOOL grayscaleMode;
 
 @property (nonatomic, assign) BOOL recordVideo;
-@property (nonatomic, assign) BOOL rotateVideo;
 @property (nonatomic, retain) AVAssetWriterInput* recordAssetWriterInput;
 @property (nonatomic, retain) AVAssetWriterInputPixelBufferAdaptor* recordPixelBufferAdaptor;
 @property (nonatomic, retain) AVAssetWriter* recordAssetWriter;
@@ -143,7 +136,6 @@
 - (void)layoutPreviewLayer;
 - (void)saveVideo;
 - (NSURL *)videoFileURL;
-- (NSString *)videoFileString;
 
 
 @end

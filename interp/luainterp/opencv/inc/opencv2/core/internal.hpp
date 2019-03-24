@@ -50,9 +50,6 @@
 
 #include <vector>
 
-#include "opencv2/core/core.hpp"
-#include "opencv2/core/types_c.h"
-
 #if defined WIN32 || defined _WIN32
 #  ifndef WIN32
 #    define WIN32
@@ -97,13 +94,6 @@ CV_INLINE IppiSize ippiSize(int width, int height)
     IppiSize size = { width, height };
     return size;
 }
-
-CV_INLINE IppiSize ippiSize(const cv::Size & _size)
-{
-    IppiSize size = { _size.width, _size.height };
-    return size;
-}
-
 #endif
 
 #ifndef IPPI_CALL
@@ -141,19 +131,9 @@ CV_INLINE IppiSize ippiSize(const cv::Size & _size)
 #      define __xgetbv() 0
 #    endif
 #  endif
-#  if defined __AVX2__
-#    include <immintrin.h>
-#    define CV_AVX2 1
-#  endif
 #endif
 
-
-#if (defined WIN32 || defined _WIN32) && defined(_M_ARM)
-# include <Intrin.h>
-# include "arm_neon.h"
-# define CV_NEON 1
-# define CPU_HAS_NEON_FEATURE (true)
-#elif defined(__ARM_NEON__) || defined(__ARM_NEON)
+#ifdef __ARM_NEON__
 #  include <arm_neon.h>
 #  define CV_NEON 1
 #  define CPU_HAS_NEON_FEATURE (true)
@@ -179,9 +159,6 @@ CV_INLINE IppiSize ippiSize(const cv::Size & _size)
 #endif
 #ifndef CV_AVX
 #  define CV_AVX 0
-#endif
-#ifndef CV_AVX2
-#  define CV_AVX2 0
 #endif
 #ifndef CV_NEON
 #  define CV_NEON 0
@@ -274,10 +251,6 @@ namespace cv
         body(range);
     }
 #endif
-
-    // Returns a static string if there is a parallel framework,
-    // NULL otherwise.
-    CV_EXPORTS const char* currentParallelFramework();
 } //namespace cv
 
 #define CV_INIT_ALGORITHM(classname, algname, memberinit) \
@@ -360,12 +333,36 @@ namespace cv
 *                                  Common declarations                                   *
 \****************************************************************************************/
 
+/* get alloca declaration */
+#ifdef __GNUC__
+#  undef alloca
+#  define alloca __builtin_alloca
+#  define CV_HAVE_ALLOCA 1
+#elif defined WIN32 || defined _WIN32 || \
+      defined WINCE || defined _MSC_VER || defined __BORLANDC__
+#  include <malloc.h>
+#  define CV_HAVE_ALLOCA 1
+#elif defined HAVE_ALLOCA_H
+#  include <alloca.h>
+#  define CV_HAVE_ALLOCA 1
+#elif defined HAVE_ALLOCA
+#  include <stdlib.h>
+#  define CV_HAVE_ALLOCA 1
+#else
+#  undef CV_HAVE_ALLOCA
+#endif
+
 #ifdef __GNUC__
 #  define CV_DECL_ALIGNED(x) __attribute__ ((aligned (x)))
 #elif defined _MSC_VER
 #  define CV_DECL_ALIGNED(x) __declspec(align(x))
 #else
 #  define CV_DECL_ALIGNED(x)
+#endif
+
+#if CV_HAVE_ALLOCA
+/* ! DO NOT make it an inline function */
+#  define cvStackAlloc(size) cvAlignPtr( alloca((size) + CV_MALLOC_ALIGN), CV_MALLOC_ALIGN )
 #endif
 
 #ifndef CV_IMPL
@@ -754,9 +751,7 @@ typedef struct CvBigFuncTable
     (tab).fn_2d[CV_64F] = (void*)FUNCNAME##_64f##FLAG
 
 #ifdef __cplusplus
-
-// < Deprecated
-
+//! OpenGL extension table
 class CV_EXPORTS CvOpenGlFuncTab
 {
 public:
@@ -782,13 +777,11 @@ CV_EXPORTS void icvSetOpenGlFuncTab(const CvOpenGlFuncTab* tab);
 
 CV_EXPORTS bool icvCheckGlError(const char* file, const int line, const char* func = "");
 
-// >
-
-namespace cv { namespace ogl {
-CV_EXPORTS bool checkError(const char* file, const int line, const char* func = "");
-}}
-
-#define CV_CheckGlError() CV_DbgAssert( (cv::ogl::checkError(__FILE__, __LINE__, CV_Func)) )
+#if defined(__GNUC__)
+    #define CV_CheckGlError() CV_DbgAssert( (::icvCheckGlError(__FILE__, __LINE__, __func__)) )
+#else
+    #define CV_CheckGlError() CV_DbgAssert( (::icvCheckGlError(__FILE__, __LINE__)) )
+#endif
 
 #endif //__cplusplus
 

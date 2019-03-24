@@ -137,7 +137,7 @@
 #ifndef CV_INLINE
 #  if defined __cplusplus
 #    define CV_INLINE inline
-#  elif defined _MSC_VER
+#  elif (defined WIN32 || defined _WIN32 || defined WINCE) && !defined __GNUC__
 #    define CV_INLINE __inline
 #  else
 #    define CV_INLINE static
@@ -245,7 +245,7 @@ enum {
  CV_StsVecLengthErr=           -28, /* incorrect vector length */
  CV_StsFilterStructContentErr= -29, /* incorr. filter structure content */
  CV_StsKernelStructContentErr= -30, /* incorr. transform kernel content */
- CV_StsFilterOffsetErr=        -31, /* incorrect filter offset value */
+ CV_StsFilterOffsetErr=        -31, /* incorrect filter ofset value */
  CV_StsBadSize=                -201, /* the input/output structure size is incorrect  */
  CV_StsDivByZero=              -202, /* division by zero */
  CV_StsInplaceNotSupported=    -203, /* in-place operation is not supported */
@@ -264,10 +264,7 @@ enum {
  CV_GpuNotSupported=           -216,
  CV_GpuApiCallError=           -217,
  CV_OpenGlNotSupported=        -218,
- CV_OpenGlApiCallError=        -219,
- CV_OpenCLDoubleNotSupported=  -220,
- CV_OpenCLInitError=           -221,
- CV_OpenCLNoAMDBlasFft=        -222
+ CV_OpenGlApiCallError=        -219
 };
 
 /****************************************************************************************\
@@ -305,31 +302,6 @@ enum {
 #define  CV_CMP(a,b)    (((a) > (b)) - ((a) < (b)))
 #define  CV_SIGN(a)     CV_CMP((a),0)
 
-#if defined __GNUC__ && defined __arm__ && (defined __ARM_PCS_VFP || defined __ARM_VFPV3__)
-#  define CV_VFP 1
-#else
-#  define CV_VFP 0
-#endif
-
-
-#if CV_VFP
-// 1. general scheme
-#define ARM_ROUND(_value, _asm_string) \
-    int res; \
-    float temp; \
-    (void)temp; \
-    asm(_asm_string : [res] "=r" (res), [temp] "=w" (temp) : [value] "w" (_value)); \
-    return res;
-// 2. version for double
-#ifdef __clang__
-#define ARM_ROUND_DBL(value) ARM_ROUND(value, "vcvtr.s32.f64 %[temp], %[value] \n vmov %[res], %[temp]")
-#else
-#define ARM_ROUND_DBL(value) ARM_ROUND(value, "vcvtr.s32.f64 %[temp], %P[value] \n vmov %[res], %[temp]")
-#endif
-// 3. version for float
-#define ARM_ROUND_FLT(value) ARM_ROUND(value, "vcvtr.s32.f32 %[temp], %[value]\n vmov %[res], %[temp]")
-#endif // CV_VFP
-
 CV_INLINE  int  cvRound( double value )
 {
 #if (defined _MSC_VER && defined _M_X64) || (defined __GNUC__ && defined __x86_64__ && defined __SSE2__ && !defined __APPLE__)
@@ -343,23 +315,15 @@ CV_INLINE  int  cvRound( double value )
         fistp t;
     }
     return t;
-#elif defined _MSC_VER && defined _M_ARM && defined HAVE_TEGRA_OPTIMIZATION
-    TEGRA_ROUND(value);
-#elif defined CV_ICC || defined __GNUC__
+#elif defined HAVE_LRINT || defined CV_ICC || defined __GNUC__
 #  ifdef HAVE_TEGRA_OPTIMIZATION
     TEGRA_ROUND(value);
-#  elif CV_VFP
-    ARM_ROUND_DBL(value)
 #  else
     return (int)lrint(value);
 #  endif
 #else
-    double intpart, fractpart;
-    fractpart = modf(value, &intpart);
-    if ((fabs(fractpart) != 0.5) || ((((int)intpart) % 2) != 0))
-        return (int)(value + (value >= 0 ? 0.5 : -0.5));
-    else
-        return (int)intpart;
+    // while this is not IEEE754-compliant rounding, it's usually a good enough approximation
+    return (int)(value + (value >= 0 ? 0.5 : -0.5));
 #endif
 }
 
@@ -378,8 +342,9 @@ CV_INLINE  int  cvFloor( double value )
     return i - (i > value);
 #else
     int i = cvRound(value);
-    float diff = (float)(value - i);
-    return i - (diff < 0);
+    Cv32suf diff;
+    diff.f = (float)(value - i);
+    return i - (diff.i < 0);
 #endif
 }
 
@@ -395,8 +360,9 @@ CV_INLINE  int  cvCeil( double value )
     return i + (i < value);
 #else
     int i = cvRound(value);
-    float diff = (float)(i - value);
-    return i + (diff < 0);
+    Cv32suf diff;
+    diff.f = (float)(i - value);
+    return i + (diff.i < 0);
 #endif
 }
 
@@ -405,19 +371,31 @@ CV_INLINE  int  cvCeil( double value )
 
 CV_INLINE int cvIsNaN( double value )
 {
+#if 1/*defined _MSC_VER || defined __BORLANDC__
+    return _isnan(value);
+#elif defined __GNUC__
+    return isnan(value);
+#else*/
     Cv64suf ieee754;
     ieee754.f = value;
     return ((unsigned)(ieee754.u >> 32) & 0x7fffffff) +
            ((unsigned)ieee754.u != 0) > 0x7ff00000;
+#endif
 }
 
 
 CV_INLINE int cvIsInf( double value )
 {
+#if 1/*defined _MSC_VER || defined __BORLANDC__
+    return !_finite(value);
+#elif defined __GNUC__
+    return isinf(value);
+#else*/
     Cv64suf ieee754;
     ieee754.f = value;
     return ((unsigned)(ieee754.u >> 32) & 0x7fffffff) == 0x7ff00000 &&
            (unsigned)ieee754.u == 0;
+#endif
 }
 
 
@@ -796,11 +774,11 @@ CV_INLINE  double  cvmGet( const CvMat* mat, int row, int col )
             (unsigned)col < (unsigned)mat->cols );
 
     if( type == CV_32FC1 )
-        return ((float*)(void*)(mat->data.ptr + (size_t)mat->step*row))[col];
+        return ((float*)(mat->data.ptr + (size_t)mat->step*row))[col];
     else
     {
         assert( type == CV_64FC1 );
-        return ((double*)(void*)(mat->data.ptr + (size_t)mat->step*row))[col];
+        return ((double*)(mat->data.ptr + (size_t)mat->step*row))[col];
     }
 }
 
@@ -813,11 +791,11 @@ CV_INLINE  void  cvmSet( CvMat* mat, int row, int col, double value )
             (unsigned)col < (unsigned)mat->cols );
 
     if( type == CV_32FC1 )
-        ((float*)(void*)(mat->data.ptr + (size_t)mat->step*row))[col] = (float)value;
+        ((float*)(mat->data.ptr + (size_t)mat->step*row))[col] = (float)value;
     else
     {
         assert( type == CV_64FC1 );
-        ((double*)(void*)(mat->data.ptr + (size_t)mat->step*row))[col] = value;
+        ((double*)(mat->data.ptr + (size_t)mat->step*row))[col] = (double)value;
     }
 }
 

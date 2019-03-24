@@ -105,7 +105,7 @@ CVAPI(void)  cvResetImageROI( IplImage* image );
 /* Retrieves image ROI */
 CVAPI(CvRect) cvGetImageROI( const IplImage* image );
 
-/* Allocates and initializes CvMat header */
+/* Allocates and initalizes CvMat header */
 CVAPI(CvMat*)  cvCreateMatHeader( int rows, int cols, int type );
 
 #define CV_AUTOSTEP  0x7fffffff
@@ -1107,7 +1107,7 @@ CV_INLINE  CvSetElem* cvSetNew( CvSet* set_header )
         set_header->active_count++;
     }
     else
-        cvSetAdd( set_header, NULL, &elem );
+        cvSetAdd( set_header, NULL, (CvSetElem**)&elem );
     return elem;
 }
 
@@ -1129,7 +1129,7 @@ CVAPI(void)   cvSetRemove( CvSet* set_header, int index );
    NULL is returned */
 CV_INLINE CvSetElem* cvGetSetElem( const CvSet* set_header, int idx )
 {
-    CvSetElem* elem = (CvSetElem*)(void *)cvGetSeqElem( (CvSeq*)set_header, idx );
+    CvSetElem* elem = (CvSetElem*)cvGetSeqElem( (CvSeq*)set_header, idx );
     return elem && CV_IS_SET_ELEM( elem ) ? elem : 0;
 }
 
@@ -1706,7 +1706,6 @@ CVAPI(double) cvGetTickFrequency( void );
 #define CV_CPU_SSE4_2  7
 #define CV_CPU_POPCNT  8
 #define CV_CPU_AVX    10
-#define CV_CPU_AVX2   11
 #define CV_HARDWARE_MAX_FEATURE 255
 
 CVAPI(int) cvCheckHardwareSupport(int feature);

@@ -28,7 +28,7 @@
 //     derived from this software without specific prior written permission.
 //
 // This software is provided by the copyright holders and contributors "as is" and
-// any express or implied warranties, including, but not limited to, the implied
+// any express or bpied warranties, including, but not limited to, the bpied
 // warranties of merchantability and fitness for a particular purpose are disclaimed.
 // In no event shall the Intel Corporation or contributors be liable for any direct,
 // indirect, incidental, special, exemplary, or consequential damages
@@ -626,12 +626,12 @@ namespace cv { namespace gpu { namespace device
 
         __device__ __forceinline__ int idx_row_low(int y) const
         {
-            return (y >= 0) ? y : (y - ((y - height + 1) / height) * height);
+            return (y >= 0) * y + (y < 0) * (y - ((y - height + 1) / height) * height);
         }
 
         __device__ __forceinline__ int idx_row_high(int y) const
         {
-            return (y < height) ? y : (y % height);
+            return (y < height) * y + (y >= height) * (y % height);
         }
 
         __device__ __forceinline__ int idx_row(int y) const
@@ -641,12 +641,12 @@ namespace cv { namespace gpu { namespace device
 
         __device__ __forceinline__ int idx_col_low(int x) const
         {
-            return (x >= 0) ? x : (x - ((x - width + 1) / width) * width);
+            return (x >= 0) * x + (x < 0) * (x - ((x - width + 1) / width) * width);
         }
 
         __device__ __forceinline__ int idx_col_high(int x) const
         {
-            return (x < width) ? x : (x % width);
+            return (x < width) * x + (x >= width) * (x % width);
         }
 
         __device__ __forceinline__ int idx_col(int x) const

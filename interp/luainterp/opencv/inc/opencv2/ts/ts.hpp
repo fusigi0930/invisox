@@ -1,53 +1,16 @@
-/*M///////////////////////////////////////////////////////////////////////////////////////
-//
-//  IMPORTANT: READ BEFORE DOWNLOADING, COPYING, INSTALLING OR USING.
-//
-//  By downloading, copying, installing or using the software you agree to this license.
-//  If you do not agree to this license, do not download, install,
-//  copy or use the software.
-//
-//
-//                           License Agreement
-//                For Open Source Computer Vision Library
-//
-// Copyright (C) 2000-2008, Intel Corporation, all rights reserved.
-// Copyright (C) 2009, Willow Garage Inc., all rights reserved.
-// Third party copyrights are property of their respective owners.
-//
-// Redistribution and use in source and binary forms, with or without modification,
-// are permitted provided that the following conditions are met:
-//
-//   * Redistribution's of source code must retain the above copyright notice,
-//     this list of conditions and the following disclaimer.
-//
-//   * Redistribution's in binary form must reproduce the above copyright notice,
-//     this list of conditions and the following disclaimer in the documentation
-//     and/or other materials provided with the distribution.
-//
-//   * The name of the copyright holders may not be used to endorse or promote products
-//     derived from this software without specific prior written permission.
-//
-// This software is provided by the copyright holders and contributors "as is" and
-// any express or implied warranties, including, but not limited to, the implied
-// warranties of merchantability and fitness for a particular purpose are disclaimed.
-// In no event shall the Intel Corporation or contributors be liable for any direct,
-// indirect, incidental, special, exemplary, or consequential damages
-// (including, but not limited to, procurement of substitute goods or services;
-// loss of use, data, or profits; or business interruption) however caused
-// and on any theory of liability, whether in contract, strict liability,
-// or tort (including negligence or otherwise) arising in any way out of
-// the use of this software, even if advised of the possibility of such damage.
-//
-//M*/
-
 #ifndef __OPENCV_GTESTCV_HPP__
 #define __OPENCV_GTESTCV_HPP__
 
-#include <stdarg.h> // for va_list
-
-#ifdef HAVE_WINRT
-    #pragma warning(disable:4447) // Disable warning 'main' signature found without threading model
+#if HAVE_CVCONFIG_H
+#include "cvconfig.h"
 #endif
+#ifndef GTEST_CREATE_SHARED_LIBRARY
+#ifdef BUILD_SHARED_LIBS
+#define GTEST_LINKED_AS_SHARED_LIBRARY 1
+#endif
+#endif
+
+#include <stdarg.h> // for va_list
 
 #ifdef _MSC_VER
 #pragma warning( disable: 4127 )
@@ -414,8 +377,8 @@ public:
         // processing time (in this case there should be possibility to interrupt such a function
         FAIL_HANG=-13,
 
-        // unexpected response on passing bad arguments to the tested function
-        // (the function crashed, proceed successfully (while it should not), or returned
+        // unexpected responce on passing bad arguments to the tested function
+        // (the function crashed, proceed succesfully (while it should not), or returned
         // error code that is different from what is expected)
         FAIL_BAD_ARG_CHECK=-14,
 
@@ -425,7 +388,7 @@ public:
         // the test has been skipped because it is not in the selected subset of the tests to run,
         // because it has been run already within the same run with the same parameters, or because
         // of some other reason and this is not considered as an error.
-        // Normally TS::run() (or overridden method in the derived class) takes care of what
+        // Normally TS::run() (or overrided method in the derived class) takes care of what
         // needs to be run, so this code should not occur.
         SKIPPED=1
     };
@@ -584,16 +547,6 @@ struct CV_EXPORTS DefaultRngAuto
 
 }
 
-namespace cvtest
-{
-
-// test images generation functions
-CV_EXPORTS void fillGradient(Mat& img, int delta = 5);
-CV_EXPORTS void smoothBorder(Mat& img, const Scalar& color, int delta = 3);
-
-CV_EXPORTS void printVersionInfo(bool useStdOut = true);
-} //namespace cvtest
-
 // fills c with zeros
 CV_EXPORTS void cvTsZero( CvMat* c, const CvMat* mask=0 );
 
@@ -606,32 +559,13 @@ CV_EXPORTS void  cvTsConvert( const CvMat* src, CvMat* dst );
 CV_EXPORTS void cvTsGEMM( const CvMat* a, const CvMat* b, double alpha,
                          const CvMat* c, double beta, CvMat* d, int flags );
 
-#ifndef __CV_TEST_EXEC_ARGS
-#if defined(_MSC_VER) && (_MSC_VER <= 1400)
-#define __CV_TEST_EXEC_ARGS(...)    \
-    while (++argc >= (--argc,-1)) {__VA_ARGS__; break;} /*this ugly construction is needed for VS 2005*/
-#else
-#define __CV_TEST_EXEC_ARGS(...)    \
-    __VA_ARGS__;
-#endif
-#endif
-
-#define CV_TEST_MAIN(resourcesubdir, ...) \
+#define CV_TEST_MAIN(resourcesubdir) \
 int main(int argc, char **argv) \
 { \
     cvtest::TS::ptr()->init(resourcesubdir); \
     ::testing::InitGoogleTest(&argc, argv); \
-    cvtest::printVersionInfo(); \
-    __CV_TEST_EXEC_ARGS(__VA_ARGS__) \
     return RUN_ALL_TESTS(); \
 }
-
-// This usually only makes sense in perf tests with several implementations,
-// some of which are not available.
-#define CV_TEST_FAIL_NO_IMPL() do { \
-    ::testing::Test::RecordProperty("custom_status", "noimpl"); \
-    FAIL() << "No equivalent implementation."; \
-} while (0)
 
 #endif
 

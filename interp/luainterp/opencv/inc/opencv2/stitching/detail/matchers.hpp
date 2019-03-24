@@ -44,13 +44,11 @@
 #define __OPENCV_STITCHING_MATCHERS_HPP__
 
 #include "opencv2/core/core.hpp"
-#include "opencv2/core/gpumat.hpp"
 #include "opencv2/features2d/features2d.hpp"
 
 #include "opencv2/opencv_modules.hpp"
-
-#if defined(HAVE_OPENCV_NONFREE)
-    #include "opencv2/nonfree/gpu.hpp"
+#ifdef HAVE_OPENCV_GPU
+#include "opencv2/gpu/gpu.hpp"
 #endif
 
 namespace cv {
@@ -105,7 +103,7 @@ private:
 };
 
 
-#if defined(HAVE_OPENCV_NONFREE)
+#ifdef HAVE_OPENCV_GPU
 class CV_EXPORTS SurfFeaturesFinderGpu : public FeaturesFinder
 {
 public:
@@ -122,10 +120,8 @@ private:
     gpu::SURF_GPU surf_;
     gpu::GpuMat keypoints_;
     gpu::GpuMat descriptors_;
-#if defined(HAVE_OPENCV_GPU) && !defined(DYNAMIC_CUDA_SUPPORT)
     int num_octaves_, num_layers_;
     int num_octaves_descr_, num_layers_descr_;
-#endif
 };
 #endif
 

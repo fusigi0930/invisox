@@ -366,8 +366,7 @@ inline void Mat::release()
     if( refcount && CV_XADD(refcount, -1) == 1 )
         deallocate();
     data = datastart = dataend = datalimit = 0;
-    for(int i = 0; i < dims; i++)
-        size.p[i] = 0;
+    size.p[0] = 0;
     refcount = 0;
 }
 
@@ -432,7 +431,7 @@ template<typename _Tp> inline _Tp* Mat::ptr(int y)
 
 template<typename _Tp> inline const _Tp* Mat::ptr(int y) const
 {
-    CV_DbgAssert( y == 0 || (data && dims >= 1 && (unsigned)y < (unsigned)size.p[0]) );
+    CV_DbgAssert( y == 0 || (data && dims >= 1 && data && (unsigned)y < (unsigned)size.p[0]) );
     return (const _Tp*)(data + step.p[0]*y);
 }
 
@@ -684,8 +683,6 @@ template<typename _Tp> inline void Mat::push_back(const _Tp& elem)
 {
     if( !data )
     {
-        CV_Assert((type()==0) || (DataType<_Tp>::type == type()));
-
         *this = Mat(1, 1, DataType<_Tp>::type, (void*)&elem).clone();
         return;
     }
@@ -820,9 +817,6 @@ template<typename _Tp> inline Mat_<_Tp>::Mat_(int _dims, const int* _sz)
 
 template<typename _Tp> inline Mat_<_Tp>::Mat_(int _dims, const int* _sz, const _Tp& _s)
     : Mat(_dims, _sz, DataType<_Tp>::type, Scalar(_s)) {}
-
-template<typename _Tp> inline Mat_<_Tp>::Mat_(int _dims, const int* _sz, _Tp* _data, const size_t* _steps)
-    : Mat(_dims, _sz, DataType<_Tp>::type, _data, _steps) {}
 
 template<typename _Tp> inline Mat_<_Tp>::Mat_(const Mat_<_Tp>& m, const Range* ranges)
     : Mat(m, ranges) {}
@@ -1081,9 +1075,7 @@ template<typename _Tp> template<int n> inline Mat_<_Tp>::operator Vec<typename D
 template<typename _Tp> template<int m, int n> inline Mat_<_Tp>::operator Matx<typename DataType<_Tp>::channel_type, m, n>() const
 {
     CV_Assert(n % DataType<_Tp>::channels == 0);
-
-    Matx<typename DataType<_Tp>::channel_type, m, n> res = this->Mat::operator Matx<typename DataType<_Tp>::channel_type, m, n>();
-    return res;
+    return this->Mat::operator Matx<typename DataType<_Tp>::channel_type, m, n>();
 }
 
 template<typename T1, typename T2, typename Op> inline void
@@ -2271,10 +2263,10 @@ template<typename _Tp> inline const _Tp& SparseMat::value(const Node* n) const
 { return *(const _Tp*)((const uchar*)n + hdr->valueOffset); }
 
 inline SparseMat::Node* SparseMat::node(size_t nidx)
-{ return (Node*)(void*)&hdr->pool[nidx]; }
+{ return (Node*)&hdr->pool[nidx]; }
 
 inline const SparseMat::Node* SparseMat::node(size_t nidx) const
-{ return (const Node*)(void*)&hdr->pool[nidx]; }
+{ return (const Node*)&hdr->pool[nidx]; }
 
 inline SparseMatIterator SparseMat::begin()
 { return SparseMatIterator(this); }
@@ -2335,7 +2327,7 @@ template<typename _Tp> inline const _Tp& SparseMatConstIterator::value() const
 inline const SparseMat::Node* SparseMatConstIterator::node() const
 {
     return ptr && m && m->hdr ?
-        (const SparseMat::Node*)(void*)(ptr - m->hdr->valueOffset) : 0;
+        (const SparseMat::Node*)(ptr - m->hdr->valueOffset) : 0;
 }
 
 inline SparseMatConstIterator SparseMatConstIterator::operator ++(int)
@@ -2407,7 +2399,7 @@ template<typename _Tp> inline SparseMat_<_Tp>::SparseMat_(const SparseMat& m)
     if( m.type() == DataType<_Tp>::type )
         *this = (const SparseMat_<_Tp>&)m;
     else
-        m.convertTo(*this, DataType<_Tp>::type);
+        m.convertTo(this, DataType<_Tp>::type);
 }
 
 template<typename _Tp> inline SparseMat_<_Tp>::SparseMat_(const SparseMat_<_Tp>& m)
@@ -2539,13 +2531,6 @@ SparseMatConstIterator_<_Tp>::SparseMatConstIterator_(const SparseMat_<_Tp>* _m)
 {}
 
 template<typename _Tp> inline
-SparseMatConstIterator_<_Tp>::SparseMatConstIterator_(const SparseMat* _m)
-: SparseMatConstIterator(_m)
-{
-    CV_Assert( _m->type() == DataType<_Tp>::type );
-}
-
-template<typename _Tp> inline
 SparseMatConstIterator_<_Tp>::SparseMatConstIterator_(const SparseMatConstIterator_<_Tp>& it)
 : SparseMatConstIterator(it)
 {}
@@ -2570,7 +2555,7 @@ SparseMatConstIterator_<_Tp>::operator ++()
 template<typename _Tp> inline SparseMatConstIterator_<_Tp>
 SparseMatConstIterator_<_Tp>::operator ++(int)
 {
-    SparseMatConstIterator_<_Tp> it = *this;
+    SparseMatConstIterator it = *this;
     SparseMatConstIterator::operator ++();
     return it;
 }
@@ -2581,11 +2566,6 @@ SparseMatIterator_<_Tp>::SparseMatIterator_()
 
 template<typename _Tp> inline
 SparseMatIterator_<_Tp>::SparseMatIterator_(SparseMat_<_Tp>* _m)
-: SparseMatConstIterator_<_Tp>(_m)
-{}
-
-template<typename _Tp> inline
-SparseMatIterator_<_Tp>::SparseMatIterator_(SparseMat* _m)
 : SparseMatConstIterator_<_Tp>(_m)
 {}
 
@@ -2614,7 +2594,7 @@ SparseMatIterator_<_Tp>::operator ++()
 template<typename _Tp> inline SparseMatIterator_<_Tp>
 SparseMatIterator_<_Tp>::operator ++(int)
 {
-    SparseMatIterator_<_Tp> it = *this;
+    SparseMatIterator it = *this;
     SparseMatConstIterator::operator ++();
     return it;
 }

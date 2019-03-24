@@ -258,7 +258,7 @@ CV_EXPORTS_W int meanShift( InputArray probImage, CV_OUT CV_IN_OUT Rect& window,
 /*!
  Kalman filter.
 
- The class implements standard Kalman filter http://en.wikipedia.org/wiki/Kalman_filter.
+ The class implements standard Kalman filter \url{http://en.wikipedia.org/wiki/Kalman_filter}.
  However, you can modify KalmanFilter::transitionMatrix, KalmanFilter::controlMatrix and
  KalmanFilter::measurementMatrix to get the extended Kalman filter functionality.
 */
@@ -351,20 +351,6 @@ CV_EXPORTS_W void calcOpticalFlowSF(Mat& from,
                                     double upscale_sigma_dist,
                                     double upscale_sigma_color,
                                     double speed_up_thr);
-
-class CV_EXPORTS DenseOpticalFlow : public Algorithm
-{
-public:
-    virtual void calc(InputArray I0, InputArray I1, InputOutputArray flow) = 0;
-    virtual void collectGarbage() = 0;
-};
-
-// Implementation of the Zach, Pock and Bischof Dual TV-L1 Optical Flow method
-//
-// see reference:
-//   [1] C. Zach, T. Pock and H. Bischof, "A Duality Based Approach for Realtime TV-L1 Optical Flow".
-//   [2] Javier Sanchez, Enric Meinhardt-Llopis and Gabriele Facciolo. "TV-L1 Optical Flow Estimation".
-CV_EXPORTS Ptr<DenseOpticalFlow> createOptFlow_DualTVL1();
 
 }
 

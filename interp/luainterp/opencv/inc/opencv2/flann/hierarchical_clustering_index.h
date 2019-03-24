@@ -210,11 +210,8 @@ private:
         assert(index >=0 && index < n);
         centers[0] = dsindices[index];
 
-        // Computing distance^2 will have the advantage of even higher probability further to pick new centers
-        // far from previous centers (and this complies to "k-means++: the advantages of careful seeding" article)
         for (int i = 0; i < n; i++) {
             closestDistSq[i] = distance(dataset[dsindices[i]], dataset[dsindices[index]], dataset.cols);
-            closestDistSq[i] = ensureSquareDistance<Distance>( closestDistSq[i] );
             currentPot += closestDistSq[i];
         }
 
@@ -240,10 +237,7 @@ private:
 
                 // Compute the new potential
                 double newPot = 0;
-                for (int i = 0; i < n; i++) {
-                    DistanceType dist = distance(dataset[dsindices[i]], dataset[dsindices[index]], dataset.cols);
-                    newPot += std::min( ensureSquareDistance<Distance>(dist), closestDistSq[i] );
-                }
+                for (int i = 0; i < n; i++) newPot += std::min( distance(dataset[dsindices[i]], dataset[dsindices[index]], dataset.cols), closestDistSq[i] );
 
                 // Store the best result
                 if ((bestNewPot < 0)||(newPot < bestNewPot)) {
@@ -255,10 +249,7 @@ private:
             // Add the appropriate center
             centers[centerCount] = dsindices[bestNewIndex];
             currentPot = bestNewPot;
-            for (int i = 0; i < n; i++) {
-                DistanceType dist = distance(dataset[dsindices[i]], dataset[dsindices[bestNewIndex]], dataset.cols);
-                closestDistSq[i] = std::min( ensureSquareDistance<Distance>(dist), closestDistSq[i] );
-            }
+            for (int i = 0; i < n; i++) closestDistSq[i] = std::min( distance(dataset[dsindices[i]], dataset[dsindices[bestNewIndex]], dataset.cols), closestDistSq[i] );
         }
 
         centers_length = centerCount;
@@ -307,11 +298,6 @@ public:
         trees_ = get_param(params,"trees",4);
         root = new NodePtr[trees_];
         indices = new int*[trees_];
-
-        for (int i=0; i<trees_; ++i) {
-            root[i] = NULL;
-            indices[i] = NULL;
-        }
     }
 
     HierarchicalClusteringIndex(const HierarchicalClusteringIndex&);
@@ -324,33 +310,10 @@ public:
      */
     virtual ~HierarchicalClusteringIndex()
     {
-        free_elements();
-
-        if (root!=NULL) {
-            delete[] root;
-        }
-
         if (indices!=NULL) {
             delete[] indices;
         }
     }
-
-
-    /**
-     * Release the inner elements of indices[]
-     */
-    void free_elements()
-    {
-        if (indices!=NULL) {
-            for(int i=0; i<trees_; ++i) {
-                if (indices[i]!=NULL) {
-                    delete[] indices[i];
-                    indices[i] = NULL;
-                }
-            }
-        }
-    }
-
 
     /**
      *  Returns size of index.
@@ -378,14 +341,6 @@ public:
         return pool.usedMemory+pool.wastedMemory+memoryCounter;
     }
 
-
-    /**
-     * Dummy implementation for other algorithms of addable indexes after that.
-     */
-    void addIndex(const Matrix<ElementType>& /*wholeData*/, const Matrix<ElementType>& /*additionalData*/)
-    {
-    }
-
     /**
      * Builds the index
      */
@@ -394,9 +349,6 @@ public:
         if (branching_<2) {
             throw FLANNException("Branching factor must be at least 2");
         }
-
-        free_elements();
-
         for (int i=0; i<trees_; ++i) {
             indices[i] = new int[size_];
             for (size_t j=0; j<size_; ++j) {
@@ -431,22 +383,11 @@ public:
 
     void loadIndex(FILE* stream)
     {
-        free_elements();
-
-        if (root!=NULL) {
-            delete[] root;
-        }
-
-        if (indices!=NULL) {
-            delete[] indices;
-        }
-
         load_value(stream, branching_);
         load_value(stream, trees_);
         load_value(stream, centers_init_);
         load_value(stream, leaf_size_);
         load_value(stream, memoryCounter);
-
         indices = new int*[trees_];
         root = new NodePtr[trees_];
         for (int i=0; i<trees_; ++i) {

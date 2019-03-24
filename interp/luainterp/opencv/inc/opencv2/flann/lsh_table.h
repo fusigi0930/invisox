@@ -152,13 +152,9 @@ public:
      * Create the mask and allocate the memory
      * @param feature_size is the size of the feature (considered as a ElementType[])
      * @param key_size is the number of bits that are turned on in the feature
-     * @param indices
      */
-    LshTable(unsigned int feature_size, unsigned int key_size, std::vector<size_t> & indices)
+    LshTable(unsigned int /*feature_size*/, unsigned int /*key_size*/)
     {
-        (void)feature_size;
-        (void)key_size;
-        (void)indices;
         std::cerr << "LSH is not implemented for that type" << std::endl;
         assert(0);
     }
@@ -192,16 +188,15 @@ public:
     }
 
     /** Add a set of features to the table
-     * @param indexed_ofst previous indexed offset
      * @param dataset the values to store
      */
-    void add(int indexed_ofst, Matrix<ElementType> dataset)
+    void add(Matrix<ElementType> dataset)
     {
 #if USE_UNORDERED_MAP
         buckets_space_.rehash((buckets_space_.size() + dataset.rows) * 1.2);
 #endif
         // Add the features to the table
-        for (unsigned int i = 0; i < dataset.rows; ++i) add(i + indexed_ofst, dataset[i]);
+        for (unsigned int i = 0; i < dataset.rows; ++i) add(i, dataset[i]);
         // Now that the table is full, optimize it for speed/space
         optimize();
     }
@@ -266,16 +261,6 @@ private:
      */
     void initialize(size_t key_size)
     {
-        const size_t key_size_lower_bound = 1;
-        //a value (size_t(1) << key_size) must fit the size_t type so key_size has to be strictly less than size of size_t
-        const size_t key_size_upper_bound = std::min(sizeof(BucketKey) * CHAR_BIT + 1, sizeof(size_t) * CHAR_BIT);
-        if (key_size < key_size_lower_bound || key_size >= key_size_upper_bound)
-        {
-            std::stringstream errorMessage;
-            errorMessage << "Invalid key_size (=" << key_size << "). Valid values for your system are " << key_size_lower_bound << " <= key_size < " << key_size_upper_bound << ".";
-            CV_Error(CV_StsBadArg, errorMessage.str());
-        }
-
         speed_level_ = kHash;
         key_size_ = (unsigned)key_size;
     }
@@ -288,10 +273,10 @@ private:
         if (speed_level_ == kArray) return;
 
         // Use an array if it will be more than half full
-        if (buckets_space_.size() > ((size_t(1) << key_size_) / 2)) {
+        if (buckets_space_.size() > (unsigned int)((1 << key_size_) / 2)) {
             speed_level_ = kArray;
             // Fill the array version of it
-            buckets_speed_.resize(size_t(1) << key_size_);
+            buckets_speed_.resize(1 << key_size_);
             for (BucketsSpace::const_iterator key_bucket = buckets_space_.begin(); key_bucket != buckets_space_.end(); ++key_bucket) buckets_speed_[key_bucket->first] = key_bucket->second;
 
             // Empty the hash table
@@ -302,9 +287,9 @@ private:
         // If the bitset is going to use less than 10% of the RAM of the hash map (at least 1 size_t for the key and two
         // for the vector) or less than 512MB (key_size_ <= 30)
         if (((std::max(buckets_space_.size(), buckets_speed_.size()) * CHAR_BIT * 3 * sizeof(BucketKey)) / 10
-             >= (size_t(1) << key_size_)) || (key_size_ <= 32)) {
+             >= size_t(1 << key_size_)) || (key_size_ <= 32)) {
             speed_level_ = kBitsetHash;
-            key_bitset_.resize(size_t(1) << key_size_);
+            key_bitset_.resize(1 << key_size_);
             key_bitset_.reset();
             // Try with the BucketsSpace
             for (BucketsSpace::const_iterator key_bucket = buckets_space_.begin(); key_bucket != buckets_space_.end(); ++key_bucket) key_bitset_.set(key_bucket->first);
@@ -346,20 +331,20 @@ private:
 // Specialization for unsigned char
 
 template<>
-inline LshTable<unsigned char>::LshTable( unsigned int feature_size,
-                                          unsigned int subsignature_size,
-                                          std::vector<size_t> & indices  )
+inline LshTable<unsigned char>::LshTable(unsigned int feature_size, unsigned int subsignature_size)
 {
     initialize(subsignature_size);
     // Allocate the mask
     mask_ = std::vector<size_t>((size_t)ceil((float)(feature_size * sizeof(char)) / (float)sizeof(size_t)), 0);
 
+    // A bit brutal but fast to code
+    std::vector<size_t> indices(feature_size * CHAR_BIT);
+    for (size_t i = 0; i < feature_size * CHAR_BIT; ++i) indices[i] = i;
+    std::random_shuffle(indices.begin(), indices.end());
+
     // Generate a random set of order of subsignature_size_ bits
     for (unsigned int i = 0; i < key_size_; ++i) {
-        //Ensure the Nth bit will be selected only once among the different LshTables
-        //to avoid having two different tables with signatures sharing many dimensions/many bits
-        size_t index = indices[0];
-        indices.erase( indices.begin() );
+        size_t index = indices[i];
 
         // Set that bit in the mask
         size_t divisor = CHAR_BIT * sizeof(size_t);
@@ -391,7 +376,7 @@ inline size_t LshTable<unsigned char>::getKey(const unsigned char* feature) cons
 {
     // no need to check if T is dividable by sizeof(size_t) like in the Hamming
     // distance computation as we have a mask
-    const size_t* feature_block_ptr = reinterpret_cast<const size_t*> ((const void*)feature);
+    const size_t* feature_block_ptr = reinterpret_cast<const size_t*> (feature);
 
     // Figure out the subsignature of the feature
     // Given the feature ABCDEF, and the mask 001011, the output will be

@@ -1,3 +1,7 @@
+/*! \file imgproc.hpp
+ \brief The Image Processing
+ */
+
 /*M///////////////////////////////////////////////////////////////////////////////////////
 //
 //  IMPORTANT: READ BEFORE DOWNLOADING, COPYING, INSTALLING OR USING.
@@ -80,7 +84,7 @@ public:
     BaseRowFilter();
     //! the destructor
     virtual ~BaseRowFilter();
-    //! the filtering operator. Must be overridden in the derived classes. The horizontal border interpolation is done outside of the class.
+    //! the filtering operator. Must be overrided in the derived classes. The horizontal border interpolation is done outside of the class.
     virtual void operator()(const uchar* src, uchar* dst,
                             int width, int cn) = 0;
     int ksize, anchor;
@@ -107,7 +111,7 @@ public:
     BaseColumnFilter();
     //! the destructor
     virtual ~BaseColumnFilter();
-    //! the filtering operator. Must be overridden in the derived classes. The vertical border interpolation is done outside of the class.
+    //! the filtering operator. Must be overrided in the derived classes. The vertical border interpolation is done outside of the class.
     virtual void operator()(const uchar** src, uchar* dst, int dststep,
                             int dstcount, int width) = 0;
     //! resets the internal buffers, if any
@@ -352,7 +356,7 @@ CV_EXPORTS_W Mat getGaborKernel( Size ksize, double sigma, double theta, double 
 enum { MORPH_ERODE=CV_MOP_ERODE, MORPH_DILATE=CV_MOP_DILATE,
        MORPH_OPEN=CV_MOP_OPEN, MORPH_CLOSE=CV_MOP_CLOSE,
        MORPH_GRADIENT=CV_MOP_GRADIENT, MORPH_TOPHAT=CV_MOP_TOPHAT,
-       MORPH_BLACKHAT=CV_MOP_BLACKHAT, MORPH_HITMISS };
+       MORPH_BLACKHAT=CV_MOP_BLACKHAT };
 
 //! returns horizontal 1D morphological filter
 CV_EXPORTS Ptr<BaseRowFilter> getMorphologyRowFilter(int op, int type, int ksize, int anchor=-1);
@@ -394,10 +398,6 @@ CV_EXPORTS_W void GaussianBlur( InputArray src,
 CV_EXPORTS_W void bilateralFilter( InputArray src, OutputArray dst, int d,
                                    double sigmaColor, double sigmaSpace,
                                    int borderType=BORDER_DEFAULT );
-//! smooths the image using adaptive bilateral filter
-CV_EXPORTS_W void adaptiveBilateralFilter( InputArray src, OutputArray dst, Size ksize,
-                                           double sigmaSpace, double maxSigmaColor = 20.0, Point anchor=Point(-1, -1),
-                                           int borderType=BORDER_DEFAULT );
 //! smooths the image using the box filter. Each pixel is processed in O(1) time
 CV_EXPORTS_W void boxFilter( InputArray src, OutputArray dst, int ddepth,
                              Size ksize, Point anchor=Point(-1,-1),
@@ -478,7 +478,7 @@ CV_EXPORTS_W void HoughLines( InputArray image, OutputArray lines,
                               double rho, double theta, int threshold,
                               double srn=0, double stn=0 );
 
-//! finds line segments in the black-n-white image using probabilistic Hough transform
+//! finds line segments in the black-n-white image using probabalistic Hough transform
 CV_EXPORTS_W void HoughLinesP( InputArray image, OutputArray lines,
                                double rho, double theta, int threshold,
                                double minLineLength=0, double maxLineGap=0 );
@@ -758,21 +758,6 @@ CV_EXPORTS double compareHist( const SparseMat& H1, const SparseMat& H2, int met
 
 //! normalizes the grayscale image brightness and contrast by normalizing its histogram
 CV_EXPORTS_W void equalizeHist( InputArray src, OutputArray dst );
-
-class CV_EXPORTS_W CLAHE : public Algorithm
-{
-public:
-    CV_WRAP virtual void apply(InputArray src, OutputArray dst) = 0;
-
-    CV_WRAP virtual void setClipLimit(double clipLimit) = 0;
-    CV_WRAP virtual double getClipLimit() const = 0;
-
-    CV_WRAP virtual void setTilesGridSize(Size tileGridSize) = 0;
-    CV_WRAP virtual Size getTilesGridSize() const = 0;
-
-    CV_WRAP virtual void collectGarbage() = 0;
-};
-CV_EXPORTS_W Ptr<CLAHE> createCLAHE(double clipLimit = 40.0, Size tileGridSize = Size(8, 8));
 
 CV_EXPORTS float EMD( InputArray signature1, InputArray signature2,
                       int distType, InputArray cost=noArray(),
@@ -1065,21 +1050,7 @@ enum
     COLOR_RGBA2mRGBA = 125,
     COLOR_mRGBA2RGBA = 126,
 
-    COLOR_RGB2YUV_I420 = 127,
-    COLOR_BGR2YUV_I420 = 128,
-    COLOR_RGB2YUV_IYUV = COLOR_RGB2YUV_I420,
-    COLOR_BGR2YUV_IYUV = COLOR_BGR2YUV_I420,
-
-    COLOR_RGBA2YUV_I420 = 129,
-    COLOR_BGRA2YUV_I420 = 130,
-    COLOR_RGBA2YUV_IYUV = COLOR_RGBA2YUV_I420,
-    COLOR_BGRA2YUV_IYUV = COLOR_BGRA2YUV_I420,
-    COLOR_RGB2YUV_YV12  = 131,
-    COLOR_BGR2YUV_YV12  = 132,
-    COLOR_RGBA2YUV_YV12 = 133,
-    COLOR_BGRA2YUV_YV12 = 134,
-
-    COLOR_COLORCVT_MAX  = 135
+    COLOR_COLORCVT_MAX  = 127
 };
 
 
