@@ -1,5 +1,5 @@
-#ifndef COPENCV_H
-#define COPENCV_H
+#ifndef __COPENCV_H__
+#define __COPENCV_H__
 
 #include "opencv2/opencv.hpp"
 #include "lua.h"
@@ -36,4 +36,4 @@ public:
 
 };
 
-#endif // COPENCV_H
+#endif // __COPENCV_H__

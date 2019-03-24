@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += network
+QT       += network opengl svg multimedia xml sql
 
 QT       -= gui
 
@@ -21,6 +21,7 @@ SOURCES += cluainterpreter.cpp \
     ../../inc/cbaseinterp.cpp \
     clua.cpp \
     cluafunc.cpp \
+    copencv.cpp \
     crunluathread.cpp
 
 HEADERS += cluainterpreter.h\
@@ -29,6 +30,13 @@ HEADERS += cluainterpreter.h\
     clua.h \
     crunluathread.h \
     copencv.h
+
+INCLUDEPATH += \
+    $$_PRO_FILE_PWD_/lua-5.3.2/src \
+    $$_PRO_FILE_PWD_/opencv/inc
+
+QMAKE_CXXFLAGS += \
+    -fpermissive
 
 CONFIG(debug, debug|release) {
 	DESTDIR = $$_PRO_FILE_PWD_/../../out/debug
@@ -46,12 +54,13 @@ unix {
     INSTALLS += target
 
 }
-win32 {
+win32 | win64 {
 	CONFIG += dll warn_off
 	QMAKE_LFLAGS+=-Wl,-e,_DllMainCRTStartup@12
 	LIBS += \
     -L$$_PRO_FILE_PWD_/lua-5.3.2/src \
-    -L$$_PRO_FILE_PWD_/opencv/lib \
+    -L$$_PRO_FILE_PWD_/opencv/lib64 \
+    -L$$DESTDIR \
     -llua
 
 	LIBS += \
@@ -62,18 +71,27 @@ win32 {
 		-llibtiff \
 		-lIlmImf \
 
-	LIBS += \
-		-lopencv_core2413.dll \
-		-lopencv_highgui2413.dll \
-		-lopencv_imgproc2413.dll \
-		-lopencv_objdetect2413.dll
+# remove 32 bits libraries
+#	LIBS += \
+#		-lopencv_core2413.dll \
+#		-lopencv_highgui2413.dll \
+#		-lopencv_imgproc2413.dll \
+#		-lopencv_objdetect2413.dll
+
+# add 64 bits
+    LIBS += \
+        -lopencv_core243.dll \
+        -lopencv_highgui243.dll \
+        -lopencv_imgproc243.dll \
+        -lopencv_objdetect243.dll
+
 
 	LIBS += \
 		-lgdi32
 
 	QMAKE_POST_LINK += $$_PRO_FILE_PWD_/post_build.bat $$replace(_PRO_FILE_PWD_, /, \\) $$replace(DESTDIR, /, \\)
     lua_src.commands = mingw32-make -C $$_PRO_FILE_PWD_/lua-5.3.2 mingw
-    lua_inst.commands = mingw32-make -C $$_PRO_FILE_PWD_/lua-5.3.2 mingw		
+    lua_inst.commands = mingw32-make -C $$_PRO_FILE_PWD_/lua-5.3.2 mingw
 }
 
 

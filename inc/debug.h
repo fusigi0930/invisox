@@ -11,18 +11,10 @@
 
 #ifdef _INVISOX_DISP_CLOCK
 #   define _DMSG(e,...) \
-{ \
-    char sz[512]; \
-    ::sprintf(sz, "%d-[%s:%d] " e, (clock()/(CLOCKS_PRE_SEC/1000)), _INVISOX_FUNC, __LINE__, ##__VA_ARGS__); \
-    qDebug() << sz; \
-}
+	qDebug("%ulld-[%s:%d] " e "\n", (clock()/(CLOCKS_PRE_SEC/1000)), _INVISOX_FUNC, __LINE__, ##__VA_ARGS__)
 #else
 #   define _DMSG(e,...) \
-{ \
-    char sz[512]; \
-    ::sprintf(sz, "[%s:%d] " e, _INVISOX_FUNC, __LINE__, ##__VA_ARGS__); \
-    qDebug() << sz; \
-}
+	qDebug("[%s:%d] " e "\n", _INVISOX_FUNC, __LINE__, ##__VA_ARGS__)
 #endif
 
 #ifndef DMSG
