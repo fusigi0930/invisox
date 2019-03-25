@@ -17,8 +17,8 @@ win32 {
 RESOURCES += qml.qrc
 
 
-INCLUDEPATH += ../inc \
-               ../interp/cinterp \
+INCLUDEPATH += $$_PRO_FILE_PWD_/../inc \
+               $$_PRO_FILE_PWD_/../auto/inc \
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =

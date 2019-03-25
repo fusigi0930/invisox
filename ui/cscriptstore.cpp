@@ -1,5 +1,6 @@
 #include "cscriptstore.h"
-#include "ccinterpreter.h"
+#include "cluainterpreter.h"
+#include "debug.h"
 
 /*
  * <?xml version="1.0" encoding="utf-8"?>
@@ -246,6 +247,9 @@ bool CScriptStore::getItems() {
                         case _INTERP_JS:
                             m_currentItem.insert(LIST_INTERPRETER, XML_ITEM_INTERPRETER_JAVASCRIPT);
                             break;
+						case _INTERP_LUA:
+							m_currentItem.insert(LIST_INTERPRETER, XML_ITEM_INTERPRETER_LUA);
+							break;
                     }
 
                     emit sigAddListItem();
@@ -394,7 +398,7 @@ QString CScriptStore::actionToXml(QString szOri) {
      *
      */
 
-    _DMSG("the ori string: %s", szOri.toUtf8().data());
+	_DMSG("the ori string: %s", QSZ(szOri));
     QString szRet;
     // is the action network command?
     if (0 == szOri.left(3).compare("nc:")) {

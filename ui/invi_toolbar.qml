@@ -67,7 +67,7 @@ ToolBar {
 			height: 40
 			buttonText: qsTr("test")
 			labelText: qsTr("test")
-			tooltip: qsTr("settings")
+			tooltip: qsTr("test")
 			onSigClicked: rootBar.sigClickTest()
 		}
 	}

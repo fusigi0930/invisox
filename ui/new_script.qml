@@ -335,17 +335,8 @@ Dialog {
                 editFile.text=info[prop];
             }
             else if ("lang" === prop) {
-                if ("c/c++" === info[prop]) {
+				if ("lua" === info[prop]) {
                     comboInterp.currentIndex=0;
-                }
-                else if ("php" === info[prop]) {
-                    comboInterp.currentIndex=1;
-                }
-                else if ("basic" === info[prop]) {
-                    comboInterp.currentIndex=2;
-                }
-                else if ("javascript" === info[prop]) {
-                    comboInterp.currentIndex=3;
                 }
             }
         }
