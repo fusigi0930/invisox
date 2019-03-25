@@ -18,21 +18,21 @@
 
 int main(int argc, char *argv[])
 {
-    QApplication app(argc, argv);
+	QApplication app(argc, argv);
 
-    qmlRegisterType<CScriptStore>("ScriptStore", 1, 0, "ScriptStore");
-    qmlRegisterType<CSettingStore>("SettingStore", 1, 0, "SettingStore");
-    qmlRegisterType<COSSystem>("OSSystem", 1, 0, "OSSystem");
+	qmlRegisterType<CScriptStore>("ScriptStore", 1, 0, "ScriptStore");
+	qmlRegisterType<CSettingStore>("SettingStore", 1, 0, "SettingStore");
+	qmlRegisterType<COSSystem>("OSSystem", 1, 0, "OSSystem");
 
 #ifdef Q_OS_WIN
 	CInterpEnvStore envStore;
 	envStore.slotParser();
 #endif
 
-    QQmlApplicationEngine engine;
-    engine.load(QUrl(QStringLiteral("qrc:///qml/main.qml")));
+	QQmlApplicationEngine engine;
+	engine.load(QUrl(QStringLiteral("qrc:///qml/main.qml")));
 
-    app.setWindowIcon(QIcon("qrc:///image/res/png/mainicon.png"));
+	app.setWindowIcon(QIcon("qrc:///image/res/png/mainicon.png"));
 
-    return app.exec();
+	return app.exec();
 }

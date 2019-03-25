@@ -10,33 +10,33 @@
 
 class CEnvStore : public QObject
 {
-    Q_OBJECT
-    Q_PROPERTY(QString xmlName READ slotGetFile() WRITE slotSetFile)
+	Q_OBJECT
+	Q_PROPERTY(QString xmlName READ slotGetFile() WRITE slotSetFile)
 
 
 public:
-    CEnvStore(QObject *parent = 0);
-    virtual ~CEnvStore();
+	CEnvStore(QObject *parent = 0);
+	virtual ~CEnvStore();
 
 protected:
-    QString m_szXmlFile;
-    QFile m_file;
-    QXmlStreamReader m_xmlReader;
-    QXmlStreamWriter m_xmlWriter;
+	QString m_szXmlFile;
+	QFile m_file;
+	QXmlStreamReader m_xmlReader;
+	QXmlStreamWriter m_xmlWriter;
 
 protected:
-    virtual bool parser();
-    virtual bool closeParserWrite();
+	virtual bool parser();
+	virtual bool closeParserWrite();
 
-    virtual bool store();
+	virtual bool store();
 
 
 signals:
-    void sigInit();
+	void sigInit();
 
 public slots:
-    void slotSetFile(QString szName);
-    QString slotGetFile();
+	void slotSetFile(QString szName);
+	QString slotGetFile();
 
 };
 

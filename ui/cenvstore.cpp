@@ -2,70 +2,70 @@
 #include "debug.h"
 
 CEnvStore::CEnvStore(QObject *parent) :
-    QObject(parent)
+	QObject(parent)
 {
 
 }
 
 CEnvStore::~CEnvStore() {
-    if (m_file.isOpen()) {
-        m_file.close();
-    }
+	if (m_file.isOpen()) {
+		m_file.close();
+	}
 }
 
 bool CEnvStore::parser() {
-    if (m_szXmlFile.isEmpty())
-        return false;
+	if (m_szXmlFile.isEmpty())
+		return false;
 
-    if (!QFile::exists(m_szXmlFile))
-        return false;
+	if (!QFile::exists(m_szXmlFile))
+		return false;
 
-    if (!m_file.isOpen()) {
-        m_file.setFileName(m_szXmlFile);
-        if (!m_file.open(QFile::ReadWrite)) {
-            return false;
-        }
-    }
+	if (!m_file.isOpen()) {
+		m_file.setFileName(m_szXmlFile);
+		if (!m_file.open(QFile::ReadWrite)) {
+			return false;
+		}
+	}
 
-    m_xmlReader.setDevice(&m_file);
+	m_xmlReader.setDevice(&m_file);
 
-    return true;
+	return true;
 }
 
 bool CEnvStore::closeParserWrite() {
-    m_xmlReader.clear();
-    if (m_file.isOpen())
-        m_file.close();
+	m_xmlReader.clear();
+	if (m_file.isOpen())
+		m_file.close();
 
-    return true;
+	return true;
 }
 
 bool CEnvStore::store() {
-    if (m_szXmlFile.isEmpty())
-        return false;
+	if (m_szXmlFile.isEmpty())
+		return false;
 
-    closeParserWrite();
+	closeParserWrite();
 
-    if (!m_file.isOpen()) {
-        m_file.setFileName(m_szXmlFile);
-        if (!m_file.open(QFile::ReadWrite | QFile::Truncate)) {
-            return false;
-        }
-    }
+	if (!m_file.isOpen()) {
+		m_file.setFileName(m_szXmlFile);
+		if (!m_file.open(QFile::ReadWrite | QFile::Truncate)) {
+			return false;
+		}
+	}
 
-    m_xmlWriter.setDevice(&m_file);
-    m_xmlWriter.setAutoFormatting(true);
-    return true;
+	m_xmlWriter.setDevice(&m_file);
+	m_xmlWriter.setAutoFormatting(true);
+	return true;
 }
 
 void CEnvStore::slotSetFile(QString szName) {
-    m_szXmlFile=szName;
-    parser();
-    _DMSG("xml name: %s", m_szXmlFile.toUtf8().data());
+	m_szXmlFile=szName;
+	parser();
+	_DMSG("xml name: %s", m_szXmlFile.toUtf8().data());
 }
 
 QString CEnvStore::slotGetFile() {
-    return m_szXmlFile;
+	return m_szXmlFile;
 }
 
 

@@ -5,19 +5,19 @@
 
 class CInterpEnvStore : public CEnvStore
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
 	CInterpEnvStore();
-    virtual ~CInterpEnvStore();
+	virtual ~CInterpEnvStore();
 
 private:
-    bool getInclude();
+	bool getInclude();
 
 protected:
-    virtual bool parser();
+	virtual bool parser();
 
 public slots:
-    bool slotParser();
+	bool slotParser();
 };
 
 #endif // CINTERPENVSTORE_WIN_H

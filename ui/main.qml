@@ -7,95 +7,95 @@ import SettingStore 1.0
 import "qrc:/modules/"
 
 ApplicationWindow {
-    visible: true
-    id: mainWindow
-    width: Screen.width * 2/3
-    height: Screen.height * 2/3
-    title: qsTr("invisOX")
+	visible: true
+	id: mainWindow
+	width: Screen.width * 2/3
+	height: Screen.height * 2/3
+	title: qsTr("invisOX")
 
-    objectName: "mainWindow"
+	objectName: "mainWindow"
 
-    signal sigEditItemToDialog(variant info);
-    signal sigEditSetting(variant info);
+	signal sigEditItemToDialog(variant info);
+	signal sigEditSetting(variant info);
 
-    Component.onCompleted: {
-        invisSettings.slotParser();
-    }
+	Component.onCompleted: {
+		invisSettings.slotParser();
+	}
 
-    onClosing: {
-        invisSettings.slotStore();
-        invisScripts.slotStore();
-    }
+	onClosing: {
+		invisSettings.slotStore();
+		invisScripts.slotStore();
+	}
 
-    Loader {
-        id: addDialogloader
-        // using the connections to get the dialog result
-    }
+	Loader {
+		id: addDialogloader
+		// using the connections to get the dialog result
+	}
 
-    Loader {
-        id: settingDialogLoader
-    }
+	Loader {
+		id: settingDialogLoader
+	}
 
-    Connections {
+	Connections {
 		target: addDialogloader.item
-        onSigUpdateInfo: doAddScript(info)
-        onSigUpdateEditInfo: doEditScript(editInfo)
-    }
+		onSigUpdateInfo: doAddScript(info)
+		onSigUpdateEditInfo: doEditScript(editInfo)
+	}
 
-    Connections {
-        target: settingDialogLoader.item
+	Connections {
+		target: settingDialogLoader.item
 		onSigUpdateSetting: {
 			invisSettings.slotSetSettingInfo(info)
 		}
-        onSigRemovePluginReq: {
-            if(invisSettings.slotRemovePlugin(info))
-                settingDialogLoader.item.sigRemovePluginRes(true);
-        }
-        onSigAddPluginReq: {
-            if (invisSettings.slotInsertPlugin(info)) {
-                console.log("filename: "+ info)
-                settingDialogLoader.item.sigAddPluginRes(info);
-            }
-        }
-    }
+		onSigRemovePluginReq: {
+			if(invisSettings.slotRemovePlugin(info))
+				settingDialogLoader.item.sigRemovePluginRes(true);
+		}
+		onSigAddPluginReq: {
+			if (invisSettings.slotInsertPlugin(info)) {
+				console.log("filename: "+ info)
+				settingDialogLoader.item.sigAddPluginRes(info);
+			}
+		}
+	}
 
-    onSigEditItemToDialog: addDialogloader.item.sigInitEditInfo(info)
-    onSigEditSetting: settingDialogLoader.item.sigEditSetting(info)
+	onSigEditItemToDialog: addDialogloader.item.sigInitEditInfo(info)
+	onSigEditSetting: settingDialogLoader.item.sigEditSetting(info)
 
-    function doAddScript(addInfo) {
+	function doAddScript(addInfo) {
 		console.log("add new script");
-        listScriptItems.addItemFromDialog(addInfo);
-    }
+		listScriptItems.addItemFromDialog(addInfo);
+	}
 
-    function doEditScript(editInfo) {
+	function doEditScript(editInfo) {
 		console.log("do edit script");
-        listScriptItems.editItem(editInfo);
-    }
+		listScriptItems.editItem(editInfo);
+	}
 
-    // invisOX's classes
-    ScriptStore {
-        id: invisScripts
-        xmlName: invisSettings.xml_script
-        onSigAddListItem: listScriptItems.addItem();
+	// invisOX's classes
+	ScriptStore {
+		id: invisScripts
+		xmlName: invisSettings.xml_script
+		onSigAddListItem: listScriptItems.addItem();
 
-    }
+	}
 
-    SettingStore {
-        id: invisSettings
+	SettingStore {
+		id: invisSettings
 
-    }
+	}
 
-    // ui controls
+	// ui controls
 
-    menuBar: MenuBar {
-        Menu {
-            title: qsTr("File")
-            MenuItem {
-                text: qsTr("Exit")
-                onTriggered: Qt.quit();
-            }
-        }
-    }
+	menuBar: MenuBar {
+		Menu {
+			title: qsTr("File")
+			MenuItem {
+				text: qsTr("Exit")
+				onTriggered: Qt.quit();
+			}
+		}
+	}
 
 	toolBar: InviToolBar {
 		id: inviToolBar
@@ -137,105 +137,105 @@ ApplicationWindow {
 		}
 	}
 
-    // child controls
-    Rectangle {
-        id: rectScriptList
-        x: 5
-        y: 5
+	// child controls
+	Rectangle {
+		id: rectScriptList
+		x: 5
+		y: 5
 
-        border.width: 2
-        border.color: "#7070F0"
+		border.width: 2
+		border.color: "#7070F0"
 
-        width: mainWindow.width-2*x
-        height: mainWindow.contentItem.height-2*y
+		width: mainWindow.width-2*x
+		height: mainWindow.contentItem.height-2*y
 
-        TableView {
-            id: listScript
-            x: 0
-            y: 0
-            width: parent.width
-            height: parent.height
+		TableView {
+			id: listScript
+			x: 0
+			y: 0
+			width: parent.width
+			height: parent.height
 
-            model: listScriptItems
+			model: listScriptItems
 
-            property int n_scriptListRightClickPos: -1;
+			property int n_scriptListRightClickPos: -1;
 
-            // initial the header bar
-            TableViewColumn{role: "status" ; title: qsTr("Status") ; width: 50}
-            TableViewColumn{role: "actions" ; title: qsTr("Actions") ; width: 150}
-            TableViewColumn{role: "script" ; title: qsTr("Script Path") ; width: 350}
-            TableViewColumn{role: "desc" ; title: qsTr("Descriptiton") ; width: 350}
-            TableViewColumn{role: "lang" ; title: qsTr("Language") ; width: 150}
+			// initial the header bar
+			TableViewColumn{role: "status" ; title: qsTr("Status") ; width: 50}
+			TableViewColumn{role: "actions" ; title: qsTr("Actions") ; width: 150}
+			TableViewColumn{role: "script" ; title: qsTr("Script Path") ; width: 350}
+			TableViewColumn{role: "desc" ; title: qsTr("Descriptiton") ; width: 350}
+			TableViewColumn{role: "lang" ; title: qsTr("Language") ; width: 150}
 
-            // context menu
-            Menu {
-                id: menuScriptList
+			// context menu
+			Menu {
+				id: menuScriptList
 
-                MenuItem {
-                    text: qsTr("remove")
-                    onTriggered: {
-                        var listInfo=listScriptItems.get(listScript.n_scriptListRightClickPos);
-                        var info = {"actions":listInfo["actions"],"desc":listInfo["desc"],"script":listInfo["script"],"lang":listInfo["lang"]};
-                        if (0 ===invisScripts.slotRemoveItem(info))
-                            listScriptItems.remove(listScript.n_scriptListRightClickPos);
-                    }
-                }
-                MenuItem {
-                    text: qsTr("edit")
-                    onTriggered: {
-                        var dlg=addDialogloader.setSource("/qml/new_script.qml", {
-                            visible: true,
-                            title: text,
-                            width: mainWindow.width/2,
-                            height: mainWindow.height/2,
-                            focus: false
-                            } )
+				MenuItem {
+					text: qsTr("remove")
+					onTriggered: {
+						var listInfo=listScriptItems.get(listScript.n_scriptListRightClickPos);
+						var info = {"actions":listInfo["actions"],"desc":listInfo["desc"],"script":listInfo["script"],"lang":listInfo["lang"]};
+						if (0 ===invisScripts.slotRemoveItem(info))
+							listScriptItems.remove(listScript.n_scriptListRightClickPos);
+					}
+				}
+				MenuItem {
+					text: qsTr("edit")
+					onTriggered: {
+						var dlg=addDialogloader.setSource("/qml/new_script.qml", {
+							visible: true,
+							title: text,
+							width: mainWindow.width/2,
+							height: mainWindow.height/2,
+							focus: false
+							} )
 
-                        sigEditItemToDialog(listScriptItems.get(listScript.n_scriptListRightClickPos));
-                    }
-                }
-            }
+						sigEditItemToDialog(listScriptItems.get(listScript.n_scriptListRightClickPos));
+					}
+				}
+			}
 
-            MouseArea {
-                anchors.fill: parent
-                acceptedButtons: Qt.RightButton
-                onClicked: {
-                    if (mouse.button == Qt.RightButton) {
-                        console.log("mouse x: "+ mouse.x + " y: " + mouse.y + " row: " + listScript.rowAt(mouse.x, mouse.y))
-                        listScript.selection.clear();
-                        listScript.selection.select(listScript.rowAt(mouse.x, mouse.y));
-                        if (listScript.rowAt(mouse.x, mouse.y) !== -1) {
-                            listScript.n_scriptListRightClickPos= listScript.rowAt(mouse.x, mouse.y)
-                            menuScriptList.popup()
-                        }
-                    }
-                }
-            }
+			MouseArea {
+				anchors.fill: parent
+				acceptedButtons: Qt.RightButton
+				onClicked: {
+					if (mouse.button == Qt.RightButton) {
+						console.log("mouse x: "+ mouse.x + " y: " + mouse.y + " row: " + listScript.rowAt(mouse.x, mouse.y))
+						listScript.selection.clear();
+						listScript.selection.select(listScript.rowAt(mouse.x, mouse.y));
+						if (listScript.rowAt(mouse.x, mouse.y) !== -1) {
+							listScript.n_scriptListRightClickPos= listScript.rowAt(mouse.x, mouse.y)
+							menuScriptList.popup()
+						}
+					}
+				}
+			}
 
-            // content for listScript TableView
-            ListModel {
-                id: listScriptItems
+			// content for listScript TableView
+			ListModel {
+				id: listScriptItems
 
 
-                function addItem() {
-                    append(invisScripts.item);
-                }
+				function addItem() {
+					append(invisScripts.item);
+				}
 
-                function addItemFromDialog(addInfo) {
-                    if (0 === invisScripts.slotAddItem(addInfo))
-                        append(addInfo);
-                }
+				function addItemFromDialog(addInfo) {
+					if (0 === invisScripts.slotAddItem(addInfo))
+						append(addInfo);
+				}
 
-                function editItem(editInfo) {
-                    if (0 === invisScripts.slotEditItem(editInfo))
-                        listScriptItems.set(listScript.n_scriptListRightClickPos, editInfo);
-                }
+				function editItem(editInfo) {
+					if (0 === invisScripts.slotEditItem(editInfo))
+						listScriptItems.set(listScript.n_scriptListRightClickPos, editInfo);
+				}
 
-            }
+			}
 
-        }
+		}
 
-    }
+	}
 
 
 }

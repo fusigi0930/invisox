@@ -5,17 +5,17 @@
 
 class COSSystem : public QObject
 {
-    Q_OBJECT
-    Q_PROPERTY(QString dllname READ slotGetDynamicLibrary)
+	Q_OBJECT
+	Q_PROPERTY(QString dllname READ slotGetDynamicLibrary)
 
 public:
-    COSSystem(QObject *parent = 0);
-    ~COSSystem();
+	COSSystem(QObject *parent = 0);
+	~COSSystem();
 
 signals:
 
 public slots:
-    QString slotGetDynamicLibrary();
+	QString slotGetDynamicLibrary();
 };
 
 #endif // COSSYSTEM_H

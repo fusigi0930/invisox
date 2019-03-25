@@ -4,9 +4,9 @@ TARGET = invisox
 QT += qml quick widgets xml
 
 SOURCES += main.cpp \
-    cenvstore.cpp \
-    cscriptstore.cpp \
-    csettingstore.cpp \
+	cenvstore.cpp \
+	cscriptstore.cpp \
+	csettingstore.cpp \
 	cossystem.cpp
 
 win32 {
@@ -18,7 +18,7 @@ RESOURCES += qml.qrc
 
 
 INCLUDEPATH += $$_PRO_FILE_PWD_/../inc \
-               $$_PRO_FILE_PWD_/../auto/inc \
+			   $$_PRO_FILE_PWD_/../auto/inc \
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =
@@ -27,9 +27,9 @@ QML_IMPORT_PATH =
 include(deployment.pri)
 
 HEADERS += \
-    cenvstore.h \
-    cscriptstore.h \
-    csettingstore.h \
+	cenvstore.h \
+	cscriptstore.h \
+	csettingstore.h \
 	cossystem.h
 
 win32 {

@@ -43,23 +43,23 @@ CSettingStore::~CSettingStore() {
 }
 
 CSettingStore::SSettingInfo& CSettingStore::SSettingInfo::operator=(const CSettingStore::SSettingInfo &info) {
-    szStopKey=info.szStopKey;
-    szFile=info.szFile;
-    actionMethod=info.actionMethod;
-    listPlugins.clear();
-    listPlugins=info.listPlugins;
+	szStopKey=info.szStopKey;
+	szFile=info.szFile;
+	actionMethod=info.actionMethod;
+	listPlugins.clear();
+	listPlugins=info.listPlugins;
 
-    return *this;
+	return *this;
 }
 
 CSettingStore::SSettingInfo& CSettingStore::SSettingInfo::operator=(const QVariant &info) {
-    return *this;
+	return *this;
 }
 
 void CSettingStore::initGenericDefault() {
-    m_settingInfo.szStopKey=DEFAULT_STOP_KEY;
-    m_settingInfo.szFile=DEFAULT_SCRIPT_FILE;
-    m_settingInfo.actionMethod=_METHOD_NORMAL;
+	m_settingInfo.szStopKey=DEFAULT_STOP_KEY;
+	m_settingInfo.szFile=DEFAULT_SCRIPT_FILE;
+	m_settingInfo.actionMethod=_METHOD_NORMAL;
 }
 
 void CSettingStore::initAdditionDefault() {
@@ -67,284 +67,284 @@ void CSettingStore::initAdditionDefault() {
 }
 
 void CSettingStore::initDefault() {
-    initGenericDefault();
-    initAdditionDefault();
+	initGenericDefault();
+	initAdditionDefault();
 }
 
 bool CSettingStore::getGenericSettings() {
-    while (!m_xmlReader.atEnd() && !m_xmlReader.hasError()) {
-         QXmlStreamReader::TokenType readToken=m_xmlReader.readNext();
+	while (!m_xmlReader.atEnd() && !m_xmlReader.hasError()) {
+		 QXmlStreamReader::TokenType readToken=m_xmlReader.readNext();
 
-        switch(readToken) {
-            default:
-                continue;
-            case QXmlStreamReader::StartElement:
-                if (0 == m_xmlReader.name().toString().compare(XML_GENERIC_SCRIPT)) {
-                    m_settingInfo.szFile=m_xmlReader.readElementText();
-                }
-                else if (0 == m_xmlReader.name().toString().compare(XML_GENERIC_STOP)) {
-                    m_settingInfo.szStopKey=m_xmlReader.readElementText();
-                }
-                else if (0 == m_xmlReader.name().toString().compare(XML_GENERIC_METHOD)) {
-                    m_settingInfo.actionMethod=static_cast<CSettingStore::EActionMethod>(
-                                                m_xmlReader.readElementText().toInt());
-                }
-                break;
-            case QXmlStreamReader::EndElement:
-                if (0 == m_xmlReader.name().toString().compare(XML_GENERIC)) {
-                    if (0 == m_settingInfo.szFile.length() || 0 == m_settingInfo.szStopKey.length())
-                        return false;
-                    return true;
-                }
-                break;
-        }
-    }
-    return true;
+		switch(readToken) {
+			default:
+				continue;
+			case QXmlStreamReader::StartElement:
+				if (0 == m_xmlReader.name().toString().compare(XML_GENERIC_SCRIPT)) {
+					m_settingInfo.szFile=m_xmlReader.readElementText();
+				}
+				else if (0 == m_xmlReader.name().toString().compare(XML_GENERIC_STOP)) {
+					m_settingInfo.szStopKey=m_xmlReader.readElementText();
+				}
+				else if (0 == m_xmlReader.name().toString().compare(XML_GENERIC_METHOD)) {
+					m_settingInfo.actionMethod=static_cast<CSettingStore::EActionMethod>(
+												m_xmlReader.readElementText().toInt());
+				}
+				break;
+			case QXmlStreamReader::EndElement:
+				if (0 == m_xmlReader.name().toString().compare(XML_GENERIC)) {
+					if (0 == m_settingInfo.szFile.length() || 0 == m_settingInfo.szStopKey.length())
+						return false;
+					return true;
+				}
+				break;
+		}
+	}
+	return true;
 }
 
 bool CSettingStore::getGeneric() {
-    while (!m_xmlReader.atEnd() && !m_xmlReader.hasError()) {
-         QXmlStreamReader::TokenType readToken=m_xmlReader.readNext();
+	while (!m_xmlReader.atEnd() && !m_xmlReader.hasError()) {
+		 QXmlStreamReader::TokenType readToken=m_xmlReader.readNext();
 
-        switch(readToken) {
-            default:
-                continue;
-            case QXmlStreamReader::StartElement:
-                if (0 == m_xmlReader.name().toString().compare(XML_GENERIC)) {
-                    return getGenericSettings();
-                }
-                break;
-        }
-    }
-    return true;
+		switch(readToken) {
+			default:
+				continue;
+			case QXmlStreamReader::StartElement:
+				if (0 == m_xmlReader.name().toString().compare(XML_GENERIC)) {
+					return getGenericSettings();
+				}
+				break;
+		}
+	}
+	return true;
 }
 
 bool CSettingStore::getAdditionSettings() {
-    while (!m_xmlReader.atEnd() && !m_xmlReader.hasError()) {
-         QXmlStreamReader::TokenType readToken=m_xmlReader.readNext();
+	while (!m_xmlReader.atEnd() && !m_xmlReader.hasError()) {
+		 QXmlStreamReader::TokenType readToken=m_xmlReader.readNext();
 
-        switch(readToken) {
-            default:
-                continue;
-            case QXmlStreamReader::StartElement:
-                if (0 == m_xmlReader.name().toString().compare(XML_ADD_PLUGINS)) {
-                    m_settingInfo.listPlugins.push_back(m_xmlReader.readElementText());
-                }
-                break;
-            case QXmlStreamReader::EndElement:
-                if (0 == m_xmlReader.name().toString().compare(XML_ADD)) {
-                    return true;
-                }
-                break;
-        }
-    }
-    return true;
+		switch(readToken) {
+			default:
+				continue;
+			case QXmlStreamReader::StartElement:
+				if (0 == m_xmlReader.name().toString().compare(XML_ADD_PLUGINS)) {
+					m_settingInfo.listPlugins.push_back(m_xmlReader.readElementText());
+				}
+				break;
+			case QXmlStreamReader::EndElement:
+				if (0 == m_xmlReader.name().toString().compare(XML_ADD)) {
+					return true;
+				}
+				break;
+		}
+	}
+	return true;
 }
 
 bool CSettingStore::getAddition() {
-    while (!m_xmlReader.atEnd() && !m_xmlReader.hasError()) {
-         QXmlStreamReader::TokenType readToken=m_xmlReader.readNext();
+	while (!m_xmlReader.atEnd() && !m_xmlReader.hasError()) {
+		 QXmlStreamReader::TokenType readToken=m_xmlReader.readNext();
 
-        switch(readToken) {
-            default:
-                continue;
-            case QXmlStreamReader::StartElement:
-                if (0 == m_xmlReader.name().toString().compare(XML_ADD)) {
-                    return getAdditionSettings();
-                }
-                break;
-        }
-    }
-    return true;
+		switch(readToken) {
+			default:
+				continue;
+			case QXmlStreamReader::StartElement:
+				if (0 == m_xmlReader.name().toString().compare(XML_ADD)) {
+					return getAdditionSettings();
+				}
+				break;
+		}
+	}
+	return true;
 }
 
 bool CSettingStore::parser() {
-    if (m_szXmlFile.isEmpty()) {
-        m_szXmlFile=XML_FILENAME;
-    }
+	if (m_szXmlFile.isEmpty()) {
+		m_szXmlFile=XML_FILENAME;
+	}
 
-    if (!QFile::exists(m_szXmlFile)) {
-        initDefault();
-        return true;
-    }
+	if (!QFile::exists(m_szXmlFile)) {
+		initDefault();
+		return true;
+	}
 
-    if (m_file.isOpen()) {
-        m_file.close();
-    }
+	if (m_file.isOpen()) {
+		m_file.close();
+	}
 
-    m_file.setFileName(m_szXmlFile);
-    if (!m_file.open(QFile::ReadWrite)) {
-        initDefault();
-        return true;
-    }
+	m_file.setFileName(m_szXmlFile);
+	if (!m_file.open(QFile::ReadWrite)) {
+		initDefault();
+		return true;
+	}
 
-    m_xmlReader.setDevice(&m_file);
+	m_xmlReader.setDevice(&m_file);
 
-    // start parser
-    while (!m_xmlReader.atEnd() && !m_xmlReader.hasError()) {
-        QXmlStreamReader::TokenType readToken=m_xmlReader.readNext();
-        switch (readToken) {
-            default:
-            case QXmlStreamReader::StartDocument:
-                continue;
-            case QXmlStreamReader::StartElement:
-                //_DMSG("element name: %s", m_xmlReader.name().toString().toUtf8().data());
-                if (0 == m_xmlReader.name().toString().compare(XML_MAIN)) {
-                    if (!getGeneric()) {
-                        initGenericDefault();
-                        continue;
-                    }
-                    if (!getAddition())
-                        m_settingInfo.listPlugins.clear();
-                        initAdditionDefault();
-                        continue;
-                }
-                break;
-        }
-    }
+	// start parser
+	while (!m_xmlReader.atEnd() && !m_xmlReader.hasError()) {
+		QXmlStreamReader::TokenType readToken=m_xmlReader.readNext();
+		switch (readToken) {
+			default:
+			case QXmlStreamReader::StartDocument:
+				continue;
+			case QXmlStreamReader::StartElement:
+				//_DMSG("element name: %s", m_xmlReader.name().toString().toUtf8().data());
+				if (0 == m_xmlReader.name().toString().compare(XML_MAIN)) {
+					if (!getGeneric()) {
+						initGenericDefault();
+						continue;
+					}
+					if (!getAddition())
+						m_settingInfo.listPlugins.clear();
+						initAdditionDefault();
+						continue;
+				}
+				break;
+		}
+	}
 
-    if (0 == m_settingInfo.szFile.length() || 0 == m_settingInfo.szStopKey.length()) {
-        initGenericDefault();
-    }
+	if (0 == m_settingInfo.szFile.length() || 0 == m_settingInfo.szStopKey.length()) {
+		initGenericDefault();
+	}
 
-    sigChangedScriptFile();
-    closeParserWrite();
-    return true;
+	sigChangedScriptFile();
+	closeParserWrite();
+	return true;
 }
 
 bool CSettingStore::writeGeneric() {
-    m_xmlWriter.writeStartElement(XML_GENERIC);
-    if (!writeGenericSettings())
-        return false;
+	m_xmlWriter.writeStartElement(XML_GENERIC);
+	if (!writeGenericSettings())
+		return false;
 
-    m_xmlWriter.writeEndElement();
-    return true;
+	m_xmlWriter.writeEndElement();
+	return true;
 }
 
 bool CSettingStore::writeGenericSettings() {
-    // script
-    m_xmlWriter.writeStartElement(XML_GENERIC_SCRIPT);
-    m_xmlWriter.writeCharacters(m_settingInfo.szFile);
-    m_xmlWriter.writeEndElement();
+	// script
+	m_xmlWriter.writeStartElement(XML_GENERIC_SCRIPT);
+	m_xmlWriter.writeCharacters(m_settingInfo.szFile);
+	m_xmlWriter.writeEndElement();
 
-    // hotkey
-    m_xmlWriter.writeStartElement(XML_GENERIC_STOP);
-    m_xmlWriter.writeCharacters(m_settingInfo.szStopKey);
-    m_xmlWriter.writeEndElement();
+	// hotkey
+	m_xmlWriter.writeStartElement(XML_GENERIC_STOP);
+	m_xmlWriter.writeCharacters(m_settingInfo.szStopKey);
+	m_xmlWriter.writeEndElement();
 
-    // method
-    m_xmlWriter.writeStartElement(XML_GENERIC_METHOD);
-    m_xmlWriter.writeCharacters(QString().sprintf("%d", m_settingInfo.actionMethod));
-    m_xmlWriter.writeEndElement();
-    return true;
+	// method
+	m_xmlWriter.writeStartElement(XML_GENERIC_METHOD);
+	m_xmlWriter.writeCharacters(QString().sprintf("%d", m_settingInfo.actionMethod));
+	m_xmlWriter.writeEndElement();
+	return true;
 }
 
 bool CSettingStore::writeAddition() {
-    m_xmlWriter.writeStartElement(XML_ADD);
-    if (!writeAdditionSettings())
-        return false;
+	m_xmlWriter.writeStartElement(XML_ADD);
+	if (!writeAdditionSettings())
+		return false;
 
-    m_xmlWriter.writeEndElement();
-    return true;
+	m_xmlWriter.writeEndElement();
+	return true;
 }
 
 bool CSettingStore::writeAdditionSettings() {
-    std::list<QString>::iterator pList;
-    for (pList=m_settingInfo.listPlugins.begin(); pList!=m_settingInfo.listPlugins.end(); pList++) {
-        // plugin
-        m_xmlWriter.writeStartElement(XML_ADD_PLUGINS);
-        m_xmlWriter.writeCharacters(*pList);
-        m_xmlWriter.writeEndElement();
-    }
-    return true;
+	std::list<QString>::iterator pList;
+	for (pList=m_settingInfo.listPlugins.begin(); pList!=m_settingInfo.listPlugins.end(); pList++) {
+		// plugin
+		m_xmlWriter.writeStartElement(XML_ADD_PLUGINS);
+		m_xmlWriter.writeCharacters(*pList);
+		m_xmlWriter.writeEndElement();
+	}
+	return true;
 }
 
 bool CSettingStore::store() {
-    if (!CEnvStore::store())
-        return false;
+	if (!CEnvStore::store())
+		return false;
 
-    m_xmlWriter.writeStartDocument();
-    m_xmlWriter.writeStartElement(XML_MAIN);
-    if (!writeGeneric()) {
-        return false;
-    }
-    if (!writeAddition()) {
-        return false;
-    }
+	m_xmlWriter.writeStartDocument();
+	m_xmlWriter.writeStartElement(XML_MAIN);
+	if (!writeGeneric()) {
+		return false;
+	}
+	if (!writeAddition()) {
+		return false;
+	}
 
-    m_xmlWriter.writeEndElement();
-    m_xmlWriter.writeEndDocument();
+	m_xmlWriter.writeEndElement();
+	m_xmlWriter.writeEndDocument();
 
-    return true;
+	return true;
 }
 
 bool CSettingStore::slotStore() {
-    return store();
+	return store();
 }
 
 bool CSettingStore::slotParser() {
-    return parser();
+	return parser();
 }
 
 QString CSettingStore::slotGetScriptFile() {
-    return m_settingInfo.szFile;
+	return m_settingInfo.szFile;
 }
 
 void CSettingStore::slotSetSettingInfo(QVariant info) {
-    QVariantMap infoMap=info.toMap();
-    m_settingInfo.listPlugins.clear();
-    for (QVariantMap::iterator pMap=infoMap.begin(); pMap != infoMap.end(); pMap++) {
-        if (0 == pMap.key().compare(XML_GENERIC_SCRIPT)) {
-            m_settingInfo.szFile=pMap.value().toString();
-        }
-        else if (0 == pMap.key().compare(XML_GENERIC_STOP)) {
-            m_settingInfo.szStopKey=CScriptStore::actionToXml(pMap.value().toString());
-        }
-        else if (0 == pMap.key().compare(XML_GENERIC_METHOD)) {
-            m_settingInfo.actionMethod=static_cast<CSettingStore::EActionMethod>(
-                                        pMap.value().toInt());
-        }
-        else if (0 == pMap.key().left(7).compare(XML_ADD_PLUGINS)) {
-            m_settingInfo.listPlugins.push_back(pMap.value().toString());
-        }
-    }
+	QVariantMap infoMap=info.toMap();
+	m_settingInfo.listPlugins.clear();
+	for (QVariantMap::iterator pMap=infoMap.begin(); pMap != infoMap.end(); pMap++) {
+		if (0 == pMap.key().compare(XML_GENERIC_SCRIPT)) {
+			m_settingInfo.szFile=pMap.value().toString();
+		}
+		else if (0 == pMap.key().compare(XML_GENERIC_STOP)) {
+			m_settingInfo.szStopKey=CScriptStore::actionToXml(pMap.value().toString());
+		}
+		else if (0 == pMap.key().compare(XML_GENERIC_METHOD)) {
+			m_settingInfo.actionMethod=static_cast<CSettingStore::EActionMethod>(
+										pMap.value().toInt());
+		}
+		else if (0 == pMap.key().left(7).compare(XML_ADD_PLUGINS)) {
+			m_settingInfo.listPlugins.push_back(pMap.value().toString());
+		}
+	}
 }
 
 QVariant CSettingStore::slotGetSettings() {
-    QVariantMap info;
-    info.insert(XML_GENERIC_SCRIPT, m_settingInfo.szFile);
-    info.insert(XML_GENERIC_STOP, CScriptStore::actionToUi(m_settingInfo.szStopKey));
-    info.insert(XML_GENERIC_METHOD, static_cast<int>(m_settingInfo.actionMethod));
+	QVariantMap info;
+	info.insert(XML_GENERIC_SCRIPT, m_settingInfo.szFile);
+	info.insert(XML_GENERIC_STOP, CScriptStore::actionToUi(m_settingInfo.szStopKey));
+	info.insert(XML_GENERIC_METHOD, static_cast<int>(m_settingInfo.actionMethod));
 
-    int i=0;
-    for (std::list<QString>::iterator pList=m_settingInfo.listPlugins.begin(); pList != m_settingInfo.listPlugins.end(); pList++) {
-        info.insert(QString().sprintf("%s%d",XML_ADD_PLUGINS, i++), *pList);
-    }
-    return QVariant::fromValue(info);
+	int i=0;
+	for (std::list<QString>::iterator pList=m_settingInfo.listPlugins.begin(); pList != m_settingInfo.listPlugins.end(); pList++) {
+		info.insert(QString().sprintf("%s%d",XML_ADD_PLUGINS, i++), *pList);
+	}
+	return QVariant::fromValue(info);
 }
 
 bool CSettingStore::slotRemovePlugin(QVariant info) {
-    std::list<QString>::iterator pFind=std::find(m_settingInfo.listPlugins.begin(),
-                                                 m_settingInfo.listPlugins.end(),
-                                                 info.toString());
+	std::list<QString>::iterator pFind=std::find(m_settingInfo.listPlugins.begin(),
+												 m_settingInfo.listPlugins.end(),
+												 info.toString());
 
-    if (m_settingInfo.listPlugins.end() == pFind)
-        return false;
+	if (m_settingInfo.listPlugins.end() == pFind)
+		return false;
 
-    m_settingInfo.listPlugins.remove(info.toString());
-    return true;
+	m_settingInfo.listPlugins.remove(info.toString());
+	return true;
 }
 
 bool CSettingStore::slotInsertPlugin(QVariant info) {
-    std::list<QString>::iterator pFind=std::find(m_settingInfo.listPlugins.begin(),
-                                                 m_settingInfo.listPlugins.end(),
-                                                 info.toString());
+	std::list<QString>::iterator pFind=std::find(m_settingInfo.listPlugins.begin(),
+												 m_settingInfo.listPlugins.end(),
+												 info.toString());
 
-    if (m_settingInfo.listPlugins.end() != pFind) {
-        return false;
-    }
+	if (m_settingInfo.listPlugins.end() != pFind) {
+		return false;
+	}
 
-    qDebug() << "YA: " << info.toString();
-    m_settingInfo.listPlugins.push_back(info.toString());
-    return true;
+	qDebug() << "YA: " << info.toString();
+	m_settingInfo.listPlugins.push_back(info.toString());
+	return true;
 }
