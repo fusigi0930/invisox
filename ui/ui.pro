@@ -51,3 +51,4 @@ CONFIG(debug, debug|release) {
 }
 
 LIBS += $${INTERP_LIB}
+LIBS += -lluainterp

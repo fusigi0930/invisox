@@ -145,6 +145,13 @@ CScriptStore::CScriptStore(QObject *parent) :
 
 CScriptStore::~CScriptStore() {
 	m_mapScriptInfos.clear();
+	for(std::map<QString, CBasedInterpreter*>::iterator p=m_mapRunningInterp.begin(); p!=m_mapRunningInterp.end(); p++) {
+		if (p->second) {
+			delete p->second;
+			p->second = nullptr;
+		}
+	}
+	m_mapRunningInterp.clear();
 }
 
 QVariant CScriptStore::getCurItem() {
@@ -523,6 +530,45 @@ int CScriptStore::slotRemoveItem(QVariant item) {
 	}
 
 	m_mapScriptInfos.erase(pFind);
+
+	return 0;
+}
+
+int CScriptStore::slotRunItem(QVariant item) {
+	CScriptStore::SScriptInfo info;
+	info=item;
+
+	std::map<QString, CScriptStore::SScriptInfo>::iterator pFind=m_mapScriptInfos.find(_CMD_TYPE_NETCMD == info.type ? "nc:"+info.action : info.action );
+	if (m_mapScriptInfos.end() == pFind) {
+		_DMSG("the action is not exist!");
+		return -1;
+	}
+
+	CBasedInterpreter *base = nullptr;
+
+	switch (pFind->second.interp) {
+		case _INTERP_LUA:
+			base = new CLuaInterpreter();
+			break;
+		case _INTERP_CPP:
+			break;
+		case _INTERP_JS:
+			break;
+		default:
+			break;
+	}
+
+	// do running thread actions
+
+	switch (info.type) {
+		default:
+		case _CMD_TYPE_HOTKEY:
+			m_mapRunningInterp[info.action]=base;
+			break;
+		case _CMD_TYPE_NETCMD:
+			m_mapRunningInterp["nc:"+info.action]=base;
+			break;
+	}
 
 	return 0;
 }

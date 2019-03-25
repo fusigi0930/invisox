@@ -1,6 +1,7 @@
 #ifndef CSCRIPTSTORE_H
 #define CSCRIPTSTORE_H
 #include "cenvstore.h"
+#include "cbaseinterp.h"
 #include <map>
 
 class CScriptStore : public CEnvStore
@@ -47,6 +48,7 @@ public:
 private:
 	QVariantMap m_currentItem;
 	std::map<QString, CScriptStore::SScriptInfo> m_mapScriptInfos;
+	std::map<QString, CBasedInterpreter *> m_mapRunningInterp;
 	bool getItems();
 	bool getItem(CScriptStore::SScriptInfo &info);
 
@@ -71,6 +73,7 @@ public slots:
 	int slotAddItem(QVariant item);
 	int slotEditItem(QVariant item);
 	int slotRemoveItem(QVariant item);
+	int slotRunItem(QVariant item);
 	QString slotActionToUi(QString szOri);
 	QString slotActionToXml(QString szOri);
 
