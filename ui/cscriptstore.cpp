@@ -550,15 +550,13 @@ int CScriptStore::slotRunItem(QVariant item) {
 		case _INTERP_LUA:
 			base = new CLuaInterpreter();
 			break;
-		case _INTERP_CPP:
-			break;
-		case _INTERP_JS:
-			break;
 		default:
-			break;
+			_DMSG("not support script now!");
+			return 1;
 	}
 
 	// do running thread actions
+	base->slotRun(pFind->second.scriptFile.mid(8).replace('/', '\\'));
 
 	switch (info.type) {
 		default:

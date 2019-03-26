@@ -56,7 +56,7 @@ unix {
 }
 win32 | win64 {
 	CONFIG += dll warn_off
-	QMAKE_LFLAGS+=-Wl,-e,_DllMainCRTStartup@12
+#	QMAKE_LFLAGS+=-Wl,-e,_DllMainCRTStartup@12
 	LIBS += \
     -L$$_PRO_FILE_PWD_/lua-5.3.2/src \
     -L$$_PRO_FILE_PWD_/opencv/lib64 \

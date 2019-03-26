@@ -102,6 +102,7 @@ int CBasedInterpreter::slotRun(QString szFile) {
 		return -1;
 	}
 
+	m_szFile=szFile;
 	// is the file already running?
 	if (!m_thread.isRunning()) {
 		m_thread.start();

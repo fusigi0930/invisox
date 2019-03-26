@@ -41,6 +41,7 @@ ToolBar {
 			labelText: qsTr("run")
 			iconSource: "/image/res/png/run.png"
 			tooltip: qsTr("run the selected script file")
+			onSigClicked: rootBar.sigClickRun();
 		}
 
 		InviToolButton {

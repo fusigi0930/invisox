@@ -132,6 +132,14 @@ ApplicationWindow {
 			sigEditSetting(invisSettings.slotGetSettings());
 		}
 
+		onSigClickRun: {
+			var listInfo=listScriptItems.get(listScript.currentRow);
+			console.log("curr: " + listScript.currentRow + " actions: " + listInfo["actions"]);
+			var info = {"actions":listInfo["actions"],"desc":listInfo["desc"],"script":listInfo["script"],"lang":listInfo["lang"]};
+			console.log(info);
+			invisScripts.slotRunItem(info);
+		}
+
 		onSigClickTest: {
 			invisScripts.testcling();
 		}
