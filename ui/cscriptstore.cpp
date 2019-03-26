@@ -556,7 +556,7 @@ int CScriptStore::slotRunItem(QVariant item) {
 	}
 
 	// do running thread actions
-	base->slotRun(pFind->second.scriptFile.mid(8).replace('/', '\\'));
+	base->slotRun(translatePath(pFind->second.scriptFile));
 
 	switch (info.type) {
 		default:
@@ -571,11 +571,9 @@ int CScriptStore::slotRunItem(QVariant item) {
 	return 0;
 }
 
-#if 0
-void CScriptStore::testcling() {
-
-	g_cinterp.slotRun("test.cxx");
-
-	qDebug() << g_cinterp.getStdout();
+QString CScriptStore::translatePath(QString uri) {
+	if (uri.length() < 8)
+		return uri;
+	return uri.mid(8).replace('/', '\\');
 }
-#endif
+

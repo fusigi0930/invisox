@@ -54,6 +54,7 @@ private:
 
 	bool writeItems();
 	bool writeItem(CScriptStore::SScriptInfo &info);
+	QString translatePath(QString uri);
 
 public:
 	QVariant getCurItem();
@@ -76,8 +77,6 @@ public slots:
 	int slotRunItem(QVariant item);
 	QString slotActionToUi(QString szOri);
 	QString slotActionToXml(QString szOri);
-
-	//void testcling();
 
 };
 
