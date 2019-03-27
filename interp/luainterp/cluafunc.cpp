@@ -346,28 +346,36 @@ void CLua::sendInputWmEvent(std::vector<int> *vt) {
 	switch ((*vt)[0]) {
 		default: break;
 		case EVENT_KEY:
-		switch((*vt)[2]) {
-			default: break;
-			case EVENT_ACTION_DOWN:
-				::SendMessage(::GetForegroundWindow(), WM_KEYDOWN, static_cast<WPARAM>((*vt)[1]), 1);
-				QThread::msleep((*vt)[3]);
-				break;
-			case EVENT_ACTION_UP:
-				::SendMessage(::GetForegroundWindow(), WM_KEYUP, static_cast<WPARAM>((*vt)[1]), 1);
-				QThread::msleep((*vt)[3]);
-				break;
-			case EVENT_ACTION_CLICK:
-				for(int i=0; i<(*vt)[3]; i++) {
+			if (4 > vt->size()) {
+				_DMSG("invalid argument number");
+				return;
+			}
+			switch((*vt)[2]) {
+				default: break;
+				case EVENT_ACTION_DOWN:
 					::SendMessage(::GetForegroundWindow(), WM_KEYDOWN, static_cast<WPARAM>((*vt)[1]), 1);
-					QThread::msleep(70);
+					QThread::msleep((*vt)[3]);
+					break;
+				case EVENT_ACTION_UP:
 					::SendMessage(::GetForegroundWindow(), WM_KEYUP, static_cast<WPARAM>((*vt)[1]), 1);
-					QThread::msleep(70);
-				}
-				break;
+					QThread::msleep((*vt)[3]);
+					break;
+				case EVENT_ACTION_CLICK:
+					for(int i=0; i<(*vt)[3]; i++) {
+						::SendMessage(::GetForegroundWindow(), WM_KEYDOWN, static_cast<WPARAM>((*vt)[1]), 1);
+						QThread::msleep(70);
+						::SendMessage(::GetForegroundWindow(), WM_KEYUP, static_cast<WPARAM>((*vt)[1]), 1);
+						QThread::msleep(70);
+					}
+					break;
 			}
 
 			break;
 		case EVENT_MOUSE:
+			if (5 > vt->size()) {
+				_DMSG("invalid argument number");
+				return;
+			}
 			switch ((*vt)[3]) {
 				default: break;
 				case EVENT_ACTION_DOWN:
@@ -406,8 +414,8 @@ void CLua::sendInputWmEvent(std::vector<int> *vt) {
 					::SendMessage(::GetForegroundWindow(), WM_MOUSEMOVE, 0, static_cast<LPARAM>((*vt)[1] | (*vt)[2] << 16));
 					QThread::msleep((*vt)[4]);
 					break;
-			}
-			break;
+		}
+		break;
 	}
 }
 
