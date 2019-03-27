@@ -75,6 +75,7 @@ void CLua::runFile(QString szFile) {
 		return;
 	}
 
+	DMSG("run lua script finished");
 }
 
 void CLua::runString(QString szScript) {

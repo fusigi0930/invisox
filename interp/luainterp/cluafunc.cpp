@@ -417,6 +417,8 @@ void CLua::sendInputFuncEvent(std::vector<int> *vt) {
 	// argument 2: event action
 	// argument 3: event duration or repeat times
 
+	_DMSG("vector leng: %d", vt->size());
+
 	INPUT in;
 	_DMSG("sent input event");
 	switch ((*vt)[0]) {
@@ -427,6 +429,10 @@ void CLua::sendInputFuncEvent(std::vector<int> *vt) {
 			in.ki.wScan=0;
 			in.ki.time=0;
 			in.ki.dwExtraInfo=NULL;
+			if (4 > vt->size()) {
+				_DMSG("invalid argument number");
+				return;
+			}
 
 			switch((*vt)[2]) {
 				default: break;
@@ -460,6 +466,10 @@ void CLua::sendInputFuncEvent(std::vector<int> *vt) {
 			in.mi.mouseData=0;
 			in.mi.time=0;
 			in.mi.dwExtraInfo=NULL;
+			if (5 > vt->size()) {
+				_DMSG("invalid argument number");
+				return;
+			}
 
 			switch ((*vt)[3]) {
 				default: break;
