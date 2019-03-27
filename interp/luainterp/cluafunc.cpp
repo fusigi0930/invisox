@@ -297,6 +297,7 @@ int CLua::luaRunThread(lua_State *L) {
 	int nArgNum=lua_gettop(L);
 	if (0 >= nArgNum) {
 		_DMSG("no argument!");
+		luaL_error(L, "zero argument number for run_thread function\n");
 		return 0;
 	}
 
@@ -346,10 +347,6 @@ void CLua::sendInputWmEvent(std::vector<int> *vt) {
 	switch ((*vt)[0]) {
 		default: break;
 		case EVENT_KEY:
-			if (4 > vt->size()) {
-				_DMSG("invalid argument number");
-				return;
-			}
 			switch((*vt)[2]) {
 				default: break;
 				case EVENT_ACTION_DOWN:
@@ -372,10 +369,6 @@ void CLua::sendInputWmEvent(std::vector<int> *vt) {
 
 			break;
 		case EVENT_MOUSE:
-			if (5 > vt->size()) {
-				_DMSG("invalid argument number");
-				return;
-			}
 			switch ((*vt)[3]) {
 				default: break;
 				case EVENT_ACTION_DOWN:
@@ -437,10 +430,6 @@ void CLua::sendInputFuncEvent(std::vector<int> *vt) {
 			in.ki.wScan=0;
 			in.ki.time=0;
 			in.ki.dwExtraInfo=NULL;
-			if (4 > vt->size()) {
-				_DMSG("invalid argument number");
-				return;
-			}
 
 			switch((*vt)[2]) {
 				default: break;
@@ -474,10 +463,6 @@ void CLua::sendInputFuncEvent(std::vector<int> *vt) {
 			in.mi.mouseData=0;
 			in.mi.time=0;
 			in.mi.dwExtraInfo=NULL;
-			if (5 > vt->size()) {
-				_DMSG("invalid argument number");
-				return;
-			}
 
 			switch ((*vt)[3]) {
 				default: break;
@@ -537,16 +522,17 @@ int CLua::luaSendEvent(lua_State *L) {
 	if (NULL == L) return 0;
 
 	int nArgNum=lua_gettop(L);
-	if (4 > nArgNum) {
-		_DMSG("argument number error!");
-		return 0;
-	}
-
 	std::vector<int> vtArgu;
 
 	for (int i=1; i<=nArgNum; i++) {
 		int nBuf=lua_tointeger(L, i);
 		vtArgu.push_back(nBuf);
+	}
+
+	if ((vtArgu[0] == EVENT_KEY ? 4 : 5) > nArgNum) {
+		_DMSG("argument number error!");
+		luaL_error(L, "invalid argument number for sent_event function\n");
+		return 0;
 	}
 
 	lua_getglobal(L, VAR_EVENT_MODE);
