@@ -54,4 +54,4 @@ QMAKE_TARGET_COPYRIGHT = "Copyright(c) 2019 ChuYuan Chiang. All rights reserved"
 QMAKE_TARGET_COMPANY = "ChuYuan Chiang Personal."
 
 LIBS += $${INTERP_LIB}
-LIBS += -lluainterp
+LIBS += -lluainterp -lengine

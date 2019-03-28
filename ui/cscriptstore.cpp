@@ -1,5 +1,6 @@
 #include "cscriptstore.h"
 #include "cluainterpreter.h"
+#include "engine.h"
 #include "debug.h"
 
 /*
@@ -25,8 +26,6 @@
  *
  *
  */
-
-#include "debug.h"
 
 #define XML_MAIN                                "scripts"
 #define XML_ITEM                                "item"
@@ -569,6 +568,10 @@ int CScriptStore::slotRunItem(QVariant item) {
 	}
 
 	return 0;
+}
+
+int CScriptStore::slotEngineReady() {
+	::engStart();
 }
 
 QString CScriptStore::translatePath(QString uri) {

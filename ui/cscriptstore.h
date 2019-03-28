@@ -75,6 +75,7 @@ public slots:
 	int slotEditItem(QVariant item);
 	int slotRemoveItem(QVariant item);
 	int slotRunItem(QVariant item);
+	int slotEngineReady();
 	QString slotActionToUi(QString szOri);
 	QString slotActionToXml(QString szOri);
 

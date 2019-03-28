@@ -19,6 +19,7 @@ ApplicationWindow {
 	signal sigEditSetting(variant info);
 
 	Component.onCompleted: {
+		invisScripts.slotEngineReady();
 		invisSettings.slotParser();
 	}
 

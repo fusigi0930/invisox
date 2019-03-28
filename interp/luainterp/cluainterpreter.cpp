@@ -22,7 +22,7 @@ extern "C" BOOL WINAPI DllMain(
 	switch (fdwReason)
 	{
 		case DLL_PROCESS_ATTACH:
-			_DMSG("dll attached");
+			_DMSG("%s dll attached", __FILE__);
 
 			break;
 		case DLL_THREAD_ATTACH:
@@ -30,7 +30,7 @@ extern "C" BOOL WINAPI DllMain(
 		case DLL_THREAD_DETACH:
 			break;
 		case DLL_PROCESS_DETACH:
-			_DMSG("dll deattached");
+			_DMSG("%s dll deattached", __FILE__);
 
 			break;
 	}
