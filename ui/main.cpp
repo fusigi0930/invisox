@@ -11,7 +11,7 @@
 
 #include "cossystem.h"
 
-#ifdef Q_OS_WIN
+#if 0
 #	include "cinterpenvstore_win.h"
 #	include <stdlib.h>
 #endif
@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 	qmlRegisterType<CSettingStore>("SettingStore", 1, 0, "SettingStore");
 	qmlRegisterType<COSSystem>("OSSystem", 1, 0, "OSSystem");
 
-#ifdef Q_OS_WIN
+#if 0
 	CInterpEnvStore envStore;
 	envStore.slotParser();
 #endif

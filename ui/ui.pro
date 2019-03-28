@@ -9,11 +9,6 @@ SOURCES += main.cpp \
 	csettingstore.cpp \
 	cossystem.cpp
 
-win32 {
-	SOURCES += cinterpenvstore_win.cpp
-}
-
-
 RESOURCES += qml.qrc
 
 
@@ -32,10 +27,6 @@ HEADERS += \
 	csettingstore.h \
 	cossystem.h
 
-win32 {
-	HEADERS += cinterpenvstore_win.h
-}
-
 CONFIG(debug, debug|release) {
 	DESTDIR = $$_PRO_FILE_PWD_/../out/debug
 	MOC_DIR = $$_PRO_FILE_PWD_/../out/obj/moc
@@ -49,6 +40,14 @@ CONFIG(debug, debug|release) {
 
 	INTERP_LIB = -L$$_PRO_FILE_PWD_/../out/release
 }
+
+GITVER = $$system("genver.bat")
+GITVER = $$replace(GITVER, "v", "")
+VERSION = $$GITVER
+QMAKE_TARGET_PRODUCT = "invisOX"
+QMAKE_TARGET_DESCRIPTION = "invisOX - ui interface"
+QMAKE_TARGET_COPYRIGHT = "Copyright(c) 2019 ChuYuan Chiang. All rights reserved"
+QMAKE_TARGET_COMPANY = "ChuYuan Chiang Personal."
 
 LIBS += $${INTERP_LIB}
 LIBS += -lluainterp
