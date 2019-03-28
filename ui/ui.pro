@@ -43,6 +43,10 @@ CONFIG(debug, debug|release) {
 
 GITVER = $$system("genver.bat")
 GITVER = $$replace(GITVER, "v", "")
+GITVER = $$replace(GITVER, "-", ".")
+GITVER = $$split(GITVER, .)
+GITVER = $$member(GITVER, 0).$$member(GITVER, 1).$$member(GITVER, 2).$$member(GITVER, 3)
+
 VERSION = $$GITVER
 QMAKE_TARGET_PRODUCT = "invisOX"
 QMAKE_TARGET_DESCRIPTION = "invisOX - ui interface"

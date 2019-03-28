@@ -94,6 +94,18 @@ win32 | win64 {
     lua_inst.commands = mingw32-make -C $$_PRO_FILE_PWD_/lua-5.3.2 mingw
 }
 
+GITVER = $$system("genver.bat")
+GITVER = $$replace(GITVER, "v", "")
+GITVER = $$replace(GITVER, "-", ".")
+GITVER = $$split(GITVER, .)
+GITVER = $$member(GITVER, 0).$$member(GITVER, 1).$$member(GITVER, 2).$$member(GITVER, 3)
+
+VERSION = $$GITVER
+CONFIG += skip_target_version_ext
+QMAKE_TARGET_PRODUCT = "invisOX"
+QMAKE_TARGET_DESCRIPTION = "invisOX - lua interpreter"
+QMAKE_TARGET_COPYRIGHT = "Copyright(c) 2019 ChuYuan Chiang. All rights reserved"
+QMAKE_TARGET_COMPANY = "ChuYuan Chiang Personal."
 
 lua_src.target = lua_src
 lua_inst.target = lua_inst
