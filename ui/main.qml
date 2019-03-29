@@ -13,7 +13,7 @@ ApplicationWindow {
 	height: Screen.height * 2/3
 	title: qsTr("invisOX")
 
-	objectName: "mainWindow"
+	objectName: "invisoxMainWindow"
 
 	signal sigEditItemToDialog(variant info);
 	signal sigEditSetting(variant info);
