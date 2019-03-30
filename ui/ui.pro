@@ -7,7 +7,8 @@ SOURCES += main.cpp \
 	cenvstore.cpp \
 	cscriptstore.cpp \
 	csettingstore.cpp \
-	cossystem.cpp
+	cossystem.cpp \
+    chookthread.cpp
 
 RESOURCES += qml.qrc
 
@@ -25,7 +26,8 @@ HEADERS += \
 	cenvstore.h \
 	cscriptstore.h \
 	csettingstore.h \
-	cossystem.h
+	cossystem.h \
+    chookthread.h
 
 CONFIG(debug, debug|release) {
 	DESTDIR = $$_PRO_FILE_PWD_/../out/debug

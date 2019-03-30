@@ -3,6 +3,7 @@
 #include <QFile>
 #include <opencv2/highgui/highgui_c.h>
 #include "debug.h"
+#include "invisox_common.h"
 
 #define TEST_CV_WIN "__CVWin__"
 

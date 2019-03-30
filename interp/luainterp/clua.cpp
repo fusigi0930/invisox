@@ -3,6 +3,7 @@
 #include <QFile>
 #include "debug.h"
 #include <QFileInfo>
+#include "invisox_common.h"
 
 CLua::CLua()
 {

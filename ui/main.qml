@@ -24,6 +24,7 @@ ApplicationWindow {
 	}
 
 	onClosing: {
+		invisScripts.slotEngineStop();
 		invisSettings.slotStore();
 		invisScripts.slotStore();
 	}

@@ -1,5 +1,6 @@
 #include "clua.h"
 #include "debug.h"
+#include "invisox_common.h"
 #include "crunluathread.h"
 #include <typeinfo>
 #include "copencv.h"

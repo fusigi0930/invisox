@@ -1,5 +1,6 @@
 #include "cenvstore.h"
 #include "debug.h"
+#include "invisox_common.h"
 
 CEnvStore::CEnvStore(QObject *parent) :
 	QObject(parent)

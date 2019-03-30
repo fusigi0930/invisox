@@ -2,6 +2,8 @@
 #include "cluainterpreter.h"
 #include "engine.h"
 #include "debug.h"
+#include "invisox_common.h"
+#include "chookthread.h"
 
 /*
  * <?xml version="1.0" encoding="utf-8"?>
@@ -139,7 +141,7 @@ CScriptStore::SScriptInfo& CScriptStore::SScriptInfo::operator=(const QVariant &
 CScriptStore::CScriptStore(QObject *parent) :
 	CEnvStore(parent)
 {
-
+	m_pHookThread = nullptr;
 }
 
 CScriptStore::~CScriptStore() {
@@ -572,6 +574,57 @@ int CScriptStore::slotRunItem(QVariant item) {
 
 int CScriptStore::slotEngineReady() {
 	::engStart();
+	if (nullptr != m_pHookThread) {
+		delete m_pHookThread;
+		m_pHookThread = nullptr;
+	}
+	m_pHookThread = new CHookThread(this);
+
+	if (m_pHookThread) {
+		m_pHookThread->start();
+	}
+	return 0;
+}
+
+int CScriptStore::slotEngineStop() {
+	::engEnd();
+	if (nullptr != m_pHookThread) {
+		m_pHookThread->quit();
+		m_pHookThread->wait();
+		delete m_pHookThread;
+		m_pHookThread = nullptr;
+	}
+	return 0;
+}
+
+int CScriptStore::slotTest() {
+	return 0;
+}
+
+void CScriptStore::processHookingSignal() {
+	if (!m_sharedMem.attach()) {
+		_DMSG("attach shared failed");
+		return;
+	}
+	while (1) {
+		_DMSG("lock share memory");
+		m_sharedMem.lock();
+		char *buffer = reinterpret_cast<char *>(m_sharedMem.data());
+		if (buffer) {
+			if (static_cast<char>(_INVISOX_EXIT_CODE_HOOING) == buffer[_INVISOX_SHARED_MEM_SIZE - 1]) {
+				_DMSG("exit process hooking loop");
+				m_sharedMem.unlock();
+				break;
+			}
+
+			unsigned long long *pKeyData = reinterpret_cast<unsigned long long *>(buffer);
+			_DMSG("hook key: 0x%x", pKeyData[0]);
+			_DMSG("hook multiple key: 0x%x", pKeyData[1]);
+		}
+		_DMSG("unlock shared memory");
+		m_sharedMem.unlock();
+	}
+	m_sharedMem.detach();
 }
 
 QString CScriptStore::translatePath(QString uri) {

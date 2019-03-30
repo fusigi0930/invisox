@@ -21,6 +21,4 @@
 #	define DMSG _DMSG
 #endif
 
-#define QSZ(e) e.toUtf8().data()
-
 #endif

@@ -1,5 +1,6 @@
 #include "crunluathread.h"
 #include "debug.h"
+#include "invisox_common.h"
 
 CRunLuaThread::CRunLuaThread(lua_State *L)
 {

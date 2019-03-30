@@ -1,6 +1,7 @@
 #include "cluainterpreter.h"
 
 #include "debug.h"
+#include "invisox_common.h"
 #include <iostream>
 #include <sstream>
 

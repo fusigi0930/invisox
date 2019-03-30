@@ -5,6 +5,7 @@
 #include <QQmlComponent>
 #include <QQuickView>
 #include "debug.h"
+#include "invisox_common.h"
 
 #include "cscriptstore.h"
 #include "csettingstore.h"

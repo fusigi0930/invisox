@@ -4,6 +4,8 @@
 #include <QFileInfo>
 #include <algorithm>
 
+#include "debug.h"
+#include "invisox_common.h"
 /*
  * <?xml version="1.0" encoding="utf-8"?>
  * <settings>
