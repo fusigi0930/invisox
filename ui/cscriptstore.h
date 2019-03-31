@@ -3,7 +3,6 @@
 #include "cenvstore.h"
 #include "cbaseinterp.h"
 #include <map>
-#include <QSharedMemory>
 #include <QThread>
 
 class CScriptStore : public CEnvStore
@@ -51,7 +50,6 @@ private:
 	QVariantMap m_currentItem;
 	std::map<QString, CScriptStore::SScriptInfo> m_mapScriptInfos;
 	std::map<QString, CBasedInterpreter *> m_mapRunningInterp;
-	QSharedMemory m_sharedMem;
 	QThread *m_pHookThread;
 
 	bool getItems();

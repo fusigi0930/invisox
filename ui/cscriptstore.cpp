@@ -573,7 +573,6 @@ int CScriptStore::slotRunItem(QVariant item) {
 }
 
 int CScriptStore::slotEngineReady() {
-	::engStart();
 	if (nullptr != m_pHookThread) {
 		delete m_pHookThread;
 		m_pHookThread = nullptr;
@@ -583,6 +582,8 @@ int CScriptStore::slotEngineReady() {
 	if (m_pHookThread) {
 		m_pHookThread->start();
 	}
+
+	::engStart();
 	return 0;
 }
 
@@ -602,29 +603,20 @@ int CScriptStore::slotTest() {
 }
 
 void CScriptStore::processHookingSignal() {
-	if (!m_sharedMem.attach()) {
-		_DMSG("attach shared failed");
-		return;
-	}
 	while (1) {
-		_DMSG("lock share memory");
-		m_sharedMem.lock();
-		char *buffer = reinterpret_cast<char *>(m_sharedMem.data());
-		if (buffer) {
-			if (static_cast<char>(_INVISOX_EXIT_CODE_HOOING) == buffer[_INVISOX_SHARED_MEM_SIZE - 1]) {
-				_DMSG("exit process hooking loop");
-				m_sharedMem.unlock();
-				break;
-			}
+		char buffer[_INVISOX_SHARED_MEM_SIZE] = {0};
+		_DMSG("waiting for hooking key event");
+		engReadSharedMemory(buffer, sizeof(buffer));
 
-			unsigned long long *pKeyData = reinterpret_cast<unsigned long long *>(buffer);
-			_DMSG("hook key: 0x%x", pKeyData[0]);
-			_DMSG("hook multiple key: 0x%x", pKeyData[1]);
+		unsigned long long *pKeyData = reinterpret_cast<unsigned long long *>(buffer);
+		_DMSG("hook key: 0x%x", pKeyData[0]);
+		_DMSG("hook multiple key: 0x%x", pKeyData[1]);
+		if (static_cast<char>(_INVISOX_EXIT_CODE_HOOING) == buffer[_INVISOX_SHARED_MEM_SIZE - 1]) {
+			_DMSG("exit from the infinite loop");
+			break;
 		}
-		_DMSG("unlock shared memory");
-		m_sharedMem.unlock();
 	}
-	m_sharedMem.detach();
+	_DMSG("exit the process hooking");
 }
 
 QString CScriptStore::translatePath(QString uri) {

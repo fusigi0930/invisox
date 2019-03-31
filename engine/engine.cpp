@@ -1,23 +1,26 @@
 #include "engine.h"
-#include "debug.h"
 #include "invisox_common.h"
-
-#ifdef Q_OS_WIN
 #include <windows.h>
-#include <QSharedMemory>
+#include <cstdio>
 
-static HINSTANCE g_hInst = nullptr;
-static HMODULE g_hLib = nullptr;
-static HHOOK g_hHookKey = nullptr;
-static QSharedMemory g_sharedMem;
+#define _DMSG(e,...) \
+{ \
+	char string[512] = {0}; \
+	sprintf(string, "[%s:%d] " e "\n", __FUNCTION__, __LINE__, ##__VA_ARGS__); \
+	OutputDebugStringA(string) ; \
+}
+
+__attribute__((section("invisox_shared"), shared)) HINSTANCE g_hInst = nullptr;
+__attribute__((section("invisox_shared"), shared)) HMODULE g_hLib = nullptr;
+__attribute__((section("invisox_shared"), shared)) HHOOK g_hHookKey = nullptr;
+__attribute__((section("invisox_shared"), shared)) HANDLE g_hSharedMem = nullptr;
+__attribute__((section("invisox_shared"), shared)) HANDLE g_hReadEvent = nullptr;
 
 typedef HHOOK (*fnHooking)(int, HOOKPROC, HINSTANCE, DWORD);
 typedef BOOL (*fnUnHooking)(HHOOK);
-typedef LRESULT (*fnCallNextHooking)(HHOOK, int, WPARAM, LPARAM);
 
 static fnHooking hooking = nullptr;
 static fnUnHooking unHooking = nullptr;
-static fnCallNextHooking callNextHooking = nullptr;
 
 extern "C" BOOL WINAPI DllMain(
   HANDLE hinstDLL,
@@ -34,10 +37,7 @@ extern "C" BOOL WINAPI DllMain(
 			if (g_hLib) {
 				hooking = reinterpret_cast<fnHooking>(GetProcAddress(g_hLib, "SetWindowsHookExW"));
 				unHooking = reinterpret_cast<fnUnHooking>(GetProcAddress(g_hLib, "UnhookWindowsHookEx"));
-				callNextHooking = reinterpret_cast<fnCallNextHooking>(GetProcAddress(g_hLib, "CallNextHookEx"));
 			}
-			g_sharedMem.setKey(_INVISOX_SHARED_MEM_NAME);
-			g_sharedMem.create(_INVISOX_SHARED_MEM_SIZE, QSharedMemory::ReadWrite);
 			break;
 		case DLL_THREAD_ATTACH:
 			break;
@@ -52,25 +52,33 @@ extern "C" BOOL WINAPI DllMain(
 				hooking = nullptr;
 				unHooking = nullptr;
 			}
+			if (g_hReadEvent) {
+				::CloseHandle(g_hReadEvent);
+				g_hReadEvent = nullptr;
+			}
+			if (g_hSharedMem) {
+				::CloseHandle(g_hSharedMem);
+				g_hSharedMem = nullptr;
 
+			}
 			break;
 	}
 	return true;
 }
 
 static LRESULT CALLBACK monitorKeyEventProc(int nCode, WPARAM wParam, LPARAM lParam) {
-	if (nullptr == callNextHooking) {
-		return callNextHooking(g_hHookKey, nCode, wParam, lParam);
-	}
+	_DMSG("enter hooking process");
 
 	if (wParam == VK_LSHIFT || wParam == VK_RSHIFT ||
 		wParam == VK_LCONTROL || wParam == VK_RCONTROL ||
-			wParam == VK_LMENU || wParam == VK_RMENU) {
+			wParam == VK_LMENU || wParam == VK_RMENU ||
+			wParam == VK_CONTROL || wParam == VK_MENU || wParam == VK_SHIFT) {
 
-		return callNextHooking(g_hHookKey, nCode, wParam, lParam);
+		_DMSG("unnecessary hooking keys");
+		return ::CallNextHookEx(g_hHookKey, nCode, wParam, lParam);
 	}
 
-	if (lParam & 0x8000000) {
+	if (lParam & 0x80000000) {
 		LPARAM lp = 0;
 		if (0 != ::GetAsyncKeyState(VK_LSHIFT) || 0 != ::GetAsyncKeyState(VK_RSHIFT)) {
 			lp |= _INVISOX_KF_SHFIT;
@@ -83,21 +91,25 @@ static LRESULT CALLBACK monitorKeyEventProc(int nCode, WPARAM wParam, LPARAM lPa
 		}
 
 		// send information to invisox ui
-		char *buffer = reinterpret_cast<char*>(g_sharedMem.data());
-		if (buffer) {
+		HANDLE hSharedMem = ::OpenFileMappingA(FILE_MAP_ALL_ACCESS, FALSE, _INVISOX_SHARED_MEM_NAME);
+		char *buffer = reinterpret_cast<char *>(::MapViewOfFile(hSharedMem, FILE_MAP_ALL_ACCESS, 0, 0, _INVISOX_SHARED_MEM_SIZE));
+		HANDLE hReadEvent = ::OpenEventA(EVENT_ALL_ACCESS, FALSE, _INVISOX_SHARED_EVENT_NAME);
+
+		if (buffer && g_hReadEvent) {
 			unsigned long long keyData[2];
 			keyData[0] = wParam;
 			keyData[1] = static_cast<unsigned long long>(lp);
 			memcpy(buffer, reinterpret_cast<char*>(keyData), sizeof(keyData));
 
-			g_sharedMem.unlock();
-			_DMSG("unlock shared memory");
-			g_sharedMem.lock();
-			_DMSG("lock shared memory");
+			_DMSG("trigger the write event");
+			::SetEvent(hReadEvent);
 		}
+		::CloseHandle(hReadEvent);
+		::CloseHandle(hSharedMem);
 	}
 
-	return callNextHooking(g_hHookKey, nCode, wParam, lParam);
+	_DMSG("exit hooking process");
+	return ::CallNextHookEx(g_hHookKey, nCode, wParam, lParam);
 }
 
 int engStart() {
@@ -109,8 +121,12 @@ int engStart() {
 	if (nullptr == g_hHookKey)
 		return -1;
 
-	_DMSG("lock shared memory");
-	g_sharedMem.lock();
+	_DMSG("create share memory");
+	g_hSharedMem = ::CreateFileMappingA(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE, 0, _INVISOX_SHARED_MEM_SIZE, _INVISOX_SHARED_MEM_NAME);
+	_DMSG("create global event");
+	g_hReadEvent = ::CreateEventA(nullptr, FALSE, FALSE, _INVISOX_SHARED_EVENT_NAME);
+
+	_DMSG("exit");
 	return 0;
 }
 
@@ -120,16 +136,47 @@ int engEnd() {
 		g_hHookKey = nullptr;
 	}
 
-	_DMSG("unlock shared memory");
-	char *buffer = reinterpret_cast<char*>(g_sharedMem.data());
-	if (buffer) {
+	char *buffer = reinterpret_cast<char *>(::MapViewOfFile(g_hSharedMem, FILE_MAP_ALL_ACCESS, 0, 0, _INVISOX_SHARED_MEM_SIZE));
+	if (buffer && g_hReadEvent) {
 		buffer[_INVISOX_SHARED_MEM_SIZE - 1] = static_cast<char>(_INVISOX_EXIT_CODE_HOOING);
+		_DMSG("trigger the write event for ready to exist");
+		::SetEvent(g_hReadEvent);
 	}
-	g_sharedMem.unlock();
+
+	_DMSG("exit");
 	return 0;
 }
 
-#endif
+int engReadSharedMemory(char *buffer, int nLeng) {
+	if (nullptr == buffer || 0 >= nLeng)
+		return -1;
+
+	HANDLE hReadEvent = ::OpenEventA(EVENT_ALL_ACCESS, FALSE, _INVISOX_SHARED_EVENT_NAME);
+	if (hReadEvent) {
+		_DMSG("get event and wait for event signal");
+		::WaitForSingleObject(hReadEvent, INFINITE);
+		_DMSG("wait for read event");
+		char *shareMem = reinterpret_cast<char *>(::MapViewOfFile(g_hSharedMem, FILE_MAP_ALL_ACCESS, 0, 0, _INVISOX_SHARED_MEM_SIZE));
+		_DMSG("start copy share memory");
+		memcpy(buffer, shareMem, (nLeng > _INVISOX_SHARED_MEM_SIZE ? _INVISOX_SHARED_MEM_SIZE : nLeng));
+		memset(shareMem, 0, _INVISOX_SHARED_MEM_SIZE);
+		::CloseHandle(hReadEvent);
+	}
+	return 0;
+}
+int engWriteSharedMemory(char *buffer, int nLeng) {
+	if (nullptr == buffer || 0 >= nLeng)
+		return -1;
+
+	HANDLE hReadEvent = ::OpenEventA(EVENT_ALL_ACCESS, FALSE, _INVISOX_SHARED_EVENT_NAME);
+	if (hReadEvent) {
+		char *shareMem = reinterpret_cast<char *>(::MapViewOfFile(g_hSharedMem, FILE_MAP_ALL_ACCESS, 0, 0, _INVISOX_SHARED_MEM_SIZE));
+		memcpy(shareMem, buffer, (nLeng > _INVISOX_SHARED_MEM_SIZE ? _INVISOX_SHARED_MEM_SIZE : nLeng));
+		::SetEvent(hReadEvent);
+		::CloseHandle(hReadEvent);
+	}
+	return 0;
+}
 
 CEngine::CEngine()
 {

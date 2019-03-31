@@ -4,7 +4,8 @@
 #define QSZ(e) e.toUtf8().data()
 
 #define _INVISOX_SHARED_MEM_NAME "invisoxSharedMem"
-#define _INVISOX_SHARED_MEM_SIZE 100
+#define _INVISOX_SHARED_EVENT_NAME "invisoxSharedEvent"
+#define _INVISOX_SHARED_MEM_SIZE 1024
 
 #define _INVISOX_EXIT_CODE_HOOING 0x93
 
