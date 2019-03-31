@@ -535,11 +535,8 @@ int CScriptStore::slotRemoveItem(QVariant item) {
 	return 0;
 }
 
-int CScriptStore::slotRunItem(QVariant item) {
-	CScriptStore::SScriptInfo info;
-	info=item;
-
-	std::map<QString, CScriptStore::SScriptInfo>::iterator pFind=m_mapScriptInfos.find(_CMD_TYPE_NETCMD == info.type ? "nc:"+info.action : info.action );
+int CScriptStore::runItem(QString action) {
+	std::map<QString, CScriptStore::SScriptInfo>::iterator pFind=m_mapScriptInfos.find(action);
 	if (m_mapScriptInfos.end() == pFind) {
 		_DMSG("the action is not exist!");
 		return -1;
@@ -559,17 +556,17 @@ int CScriptStore::slotRunItem(QVariant item) {
 	// do running thread actions
 	base->slotRun(translatePath(pFind->second.scriptFile));
 
-	switch (info.type) {
-		default:
-		case _CMD_TYPE_HOTKEY:
-			m_mapRunningInterp[info.action]=base;
-			break;
-		case _CMD_TYPE_NETCMD:
-			m_mapRunningInterp["nc:"+info.action]=base;
-			break;
-	}
+	m_mapRunningInterp[action]=base;
 
 	return 0;
+}
+
+int CScriptStore::slotRunItem(QVariant item) {
+	CScriptStore::SScriptInfo info;
+	info=item;
+	QString actionKey = (_CMD_TYPE_NETCMD == info.type ? "nc:"+info.action : info.action);
+
+	return runItem(actionKey);
 }
 
 int CScriptStore::slotEngineReady() {
@@ -602,6 +599,28 @@ int CScriptStore::slotTest() {
 	return 0;
 }
 
+static QString transKeyData(unsigned long long *keyData) {
+	if (nullptr == keyData) {
+		return "";
+	}
+
+	QString ret;
+	if (keyData[1] & _INVISOX_KF_CTRL) {
+		ret.append("ctrl");
+	}
+	if (keyData[1] & _INVISOX_KF_ALT) {
+		ret.isEmpty() ? ret.append("alt") : ret.append(",alt");
+	}
+	if (keyData[1] & _INVISOX_KF_SHIFT) {
+		ret.isEmpty() ? ret.append("shift") : ret.append(",shift");
+	}
+	QString keyNum;
+	keyNum.sprintf(",%d", keyData[0]);
+	ret.append(keyNum);
+
+	return ret;
+}
+
 void CScriptStore::processHookingSignal() {
 	while (1) {
 		char buffer[_INVISOX_SHARED_MEM_SIZE] = {0};
@@ -615,6 +634,9 @@ void CScriptStore::processHookingSignal() {
 			_DMSG("exit from the infinite loop");
 			break;
 		}
+		// process monitor keys detect
+		QString actionKey = transKeyData(pKeyData);
+		runItem(actionKey);
 	}
 	_DMSG("exit the process hooking");
 }

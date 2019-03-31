@@ -81,7 +81,7 @@ static LRESULT CALLBACK monitorKeyEventProc(int nCode, WPARAM wParam, LPARAM lPa
 	if (lParam & 0x80000000) {
 		LPARAM lp = 0;
 		if (0 != ::GetAsyncKeyState(VK_LSHIFT) || 0 != ::GetAsyncKeyState(VK_RSHIFT)) {
-			lp |= _INVISOX_KF_SHFIT;
+			lp |= _INVISOX_KF_SHIFT;
 		}
 		if (0 != ::GetAsyncKeyState(VK_LCONTROL) || 0 != ::GetAsyncKeyState(VK_RCONTROL)) {
 			lp |= _INVISOX_KF_CTRL;

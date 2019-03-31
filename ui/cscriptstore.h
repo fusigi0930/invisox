@@ -57,6 +57,8 @@ private:
 
 	bool writeItems();
 	bool writeItem(CScriptStore::SScriptInfo &info);
+
+	int runItem(QString action);
 	QString translatePath(QString uri);
 
 public:

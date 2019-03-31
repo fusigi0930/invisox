@@ -9,7 +9,7 @@
 
 #define _INVISOX_EXIT_CODE_HOOING 0x93
 
-#define _INVISOX_KF_SHFIT		0x01
+#define _INVISOX_KF_SHIFT		0x01
 #define _INVISOX_KF_ALT			0x02
 #define _INVISOX_KF_CTRL			0x04
 
