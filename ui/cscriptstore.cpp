@@ -554,10 +554,14 @@ int CScriptStore::runItem(QString action) {
 	}
 
 	// do running thread actions
-	base->slotRun(translatePath(pFind->second.scriptFile));
+	connect(base, SIGNAL(sigThreadFinished(QString)), this, SLOT(slotInterpThreadFinished(QString)));
+	connect(base, SIGNAL(sigThreadError(QString)), this, SLOT(slotInterpThreadError(QString)));
 
-	m_mapRunningInterp[action]=base;
-
+	std::map<QString, CBasedInterpreter *>::iterator pRunFile = m_mapRunningInterp.find(translatePath(pFind->second.scriptFile));
+	if (m_mapRunningInterp.end() == pRunFile) {
+		m_mapRunningInterp[translatePath(pFind->second.scriptFile)]=base;
+		base->slotRun(translatePath(pFind->second.scriptFile));
+	}
 	return 0;
 }
 
@@ -647,3 +651,20 @@ QString CScriptStore::translatePath(QString uri) {
 	return uri.mid(8).replace('/', '\\');
 }
 
+void CScriptStore::slotInterpThreadFinished(QString szFile) {
+	std::map<QString, CBasedInterpreter *>::iterator pFind = m_mapRunningInterp.find(szFile);
+	if (m_mapRunningInterp.end() != pFind) {
+		_DMSG("file: %s run finished", QSZ(szFile));
+		delete pFind->second;
+		m_mapRunningInterp.erase(pFind);
+	}
+}
+
+void CScriptStore::slotInterpThreadError(QString szFile) {
+	std::map<QString, CBasedInterpreter *>::iterator pFind = m_mapRunningInterp.find(szFile);
+	if (m_mapRunningInterp.end() != pFind) {
+		_DMSG("file: %s run error", QSZ(szFile));
+		delete pFind->second;
+		m_mapRunningInterp.erase(pFind);
+	}
+}

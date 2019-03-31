@@ -75,6 +75,10 @@ signals:
 	void sigAddListItem();
 
 public slots:
+	void slotInterpThreadFinished(QString szFile);
+	void slotInterpThreadError(QString szFile);
+
+public slots:
 	bool slotStore();
 	bool slotParser();
 	int slotAddItem(QVariant item);
