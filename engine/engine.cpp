@@ -67,14 +67,14 @@ extern "C" BOOL WINAPI DllMain(
 }
 
 static LRESULT CALLBACK monitorKeyEventProc(int nCode, WPARAM wParam, LPARAM lParam) {
-	_DMSG("enter hooking process");
+	//_DMSG("enter hooking process");
 
 	if (wParam == VK_LSHIFT || wParam == VK_RSHIFT ||
 		wParam == VK_LCONTROL || wParam == VK_RCONTROL ||
 			wParam == VK_LMENU || wParam == VK_RMENU ||
 			wParam == VK_CONTROL || wParam == VK_MENU || wParam == VK_SHIFT) {
 
-		_DMSG("unnecessary hooking keys");
+		//_DMSG("unnecessary hooking keys");
 		return ::CallNextHookEx(g_hHookKey, nCode, wParam, lParam);
 	}
 
@@ -101,14 +101,14 @@ static LRESULT CALLBACK monitorKeyEventProc(int nCode, WPARAM wParam, LPARAM lPa
 			keyData[1] = static_cast<unsigned long long>(lp);
 			memcpy(buffer, reinterpret_cast<char*>(keyData), sizeof(keyData));
 
-			_DMSG("trigger the write event");
+			//_DMSG("trigger the write event");
 			::SetEvent(hReadEvent);
 		}
 		::CloseHandle(hReadEvent);
 		::CloseHandle(hSharedMem);
 	}
 
-	_DMSG("exit hooking process");
+	//_DMSG("exit hooking process");
 	return ::CallNextHookEx(g_hHookKey, nCode, wParam, lParam);
 }
 
