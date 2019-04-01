@@ -55,6 +55,7 @@ int CLuaInterpreter::run(QString szFile) {
 	}
 
 	mLua.runFile(szFile);
+	_DMSG("%s", QSZ(mLua.getResult()));
 
 	return 0;
 }

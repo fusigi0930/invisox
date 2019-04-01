@@ -73,6 +73,7 @@ protected:
 
 signals:
 	void sigAddListItem();
+	void sigUpdateItemStatus(QVariant updateItem);
 
 public slots:
 	void slotInterpThreadFinished(QString szFile);

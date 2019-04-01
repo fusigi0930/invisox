@@ -38,6 +38,7 @@ public:
 
 	void runString(QString szScript);
 	void runFile(QString szFile);
+	QString getResult();
 
 	// override original Lua function
 	static int luaPrint(lua_State* L);

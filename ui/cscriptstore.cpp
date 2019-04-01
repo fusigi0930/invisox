@@ -48,6 +48,7 @@
 #define LIST_DESC                               "desc"
 #define LIST_FILE                               "script"
 #define LIST_INTERPRETER                        "lang"
+#define LIST_STATUS                             "status"
 
 #define LIST_ORI_KEY                            "ori_key"
 
@@ -535,6 +536,33 @@ int CScriptStore::slotRemoveItem(QVariant item) {
 	return 0;
 }
 
+static QString transToUiAction(QString action) {
+	QStringList element = action.split(",");
+	int key = element[element.size()-1].toInt();
+	QString uiAction;
+	for (int i=0; i<element.size()-1; i++) {
+		uiAction.isEmpty() ? uiAction.append(element[i]) : uiAction.append("+"+element[i]);
+	}
+	// keyvalue
+	if (key >= VK_F1 && key <= VK_F12) {
+		QString keyvalue;
+		keyvalue.sprintf("+F%d", key - VK_F1);
+		uiAction.append(keyvalue);
+	}
+	else if (key >= '0' && key <= '9') {
+		QString keyvalue;
+		keyvalue.sprintf("+%c", key);
+		uiAction.append(keyvalue);
+	}
+	else if (key >= 'A' && key <= 'Z') {
+		QString keyvalue;
+		keyvalue.sprintf("+%c", key);
+		uiAction.append(keyvalue);
+	}
+
+	return uiAction;
+}
+
 int CScriptStore::runItem(QString action) {
 	std::map<QString, CScriptStore::SScriptInfo>::iterator pFind=m_mapScriptInfos.find(action);
 	if (m_mapScriptInfos.end() == pFind) {
@@ -560,6 +588,11 @@ int CScriptStore::runItem(QString action) {
 	std::map<QString, CBasedInterpreter *>::iterator pRunFile = m_mapRunningInterp.find(translatePath(pFind->second.scriptFile));
 	if (m_mapRunningInterp.end() == pRunFile) {
 		m_mapRunningInterp[translatePath(pFind->second.scriptFile)]=base;
+		QVariantMap item;
+
+		item.insert(LIST_ACTION, transToUiAction(action));
+		item.insert(LIST_STATUS, "run");
+		emit sigUpdateItemStatus(QVariant::fromValue(item));
 		base->slotRun(translatePath(pFind->second.scriptFile));
 	}
 	return 0;
@@ -574,6 +607,7 @@ int CScriptStore::slotRunItem(QVariant item) {
 }
 
 int CScriptStore::slotEngineReady() {
+	::engStart();
 	if (nullptr != m_pHookThread) {
 		delete m_pHookThread;
 		m_pHookThread = nullptr;
@@ -583,8 +617,6 @@ int CScriptStore::slotEngineReady() {
 	if (m_pHookThread) {
 		m_pHookThread->start();
 	}
-
-	::engStart();
 	return 0;
 }
 

@@ -40,6 +40,12 @@ void CLua::setResult(QString szResult) {
 	m_szPrintOut = szResult;
 }
 
+QString CLua::getResult() {
+	QString ret = m_szPrintOut;
+	m_szPrintOut.clear();
+	return ret;
+}
+
 void CLua::adjustLuaPath() {
 	// compare path environment
 	lua_getglobal(mLua, "package");

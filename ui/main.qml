@@ -79,6 +79,7 @@ ApplicationWindow {
 		id: invisScripts
 		xmlName: invisSettings.xml_script
 		onSigAddListItem: listScriptItems.addItem();
+		onSigUpdateItemStatus: listScriptItems.updateItemStatus(updateItem)
 
 	}
 
@@ -210,7 +211,7 @@ ApplicationWindow {
 				anchors.fill: parent
 				acceptedButtons: Qt.RightButton
 				onClicked: {
-					if (mouse.button == Qt.RightButton) {
+					if (mouse.button === Qt.RightButton) {
 						console.log("mouse x: "+ mouse.x + " y: " + mouse.y + " row: " + listScript.rowAt(mouse.x, mouse.y))
 						listScript.selection.clear();
 						listScript.selection.select(listScript.rowAt(mouse.x, mouse.y));
@@ -239,6 +240,21 @@ ApplicationWindow {
 				function editItem(editInfo) {
 					if (0 === invisScripts.slotEditItem(editInfo))
 						listScriptItems.set(listScript.n_scriptListRightClickPos, editInfo);
+				}
+
+				function updateItemStatus(statusInfo) {
+					console.log("item count: " + listScriptItems.count);
+					console.log(statusInfo.actions);
+					console.log(statusInfo.status);
+					for (var i=0; i<count; i++) {
+						var obj = get(i);
+						//if (obj.actions === statusInfo.actions) {
+						//	console.log("find item: "+ obj.tostring());
+						//	obj.status = statusInfo.status;
+						//	set(i, obj);
+						//	break;
+						//}
+					}
 				}
 
 			}
