@@ -301,12 +301,12 @@ Dialog {
 			}
 
 			if(!m_isEdit) {
-				info = {"actions":actionCmd,"desc":editDesc.text,"script":editFile.text,"lang":interpreterCmd};
+				info = {"status": "", "actions":actionCmd,"desc":editDesc.text,"script":editFile.text,"lang":interpreterCmd};
 				console.log("testtest");
 				sigUpdateInfo(info);
 			}
 			else {
-				info = {"actions":actionCmd,"desc":editDesc.text,"script":editFile.text,"lang":interpreterCmd,"ori_key":scriptDialog.szOriKey};
+				info = {"status": "", "actions":actionCmd,"desc":editDesc.text,"script":editFile.text,"lang":interpreterCmd,"ori_key":scriptDialog.szOriKey};
 				console.log("update list");
 				sigUpdateEditInfo(info);
 			}

@@ -244,16 +244,14 @@ ApplicationWindow {
 
 				function updateItemStatus(statusInfo) {
 					console.log("item count: " + listScriptItems.count);
-					console.log(statusInfo.actions);
-					console.log(statusInfo.status);
 					for (var i=0; i<count; i++) {
-						var obj = get(i);
-						//if (obj.actions === statusInfo.actions) {
-						//	console.log("find item: "+ obj.tostring());
-						//	obj.status = statusInfo.status;
-						//	set(i, obj);
-						//	break;
-						//}
+						var obj = listScriptItems.get(i);
+						if (obj.actions === statusInfo.actions) {
+							var info = {"status": statusInfo.status, "actions":obj.actions, "desc":obj.desc + "ooo", "script":obj.script, "lang":obj.lang};
+							console.log("update item: ", i, " status: ", info.status);
+							listScriptItems.set(i, info);
+							break;
+						}
 					}
 				}
 

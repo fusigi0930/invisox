@@ -241,6 +241,7 @@ bool CScriptStore::getItems() {
 					szTemp.replace("\r", "");
 					m_currentItem.insert(LIST_DESC, szTemp);
 					m_currentItem.insert(LIST_FILE, info.scriptFile);
+					m_currentItem.insert(LIST_STATUS, "");
 
 					switch (info.interp) {
 						default:
