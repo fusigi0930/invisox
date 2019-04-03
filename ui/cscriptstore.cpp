@@ -688,6 +688,11 @@ void CScriptStore::slotInterpThreadFinished(QString szFile) {
 	std::map<QString, CBasedInterpreter *>::iterator pFind = m_mapRunningInterp.find(szFile);
 	if (m_mapRunningInterp.end() != pFind) {
 		_DMSG("file: %s run finished", QSZ(szFile));
+		QVariantMap item;
+
+		item.insert(LIST_FILE, szFile);
+		item.insert(LIST_STATUS, "done");
+		emit sigUpdateItemStatus(QVariant::fromValue(item));
 		delete pFind->second;
 		m_mapRunningInterp.erase(pFind);
 	}
