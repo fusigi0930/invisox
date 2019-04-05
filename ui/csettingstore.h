@@ -9,6 +9,7 @@ class CSettingStore : public CEnvStore
 {
 	Q_OBJECT
 	Q_PROPERTY(QString xml_script READ slotGetScriptFile NOTIFY sigChangedScriptFile)
+	Q_PROPERTY(QString xml_stopKey READ slotGetStopKey NOTIFY sigChangedStopKey)
 
 public:
 	CSettingStore();
@@ -51,11 +52,13 @@ protected:
 
 signals:
 	void sigChangedScriptFile();
+	void sigChangedStopKey();
 
 public slots:
 	bool slotStore();
 	bool slotParser();
 	QString slotGetScriptFile();
+	QString slotGetStopKey();
 	void slotSetSettingInfo(QVariant info);
 	QVariant slotGetSettings();
 	bool slotRemovePlugin(QVariant info);

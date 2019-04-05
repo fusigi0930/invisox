@@ -119,3 +119,11 @@ void CBasedInterpreter::slotPause() {
 void CBasedInterpreter::slotResume() {
 	m_thread.resume();
 }
+
+void CBasedInterpreter::setAction(QString action) {
+	m_szAction = action;
+}
+
+QString CBasedInterpreter::getAction() {
+	return m_szAction;
+}

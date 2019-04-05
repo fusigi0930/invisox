@@ -57,6 +57,7 @@ protected:
 	typedef QMap<QString, QFuture<int> > TInterpThreadMap;
 	TInterpThreadMap m_mapThread;
 	QString m_szFile;
+	QString m_szAction;
 	CBasedRunThread m_thread;
 
 	static int runThread(CBasedInterpreter *interp, QString szFile);
@@ -75,6 +76,9 @@ public slots:
 	virtual void slotPause();
 	virtual void slotResume();
 
+public:
+	virtual void setAction(QString action);
+	virtual QString getAction();
 };
 
 #endif

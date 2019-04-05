@@ -210,6 +210,7 @@ bool CSettingStore::parser() {
 	}
 
 	sigChangedScriptFile();
+	emit sigChangedStopKey();
 	closeParserWrite();
 	return true;
 }
@@ -298,9 +299,11 @@ void CSettingStore::slotSetSettingInfo(QVariant info) {
 	for (QVariantMap::iterator pMap=infoMap.begin(); pMap != infoMap.end(); pMap++) {
 		if (0 == pMap.key().compare(XML_GENERIC_SCRIPT)) {
 			m_settingInfo.szFile=pMap.value().toString();
+			emit sigChangedScriptFile();
 		}
 		else if (0 == pMap.key().compare(XML_GENERIC_STOP)) {
 			m_settingInfo.szStopKey=CScriptStore::actionToXml(pMap.value().toString());
+			emit sigChangedStopKey();
 		}
 		else if (0 == pMap.key().compare(XML_GENERIC_METHOD)) {
 			m_settingInfo.actionMethod=static_cast<CSettingStore::EActionMethod>(
@@ -349,4 +352,8 @@ bool CSettingStore::slotInsertPlugin(QVariant info) {
 	qDebug() << "YA: " << info.toString();
 	m_settingInfo.listPlugins.push_back(info.toString());
 	return true;
+}
+
+QString CSettingStore::slotGetStopKey() {
+	return m_settingInfo.szStopKey;
 }

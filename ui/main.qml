@@ -80,7 +80,7 @@ ApplicationWindow {
 		xmlName: invisSettings.xml_script
 		onSigAddListItem: listScriptItems.addItem();
 		onSigUpdateItemStatus: listScriptItems.updateItemStatus(updateItem)
-
+		stopKey: invisSettings.xml_stopKey
 	}
 
 	SettingStore {
@@ -247,7 +247,7 @@ ApplicationWindow {
 					for (var i=0; i<count; i++) {
 						var obj = listScriptItems.get(i);
 						if (obj.actions === statusInfo.actions) {
-							var info = {"status": statusInfo.status, "actions":obj.actions, "desc":obj.desc + "ooo", "script":obj.script, "lang":obj.lang};
+							var info = {"status": statusInfo.status, "actions":obj.actions, "desc":obj.desc, "script":obj.script, "lang":obj.lang};
 							console.log("update item: ", i, " status: ", info.status);
 							listScriptItems.set(i, info);
 							break;

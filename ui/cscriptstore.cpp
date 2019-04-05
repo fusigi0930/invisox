@@ -594,6 +594,7 @@ int CScriptStore::runItem(QString action) {
 		item.insert(LIST_ACTION, transToUiAction(action));
 		item.insert(LIST_STATUS, "run");
 		emit sigUpdateItemStatus(QVariant::fromValue(item));
+		base->setAction(action);
 		base->slotRun(translatePath(pFind->second.scriptFile));
 	}
 	return 0;
@@ -673,7 +674,13 @@ void CScriptStore::processHookingSignal() {
 		}
 		// process monitor keys detect
 		QString actionKey = transKeyData(pKeyData);
-		runItem(actionKey);
+		_DMSG("stop key: %s, current key: %s", QSZ(m_szStopKey), QSZ(actionKey));
+		if (0 == m_szStopKey.compare(actionKey)) {
+
+		}
+		else {
+			runItem(actionKey);
+		}
 	}
 	_DMSG("exit the process hooking");
 }
@@ -690,7 +697,7 @@ void CScriptStore::slotInterpThreadFinished(QString szFile) {
 		_DMSG("file: %s run finished", QSZ(szFile));
 		QVariantMap item;
 
-		item.insert(LIST_FILE, szFile);
+		item.insert(LIST_ACTION, transToUiAction(pFind->second->getAction()));
 		item.insert(LIST_STATUS, "done");
 		emit sigUpdateItemStatus(QVariant::fromValue(item));
 		delete pFind->second;
@@ -702,7 +709,20 @@ void CScriptStore::slotInterpThreadError(QString szFile) {
 	std::map<QString, CBasedInterpreter *>::iterator pFind = m_mapRunningInterp.find(szFile);
 	if (m_mapRunningInterp.end() != pFind) {
 		_DMSG("file: %s run error", QSZ(szFile));
+		QVariantMap item;
+
+		item.insert(LIST_ACTION, transToUiAction(pFind->second->getAction()));
+		item.insert(LIST_STATUS, "error");
+		emit sigUpdateItemStatus(QVariant::fromValue(item));
 		delete pFind->second;
 		m_mapRunningInterp.erase(pFind);
 	}
+}
+
+void CScriptStore::slotSetStopKey(QString szKey) {
+	m_szStopKey = szKey;
+}
+
+QString CScriptStore::slotGetStopKey() {
+	return m_szStopKey;
 }

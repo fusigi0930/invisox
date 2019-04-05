@@ -9,6 +9,7 @@ class CScriptStore : public CEnvStore
 {
 	Q_OBJECT
 	Q_PROPERTY(QVariant item READ getCurItem NOTIFY sigAddListItem)
+	Q_PROPERTY(QString stopKey READ slotGetStopKey() WRITE slotSetStopKey)
 
 public:
 	CScriptStore(QObject *parent = 0);
@@ -51,6 +52,7 @@ private:
 	std::map<QString, CScriptStore::SScriptInfo> m_mapScriptInfos;
 	std::map<QString, CBasedInterpreter *> m_mapRunningInterp;
 	QThread *m_pHookThread;
+	QString m_szStopKey;
 
 	bool getItems();
 	bool getItem(CScriptStore::SScriptInfo &info);
@@ -89,6 +91,8 @@ public slots:
 	int slotEngineReady();
 	int slotEngineStop();
 	int slotTest();
+	void slotSetStopKey(QString szKey);
+	QString slotGetStopKey();
 
 	QString slotActionToUi(QString szOri);
 	QString slotActionToXml(QString szOri);
