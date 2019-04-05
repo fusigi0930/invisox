@@ -79,6 +79,7 @@ public slots:
 public:
 	virtual void setAction(QString action);
 	virtual QString getAction();
+	virtual void Stop();
 };
 
 #endif

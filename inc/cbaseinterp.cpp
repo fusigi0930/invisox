@@ -50,11 +50,13 @@ void CBasedRunThread::resume() {
 void CBasedRunThread::run() {
 #ifdef Q_OS_WIN
 	m_hThread = ::GetCurrentThread();
+	_DMSG("thread id: 0x%x", m_hThread);
 	if (m_interp) {
 		CBasedInterpreter::runThread(m_interp, m_interp->m_szFile);
 	}
-#endif
+#else
 	m_hThread=NULL;
+#endif
 }
 
 ////////////////////////////////////////////////
@@ -126,4 +128,10 @@ void CBasedInterpreter::setAction(QString action) {
 
 QString CBasedInterpreter::getAction() {
 	return m_szAction;
+}
+
+void CBasedInterpreter::Stop() {
+	if (m_thread.isRunning()) {
+		m_thread.stop();
+	}
 }

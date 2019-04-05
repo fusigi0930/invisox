@@ -600,6 +600,22 @@ int CScriptStore::runItem(QString action) {
 	return 0;
 }
 
+int CScriptStore::forceStopAll() {
+	_DMSG("force stop all running script threads");
+	std::map<QString, CBasedInterpreter *>::iterator pRunFile;
+	for (pRunFile = m_mapRunningInterp.begin(); pRunFile != m_mapRunningInterp.end(); pRunFile++) {
+		QVariantMap item;
+		pRunFile->second->slotPause();
+		item.insert(LIST_ACTION, transToUiAction(pRunFile->second->getAction()));
+		item.insert(LIST_STATUS, "force stop");
+		emit sigUpdateItemStatus(QVariant::fromValue(item));
+		pRunFile->second->Stop();
+		delete pRunFile->second;
+	}
+	m_mapRunningInterp.clear();
+	return 0;
+}
+
 int CScriptStore::slotRunItem(QVariant item) {
 	CScriptStore::SScriptInfo info;
 	info=item;
@@ -653,6 +669,16 @@ static QString transKeyData(unsigned long long *keyData) {
 		ret.isEmpty() ? ret.append("shift") : ret.append(",shift");
 	}
 	QString keyNum;
+	switch (keyData[0]) {
+	default:
+		break;
+	case VK_OEM_PLUS:
+		keyData[0] = '=';
+		break;
+	case VK_OEM_MINUS:
+		keyData[0] = '-';
+		break;
+	}
 	keyNum.sprintf(",%d", keyData[0]);
 	ret.append(keyNum);
 
@@ -676,7 +702,7 @@ void CScriptStore::processHookingSignal() {
 		QString actionKey = transKeyData(pKeyData);
 		_DMSG("stop key: %s, current key: %s", QSZ(m_szStopKey), QSZ(actionKey));
 		if (0 == m_szStopKey.compare(actionKey)) {
-
+			forceStopAll();
 		}
 		else {
 			runItem(actionKey);

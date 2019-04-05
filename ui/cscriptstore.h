@@ -61,6 +61,7 @@ private:
 	bool writeItem(CScriptStore::SScriptInfo &info);
 
 	int runItem(QString action);
+	int forceStopAll();
 	QString translatePath(QString uri);
 
 public:
