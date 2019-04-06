@@ -13,6 +13,7 @@
 __attribute__((section("invisox_shared"), shared)) HINSTANCE g_hInst = nullptr;
 __attribute__((section("invisox_shared"), shared)) HMODULE g_hLib = nullptr;
 __attribute__((section("invisox_shared"), shared)) HHOOK g_hHookKey = nullptr;
+__attribute__((section("invisox_shared"), shared)) HHOOK g_hHookMouse = nullptr;
 __attribute__((section("invisox_shared"), shared)) HANDLE g_hSharedMem = nullptr;
 __attribute__((section("invisox_shared"), shared)) HANDLE g_hReadEvent = nullptr;
 
@@ -112,6 +113,27 @@ static LRESULT CALLBACK monitorKeyEventProc(int nCode, WPARAM wParam, LPARAM lPa
 	return ::CallNextHookEx(g_hHookKey, nCode, wParam, lParam);
 }
 
+static LRESULT CALLBACK monitorMouseEventProc(int nCode, WPARAM wParam, LPARAM lParam) {
+	MOUSEHOOKSTRUCT *pMouse = reinterpret_cast<MOUSEHOOKSTRUCT*>(lParam);
+	HANDLE hSharedMem = ::OpenFileMappingA(FILE_MAP_ALL_ACCESS, FALSE, _INVISOX_SHARED_MEM_NAME);
+	char *buffer = reinterpret_cast<char *>(::MapViewOfFile(hSharedMem, FILE_MAP_ALL_ACCESS, 0, 0, _INVISOX_SHARED_MEM_SIZE));
+	HANDLE hReadEvent = ::OpenEventA(EVENT_ALL_ACCESS, FALSE, _INVISOX_SHARED_EVENT_NAME);
+
+	if (buffer && g_hReadEvent) {
+		unsigned long long keyData[3];
+		keyData[0] = wParam;
+		keyData[1] = static_cast<unsigned long long>(pMouse->pt.x);
+		keyData[2] = static_cast<unsigned long long>(pMouse->pt.y);
+		memcpy(buffer + _INVISOX_SHARED_MEM_MOUES_INDEX, reinterpret_cast<char*>(keyData), sizeof(keyData));
+
+		::SetEvent(hReadEvent);
+		::CloseHandle(hReadEvent);
+		::CloseHandle(hSharedMem);
+	}
+
+	return ::CallNextHookEx(g_hHookMouse, nCode, wParam, lParam);
+}
+
 int engStart() {
 	if (hooking != nullptr && g_hInst != nullptr) {
 		_DMSG("start hooking");
@@ -134,6 +156,39 @@ int engEnd() {
 	if (unHooking != nullptr && g_hHookKey != nullptr) {
 		unHooking(g_hHookKey);
 		g_hHookKey = nullptr;
+	}
+
+	char *buffer = reinterpret_cast<char *>(::MapViewOfFile(g_hSharedMem, FILE_MAP_ALL_ACCESS, 0, 0, _INVISOX_SHARED_MEM_SIZE));
+	if (buffer && g_hReadEvent) {
+		buffer[_INVISOX_SHARED_MEM_SIZE - 1] = static_cast<char>(_INVISOX_EXIT_CODE_HOOING);
+		_DMSG("trigger the write event for ready to exist");
+		::SetEvent(g_hReadEvent);
+	}
+
+	_DMSG("exit");
+	return 0;
+}
+
+int recStart() {
+	if (hooking != nullptr && g_hInst != nullptr) {
+		_DMSG("start hooking");
+		g_hHookKey = hooking(WH_KEYBOARD, monitorKeyEventProc, g_hInst, 0);
+		g_hHookMouse = hooking(WH_MOUSE, monitorMouseEventProc, g_hInst, 0);
+	}
+
+	if (nullptr == g_hHookKey || nullptr == g_hHookMouse)
+		return -1;
+
+	_DMSG("exit");
+	return 0;
+}
+
+int recEnd() {
+	if (unHooking != nullptr && g_hHookKey != nullptr && g_hHookMouse != nullptr) {
+		unHooking(g_hHookKey);
+		g_hHookKey = nullptr;
+		unHooking(g_hHookMouse);
+		g_hHookMouse = nullptr;
 	}
 
 	char *buffer = reinterpret_cast<char *>(::MapViewOfFile(g_hSharedMem, FILE_MAP_ALL_ACCESS, 0, 0, _INVISOX_SHARED_MEM_SIZE));

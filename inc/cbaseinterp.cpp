@@ -17,7 +17,8 @@ CBasedRunThread::CBasedRunThread(CBasedInterpreter *p) {
 }
 
 CBasedRunThread::~CBasedRunThread() {
-	stop();
+	if (isRunning())
+		stop();
 }
 
 void CBasedRunThread::stop() {

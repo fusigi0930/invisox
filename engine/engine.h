@@ -8,6 +8,9 @@ ENGINESHARED_EXPORT int engEnd();
 ENGINESHARED_EXPORT int engReadSharedMemory(char *buffer, int nLeng);
 ENGINESHARED_EXPORT int engWriteSharedMemory(char *buffer, int nLeng);
 
+ENGINESHARED_EXPORT int recStart();
+ENGINESHARED_EXPORT int recEnd();
+
 class ENGINESHARED_EXPORT CEngine
 {
 
