@@ -7,10 +7,28 @@
 #include <QFuture>
 #include <QFutureWatcher>
 #include <QThread>
+#include <vector>
 
 #ifdef Q_OS_WIN
 #include <windows.h>
 #endif
+
+struct SEvent {
+	int type;
+	union UNValue {
+		struct SKey {
+			int key;
+			int multiple;
+			int keyAction;
+		} key;
+		struct SMouse {
+			int x;
+			int y;
+			int mouseEvent;
+		} mouse;
+	};
+	unsigned long long timeTick;
+};
 
 class CBasedInterpreter;
 
@@ -80,6 +98,7 @@ public:
 	virtual void setAction(QString action);
 	virtual QString getAction();
 	virtual void Stop();
+	virtual void genScript(std::vector<SEvent> &events);
 };
 
 #endif

@@ -52,6 +52,9 @@ void CBasedRunThread::run() {
 #ifdef Q_OS_WIN
 	m_hThread = ::GetCurrentThread();
 	_DMSG("thread id: 0x%x", m_hThread);
+	if (INVALID_HANDLE_VALUE == m_hThread) {
+		m_hThread = nullptr;
+	}
 	if (m_interp) {
 		CBasedInterpreter::runThread(m_interp, m_interp->m_szFile);
 	}
@@ -135,4 +138,8 @@ void CBasedInterpreter::Stop() {
 	if (m_thread.isRunning()) {
 		m_thread.stop();
 	}
+}
+
+void CBasedInterpreter::genScript(std::vector<SEvent> &events) {
+
 }

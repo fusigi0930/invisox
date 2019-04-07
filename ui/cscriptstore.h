@@ -69,6 +69,7 @@ public:
 	static QString actionToUi(QString szOri);
 	static QString actionToXml(QString szOri);
 	void processHookingSignal();
+	void processRecordingSignal();
 
 protected:
 	virtual bool parser();
@@ -91,6 +92,8 @@ public slots:
 	int slotRunItem(QVariant item);
 	int slotEngineReady();
 	int slotEngineStop();
+	int slotEngineRecReady();
+	int slotEngineRecStop();
 	int slotTest();
 	void slotSetStopKey(QString szKey);
 	QString slotGetStopKey();

@@ -649,6 +649,23 @@ int CScriptStore::slotEngineStop() {
 	return 0;
 }
 
+int CScriptStore::slotEngineRecReady() {
+	::engEnd();
+	if (nullptr != m_pHookThread) {
+		m_pHookThread->quit();
+		m_pHookThread->wait();
+		delete m_pHookThread;
+		m_pHookThread = nullptr;
+	}
+
+	::recStart();
+	return 0;
+}
+
+int CScriptStore::slotEngineRecStop() {
+	return 0;
+}
+
 int CScriptStore::slotTest() {
 	return 0;
 }
@@ -709,6 +726,10 @@ void CScriptStore::processHookingSignal() {
 		}
 	}
 	_DMSG("exit the process hooking");
+}
+
+void CScriptStore::processRecordingSignal() {
+
 }
 
 QString CScriptStore::translatePath(QString uri) {
