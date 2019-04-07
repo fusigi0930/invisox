@@ -140,6 +140,6 @@ void CBasedInterpreter::Stop() {
 	}
 }
 
-void CBasedInterpreter::genScript(std::vector<SEvent> &events) {
+QString CBasedInterpreter::genScript(std::vector<SEvent> &events) {
 
 }

@@ -64,3 +64,9 @@ QString CLuaInterpreter::getStdout() {
 
 	return "";
 }
+
+QString CLuaInterpreter::genScript(std::vector<SEvent> &events) {
+	for(std::vector<SEvent>::iterator pEvent = events.begin(); pEvent != events.end(); pEvent++) {
+
+	}
+}

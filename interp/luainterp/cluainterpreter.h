@@ -25,6 +25,7 @@ protected:
 
 public:
 	QString getStdout();
+	virtual QString genScript(std::vector<SEvent> &events);
 
 };
 

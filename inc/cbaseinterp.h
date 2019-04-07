@@ -98,7 +98,7 @@ public:
 	virtual void setAction(QString action);
 	virtual QString getAction();
 	virtual void Stop();
-	virtual void genScript(std::vector<SEvent> &events);
+	virtual QString genScript(std::vector<SEvent> &events);
 };
 
 #endif
