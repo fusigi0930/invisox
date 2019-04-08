@@ -50,6 +50,9 @@ public:
 	void resume();
 	void stop();
 
+private slots:
+	void slotBasedFinished();
+
 protected:
 	virtual void run();
 };
@@ -87,7 +90,6 @@ protected:
 signals:
 	void sigThreadFinished(QString szFile);
 	void sigThreadError(QString szFile);
-
 	
 public slots:
 	virtual int slotRun(QString szFile);

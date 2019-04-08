@@ -61,6 +61,11 @@ void CBasedRunThread::run() {
 #else
 	m_hThread=NULL;
 #endif
+	connect(this, SIGNAL(finished()), this, SLOT(slotBasedFinished()));
+}
+
+void CBasedRunThread::slotBasedFinished() {
+	m_hThread = NULL;
 }
 
 ////////////////////////////////////////////////
@@ -141,5 +146,6 @@ void CBasedInterpreter::Stop() {
 }
 
 QString CBasedInterpreter::genScript(std::vector<SEvent> &events) {
+	Q_UNUSED(events);
 	return "";
 }
