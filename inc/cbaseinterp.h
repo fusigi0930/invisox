@@ -17,7 +17,7 @@ struct SEvent {
 	int type;
 	union UNValue {
 		struct SKey {
-			int key;
+			int keyvalue;
 			int multiple;
 			int keyAction;
 		} key;
@@ -26,7 +26,7 @@ struct SEvent {
 			int y;
 			int mouseEvent;
 		} mouse;
-	};
+	} o;
 	unsigned long long timeTick;
 };
 

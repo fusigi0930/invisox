@@ -4,6 +4,7 @@
 #include "debug.h"
 #include "invisox_common.h"
 #include "chookthread.h"
+#include <QDateTime>
 
 /*
  * <?xml version="1.0" encoding="utf-8"?>
@@ -729,7 +730,42 @@ void CScriptStore::processHookingSignal() {
 }
 
 void CScriptStore::processRecordingSignal() {
+	while (1) {
+		char buffer[_INVISOX_SHARED_MEM_SIZE] = {0};
+		_DMSG("waiting for hooking key event");
+		engReadSharedMemory(buffer, sizeof(buffer));
 
+		// is exist?
+		if (static_cast<char>(_INVISOX_EXIT_CODE_HOOING) == buffer[_INVISOX_SHARED_MEM_SIZE - 1]) {
+			_DMSG("exit from the infinite loop");
+			break;
+		}
+
+		// get key data
+		unsigned long long *pData = reinterpret_cast<unsigned long long *>(buffer + _INVISOX_SHARED_MEM_KEY_INDEX);
+		if (0 != pData[0]) {
+			SEvent event;
+			event.type = _INVISOX_EVENT_TYPE_KEY;
+			event.o.key.keyvalue = static_cast<int>(pData[0]);
+			event.o.key.multiple = static_cast<int>(pData[1]);
+			event.o.key.keyAction = static_cast<int>(pData[2]);
+			event.timeTick = static_cast<unsigned long long>(QDateTime::currentMSecsSinceEpoch());
+			m_vtEvents.push_back(event);
+		}
+
+		// get mouse data
+		pData = reinterpret_cast<unsigned long long *>(buffer + _INVISOX_SHARED_MEM_MOUES_INDEX);
+		if (0 != pData[0]) {
+			SEvent event;
+			event.type = _INVISOX_EVENT_TYPE_MOUSE;
+			event.o.mouse.mouseEvent = static_cast<int>(pData[0]);
+			event.o.mouse.x = static_cast<int>(pData[1]);
+			event.o.mouse.y = static_cast<int>(pData[2]);
+			event.timeTick = static_cast<unsigned long long>(QDateTime::currentMSecsSinceEpoch());
+			m_vtEvents.push_back(event);
+		}
+	}
+	_DMSG("exit the process hooking");
 }
 
 QString CScriptStore::translatePath(QString uri) {

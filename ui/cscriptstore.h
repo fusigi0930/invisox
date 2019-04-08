@@ -63,6 +63,7 @@ private:
 	int runItem(QString action);
 	int forceStopAll();
 	QString translatePath(QString uri);
+	std::vector<SEvent> m_vtEvents;
 
 public:
 	QVariant getCurItem();

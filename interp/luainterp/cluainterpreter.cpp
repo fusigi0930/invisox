@@ -70,8 +70,16 @@ QString CLuaInterpreter::genScript(std::vector<SEvent> &events) {
 		return CBasedInterpreter::genScript(events);
 	}
 	QString szScript;
+	unsigned long long nLastTick = 0;
+	unsigned long long nDuration = 0;
 	for(std::vector<SEvent>::iterator pEvent = events.begin(); pEvent != events.end(); pEvent++) {
-
+		if (0 == nLastTick) {
+			nLastTick = pEvent->timeTick;
+		}
+		else {
+			nDuration = pEvent->timeTick - nLastTick;
+			nLastTick = pEvent->timeTick;
+		}
 	}
 	return szScript;
 }
