@@ -14,6 +14,8 @@ class LUAINTERPSHARED_EXPORT CLuaInterpreter : public CBasedInterpreter
 private:
 	CLua mLua;
 
+	int genScriptKey(SEvent &event1, SEvent &event2, QString &script);
+	int genScriptMouse(SEvent &event1, SEvent &event2, QString &script);
 public:
 	CLuaInterpreter();
 	virtual ~CLuaInterpreter();
