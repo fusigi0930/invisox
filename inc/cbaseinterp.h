@@ -8,6 +8,7 @@
 #include <QFutureWatcher>
 #include <QThread>
 #include <vector>
+#include "invisox_common.h"
 
 #ifdef Q_OS_WIN
 #include <windows.h>
@@ -28,6 +29,34 @@ struct SEvent {
 		} mouse;
 	} o;
 	unsigned long long timeTick;
+
+	bool operator==(const SEvent &event) {
+		if (timeTick == event.timeTick && type == event.type && 0 == memcmp(&o, &event.o, sizeof(o))) {
+			return true;
+		}
+		return false;
+	}
+
+	bool operator<=(const SEvent &event) {
+		if (type == event.type && 0 == memcmp(&o, &event.o, sizeof(o) - sizeof(int)) && o.key.keyAction != event.o.key.keyAction) {
+			return true;
+		}
+		return false;
+	}
+
+	bool operator<(const SEvent &event) {
+		if (type == event.type && 0 != memcmp(&o, &event.o, sizeof(o))) {
+			return true;
+		}
+		return false;
+	}
+
+	bool operator!=(const SEvent &event) {
+		if (type != event.type) {
+			return true;
+		}
+		return false;
+	}
 };
 
 class CBasedInterpreter;

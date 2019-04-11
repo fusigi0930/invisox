@@ -365,7 +365,7 @@ int CLuaInterpreter::genScriptKey(SEvent &event1, SEvent &event2, QString &scrip
 	unsigned long long nDuration = event2.timeTick - event1.timeTick;
 	// last action
 	QString szAppend;
-	if (event1.timeTick == event2.timeTick) {
+	if (event1 == event2) {
 		switch (event1.o.key.keyAction) {
 			case _INVISOX_EVENT_ACTION_KEYDOWN:
 				szAppend.sprintf("send_event(CONST_EVENT_KEY, %s, CONST_EVENT_ACTION_CLICK, %d)",
@@ -379,100 +379,28 @@ int CLuaInterpreter::genScriptKey(SEvent &event1, SEvent &event2, QString &scrip
 		script.append("\r\n").append(szAppend);
 		return 1;
 	}
-	else if (event1.type == event2.type){
-		if (event1.o.key.keyvalue == event2.o.key.keyvalue) {
-			switch(event1.o.key.keyAction) {
-				case _INVISOX_EVENT_ACTION_KEYDOWN:
-				if (_INVISOX_EVENT_ACTION_KEYUP == event2.o.key.keyAction) {
-						if (_INVISOX_DEFAULT_EVENT_DURATION < nDuration) {
-							szAppend.sprintf("send_event(CONST_EVENT_KEY, %s, CONST_EVENT_ACTION_KEYDOWN, %d)",
-											 QSZ(g_szMappingKey[event1.o.key.keyvalue]), _INVISOX_DEFAULT_EVENT_DURATION);
-							script.append("\r\n").append(szAppend);
-
-							szAppend.sprintf("wait(%d)", nDuration - (2 * _INVISOX_DEFAULT_EVENT_DURATION));
-							script.append("\r\n").append(szAppend);
-
-							szAppend.sprintf("send_event(CONST_EVENT_KEY, %s, CONST_EVENT_ACTION_KEYUP, %d)",
-											 QSZ(g_szMappingKey[event2.o.key.keyvalue]), _INVISOX_DEFAULT_EVENT_DURATION);
-							script.append("\r\n").append(szAppend);
-						}
-						else {
-							szAppend.sprintf("send_event(CONST_EVENT_KEY, %s, CONST_EVENT_ACTION_CLICK, %d)",
-											 QSZ(g_szMappingKey[event2.o.key.keyvalue]), nDuration);
-							script.append("\r\n").append(szAppend);
-						}
-						return 0;
-					}
-					if (_INVISOX_DEFAULT_EVENT_DURATION < nDuration) {
-						szAppend.sprintf("send_event(CONST_EVENT_KEY, %s, CONST_EVENT_ACTION_KEYDOWN, %d)",
-										 QSZ(g_szMappingKey[event1.o.key.keyvalue]), _INVISOX_DEFAULT_EVENT_DURATION);
-						script.append("\r\n").append(szAppend);
-						szAppend.sprintf("wait(%d)", nDuration - (2 * _INVISOX_DEFAULT_EVENT_DURATION));
-					}
-					else {
-						szAppend.sprintf("send_event(CONST_EVENT_KEY, %s, CONST_EVENT_ACTION_KEYDOWN, %d)",
-										 QSZ(g_szMappingKey[event1.o.key.keyvalue]), nDuration);
-					}
-					break;
-				case _INVISOX_EVENT_ACTION_KEYUP:
-					if (_INVISOX_DEFAULT_EVENT_DURATION < nDuration) {
-						szAppend.sprintf("send_event(CONST_EVENT_KEY, %s, CONST_EVENT_ACTION_KEYUP, %d)",
-										 QSZ(g_szMappingKey[event1.o.key.keyvalue]), _INVISOX_DEFAULT_EVENT_DURATION);
-						script.append("\r\n").append(szAppend);
-						szAppend.sprintf("wait(%d)", nDuration - (2 * _INVISOX_DEFAULT_EVENT_DURATION));
-					}
-					else {
-						szAppend.sprintf("send_event(CONST_EVENT_KEY, %s, CONST_EVENT_ACTION_KEYUP, %d)",
-										 QSZ(g_szMappingKey[event1.o.key.keyvalue]), nDuration);
-					}
-					break;
-			}
-			script.append("\r\n").append(szAppend);
-			return 1;
-		}
-		else if (event1.o.key.keyvalue != event2.o.key.keyvalue) {
-			switch(event1.o.key.keyAction) {
-				case _INVISOX_EVENT_ACTION_KEYDOWN:
-					if (_INVISOX_DEFAULT_EVENT_DURATION < nDuration) {
-						szAppend.sprintf("send_event(CONST_EVENT_KEY, %s, CONST_EVENT_ACTION_KEYDOWN, %d)",
-										 QSZ(g_szMappingKey[event1.o.key.keyvalue]), _INVISOX_DEFAULT_EVENT_DURATION);
-						script.append("\r\n").append(szAppend);
-						szAppend.sprintf("wait(%d)", nDuration - (2 * _INVISOX_DEFAULT_EVENT_DURATION));
-					}
-					else {
-						szAppend.sprintf("send_event(CONST_EVENT_KEY, %s, CONST_EVENT_ACTION_KEYDOWN, %d)",
-										 QSZ(g_szMappingKey[event1.o.key.keyvalue]), nDuration);
-					}
-					break;
-				case _INVISOX_EVENT_ACTION_KEYUP:
-					if (_INVISOX_DEFAULT_EVENT_DURATION < nDuration) {
-						szAppend.sprintf("send_event(CONST_EVENT_KEY, %s, CONST_EVENT_ACTION_KEYUP, %d)",
-										 QSZ(g_szMappingKey[event1.o.key.keyvalue]), _INVISOX_DEFAULT_EVENT_DURATION);
-						script.append("\r\n").append(szAppend);
-						szAppend.sprintf("wait(%d)", nDuration - (2 * _INVISOX_DEFAULT_EVENT_DURATION));
-					}
-					else {
-						szAppend.sprintf("send_event(CONST_EVENT_KEY, %s, CONST_EVENT_ACTION_KEYUP, %d)",
-										 QSZ(g_szMappingKey[event1.o.key.keyvalue]), nDuration);
-					}
-					break;
-			}
-			script.append("\r\n").append(szAppend);
-			return 1;
-		}
-	}
-	else {
+	// event1 <= event2 is only keyaction is different
+	// event1 < event2 is keyvalue and others are different
+	// event1 != event2 is type and others are different
+	else if (event1 <= event2 || event1 < event2 || event1 != event2){
 		switch(event1.o.key.keyAction) {
 			case _INVISOX_EVENT_ACTION_KEYDOWN:
 				if (_INVISOX_DEFAULT_EVENT_DURATION < nDuration) {
-					szAppend.sprintf("send_event(CONST_EVENT_KEY, %s, CONST_EVENT_ACTION_KEYDOWN, %d)",
-									 QSZ(g_szMappingKey[event1.o.key.keyvalue]), _INVISOX_DEFAULT_EVENT_DURATION);
-					script.append("\r\n").append(szAppend);
-					szAppend.sprintf("wait(%d)", nDuration - (2 * _INVISOX_DEFAULT_EVENT_DURATION));
+						szAppend.sprintf("send_event(CONST_EVENT_KEY, %s, CONST_EVENT_ACTION_KEYDOWN, %d)",
+										 QSZ(g_szMappingKey[event1.o.key.keyvalue]), _INVISOX_DEFAULT_EVENT_DURATION);
+						script.append("\r\n").append(szAppend);
+
+						szAppend.sprintf("wait(%d)", nDuration - (2 * _INVISOX_DEFAULT_EVENT_DURATION));
+						script.append("\r\n").append(szAppend);
+
+						szAppend.sprintf("send_event(CONST_EVENT_KEY, %s, CONST_EVENT_ACTION_KEYUP, %d)",
+										 QSZ(g_szMappingKey[event2.o.key.keyvalue]), _INVISOX_DEFAULT_EVENT_DURATION);
+						script.append("\r\n").append(szAppend);
 				}
 				else {
-					szAppend.sprintf("send_event(CONST_EVENT_KEY, %s, CONST_EVENT_ACTION_KEYDOWN, %d)",
-									 QSZ(g_szMappingKey[event1.o.key.keyvalue]), nDuration);
+						szAppend.sprintf("send_event(CONST_EVENT_KEY, %s, CONST_EVENT_ACTION_CLICK, %d)",
+										 QSZ(g_szMappingKey[event2.o.key.keyvalue]), nDuration);
+						script.append("\r\n").append(szAppend);
 				}
 				break;
 			case _INVISOX_EVENT_ACTION_KEYUP:
@@ -491,6 +419,7 @@ int CLuaInterpreter::genScriptKey(SEvent &event1, SEvent &event2, QString &scrip
 		script.append("\r\n").append(szAppend);
 		return 1;
 	}
+
 	return 0;
 }
 
