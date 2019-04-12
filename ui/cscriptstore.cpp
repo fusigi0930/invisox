@@ -697,7 +697,7 @@ static QString transKeyData(unsigned long long *keyData) {
 		keyData[0] = '-';
 		break;
 	}
-	keyNum.sprintf(",%d", keyData[0]);
+	keyNum.sprintf(",%d", static_cast<int>(keyData[0]));
 	ret.append(keyNum);
 
 	return ret;
@@ -710,8 +710,8 @@ void CScriptStore::processHookingSignal() {
 		engReadSharedMemory(buffer, sizeof(buffer));
 
 		unsigned long long *pKeyData = reinterpret_cast<unsigned long long *>(buffer);
-		_DMSG("hook key: 0x%x", pKeyData[0]);
-		_DMSG("hook multiple key: 0x%x", pKeyData[1]);
+		_DMSG("hook key: 0x%x", static_cast<int>(pKeyData[0]));
+		_DMSG("hook multiple key: 0x%x", static_cast<int>(pKeyData[1]));
 		if (static_cast<char>(_INVISOX_EXIT_CODE_HOOING) == buffer[_INVISOX_SHARED_MEM_SIZE - 1]) {
 			_DMSG("exit from the infinite loop");
 			break;

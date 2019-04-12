@@ -55,6 +55,11 @@ CSettingStore::SSettingInfo& CSettingStore::SSettingInfo::operator=(const CSetti
 }
 
 CSettingStore::SSettingInfo& CSettingStore::SSettingInfo::operator=(const QVariant &info) {
+	QVariantMap mapInfo = info.toMap();
+	szStopKey = mapInfo[XML_GENERIC_STOP].toString();
+	szFile = mapInfo[XML_GENERIC_SCRIPT].toString();
+	actionMethod = static_cast<CSettingStore::EActionMethod>(mapInfo[XML_GENERIC_METHOD].toInt());
+	listPlugins.clear();
 	return *this;
 }
 
@@ -196,10 +201,11 @@ bool CSettingStore::parser() {
 						initGenericDefault();
 						continue;
 					}
-					if (!getAddition())
+					if (!getAddition()) {
 						m_settingInfo.listPlugins.clear();
 						initAdditionDefault();
 						continue;
+					}
 				}
 				break;
 		}

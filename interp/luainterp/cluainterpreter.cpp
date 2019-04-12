@@ -7,6 +7,10 @@
 
 #ifdef Q_OS_WIN
 #include <windows.h>
+#ifdef NULL
+#undef NULL
+#define NULL nullptr
+#endif
 
 static std::streambuf *g_oriStdout=NULL;
 static std::streambuf *g_oriStderr=NULL;
@@ -20,6 +24,9 @@ extern "C" BOOL WINAPI DllMain(
   LPVOID lpvReserved
 )
 {
+	Q_UNUSED(hinstDLL);
+	Q_UNUSED(fdwReason);
+	Q_UNUSED(lpvReserved);
 	switch (fdwReason)
 	{
 		case DLL_PROCESS_ATTACH:
@@ -380,8 +387,6 @@ int CLuaInterpreter::genScriptKey(SEvent &event1, SEvent &event2, QString &scrip
 		return 1;
 	}
 	// event1 <= event2 is only keyaction is different
-	// event1 < event2 is keyvalue and others are different
-	// event1 != event2 is type and others are different
 	else if (event1 <= event2){
 		switch(event1.o.key.keyAction) {
 			case _INVISOX_EVENT_ACTION_KEYDOWN:
@@ -455,13 +460,168 @@ int CLuaInterpreter::genScriptKey(SEvent &event1, SEvent &event2, QString &scrip
 		return 1;
 	}
 
-	return 0;
+	return 1;
 }
 
 int CLuaInterpreter::genScriptMouse(SEvent &event1, SEvent &event2, QString &script) {
+	unsigned long long nDuration = event2.timeTick - event1.timeTick;
 	// last action
-	if (event1.timeTick == event2.timeTick) {
+	QString szAppend;
+	if (event1 == event2) {
+		switch(event1.o.mouse.mouseEvent) {
+			case _INVISOX_EVENT_ACTION_LBDOWN:
+				szAppend.sprintf("send_event(CONST_EVENT_MOUSE, %d, %d, CONST_EVENT_ACTION_CLICK, %d)",
+								 event1.o.mouse.x, event1.o.mouse.y, _INVISOX_DEFAULT_EVENT_DURATION);
+				break;
+			case _INVISOX_EVENT_ACTION_RBDOWN:
+				szAppend.sprintf("send_event(CONST_EVENT_MOUSE, %d, %d, CONST_EVENT_ACTION_RCLICK, %d)",
+								 event1.o.mouse.x, event1.o.mouse.y, _INVISOX_DEFAULT_EVENT_DURATION);
+				break;
+			case _INVISOX_EVENT_ACTION_LBUP:
+				szAppend.sprintf("send_event(CONST_EVENT_MOUSE, %d, %d, CONST_EVENT_ACTION_UP, %d)",
+								 event1.o.mouse.x, event1.o.mouse.y, _INVISOX_DEFAULT_EVENT_DURATION);
+				break;
+			case _INVISOX_EVENT_ACTION_RBUP:
+				szAppend.sprintf("send_event(CONST_EVENT_MOUSE, %d, %d, CONST_EVENT_ACTION_RUP, %d)",
+								 event1.o.mouse.x, event1.o.mouse.y, _INVISOX_DEFAULT_EVENT_DURATION);
+				break;
+			case _INVISOX_EVENT_ACTION_MOUSEMOVE:
+				szAppend.sprintf("send_event(CONST_EVENT_MOUSE, %d, %d, CONST_EVENT_ACTION_MOVE, %d)",
+								 event1.o.mouse.x, event1.o.mouse.y, _INVISOX_DEFAULT_EVENT_DURATION);
+				break;
+		}
+		script.append("\r\n").append(szAppend);
+		return 1;
+	}
+	// event1 <= event2 is only mouseEvent is different
+	else if (event1 <= event2 || event1 < event2 || event1 != event2) {
+		switch(event1.o.mouse.mouseEvent) {
+			case _INVISOX_EVENT_ACTION_LBDOWN:
+				if (_INVISOX_EVENT_ACTION_LBUP == event2.o.mouse.mouseEvent) {
+					if (_INVISOX_DEFAULT_EVENT_DURATION >= nDuration) {
+						szAppend.sprintf("send_event(CONST_EVENT_MOUSE, %d, %d, CONST_EVENT_ACTION_CLICK, %d)",
+										 event1.o.mouse.x, event1.o.mouse.y, nDuration);
+						script.append("\r\n").append(szAppend);
+						return 0;
+					}
+					else {
+						szAppend.sprintf("send_event(CONST_EVENT_MOUSE, %d, %d, CONST_EVENT_ACTION_DOWN, %d)",
+										 event1.o.mouse.x, event1.o.mouse.y, _INVISOX_DEFAULT_EVENT_DURATION);
+						script.append("\r\n").append(szAppend);
+
+						szAppend.sprintf("wait(%d)", nDuration - (2 * _INVISOX_DEFAULT_EVENT_DURATION));
+						script.append("\r\n").append(szAppend);
+
+						szAppend.sprintf("send_event(CONST_EVENT_MOUSE, %d, %d, CONST_EVENT_ACTION_UP, %d)",
+										 event2.o.mouse.x, event2.o.mouse.y, _INVISOX_DEFAULT_EVENT_DURATION);
+						script.append("\r\n").append(szAppend);
+
+						return 0;
+					}
+				}
+				else {
+					if (_INVISOX_DEFAULT_EVENT_DURATION >= nDuration) {
+						szAppend.sprintf("send_event(CONST_EVENT_MOUSE, %d, %d, CONST_EVENT_ACTION_DOWN, %d)",
+										 event1.o.mouse.x, event1.o.mouse.y, nDuration);
+					}
+					else {
+						szAppend.sprintf("send_event(CONST_EVENT_MOUSE, %d, %d, CONST_EVENT_ACTION_DOWN, %d)",
+										 event1.o.mouse.x, event1.o.mouse.y, _INVISOX_DEFAULT_EVENT_DURATION);
+						script.append("\r\n").append(szAppend);
+
+						szAppend.sprintf("wait(%d)", nDuration - (2 * _INVISOX_DEFAULT_EVENT_DURATION));
+					}
+				}
+				break;
+			case _INVISOX_EVENT_ACTION_RBDOWN:
+				if (_INVISOX_EVENT_ACTION_RBUP == event2.o.mouse.mouseEvent) {
+					if (_INVISOX_DEFAULT_EVENT_DURATION >= nDuration) {
+						szAppend.sprintf("send_event(CONST_EVENT_MOUSE, %d, %d, CONST_EVENT_ACTION_RCLICK, %d)",
+										 event1.o.mouse.x, event1.o.mouse.y, nDuration);
+						script.append("\r\n").append(szAppend);
+						return 0;
+					}
+					else {
+						szAppend.sprintf("send_event(CONST_EVENT_MOUSE, %d, %d, CONST_EVENT_ACTION_RDOWN, %d)",
+										 event1.o.mouse.x, event1.o.mouse.y, _INVISOX_DEFAULT_EVENT_DURATION);
+						script.append("\r\n").append(szAppend);
+
+						szAppend.sprintf("wait(%d)", nDuration - (2 * _INVISOX_DEFAULT_EVENT_DURATION));
+						script.append("\r\n").append(szAppend);
+
+						szAppend.sprintf("send_event(CONST_EVENT_MOUSE, %d, %d, CONST_EVENT_ACTION_RUP, %d)",
+										 event2.o.mouse.x, event2.o.mouse.y, _INVISOX_DEFAULT_EVENT_DURATION);
+						script.append("\r\n").append(szAppend);
+
+						return 0;
+					}
+				}
+				else {
+					if (_INVISOX_DEFAULT_EVENT_DURATION >= nDuration) {
+						szAppend.sprintf("send_event(CONST_EVENT_MOUSE, %d, %d, CONST_EVENT_ACTION_RDOWN, %d)",
+										 event1.o.mouse.x, event1.o.mouse.y, nDuration);
+					}
+					else {
+						szAppend.sprintf("send_event(CONST_EVENT_MOUSE, %d, %d, CONST_EVENT_ACTION_RDOWN, %d)",
+										 event1.o.mouse.x, event1.o.mouse.y, _INVISOX_DEFAULT_EVENT_DURATION);
+						script.append("\r\n").append(szAppend);
+
+						szAppend.sprintf("wait(%d)", nDuration - (2 * _INVISOX_DEFAULT_EVENT_DURATION));
+					}
+				}
+				break;
+			case _INVISOX_EVENT_ACTION_LBUP:
+				if (_INVISOX_DEFAULT_EVENT_DURATION >= nDuration) {
+					szAppend.sprintf("send_event(CONST_EVENT_MOUSE, %d, %d, CONST_EVENT_ACTION_UP, %d)",
+									 event1.o.mouse.x, event1.o.mouse.y, nDuration);
+				}
+				else {
+					szAppend.sprintf("send_event(CONST_EVENT_MOUSE, %d, %d, CONST_EVENT_ACTION_UP, %d)",
+									 event1.o.mouse.x, event1.o.mouse.y, _INVISOX_DEFAULT_EVENT_DURATION);
+					script.append("\r\n").append(szAppend);
+
+					szAppend.sprintf("wait(%d)", nDuration - (2 * _INVISOX_DEFAULT_EVENT_DURATION));
+				}
+				break;
+			case _INVISOX_EVENT_ACTION_RBUP:
+				if (_INVISOX_DEFAULT_EVENT_DURATION >= nDuration) {
+					szAppend.sprintf("send_event(CONST_EVENT_MOUSE, %d, %d, CONST_EVENT_ACTION_RUP, %d)",
+									 event1.o.mouse.x, event1.o.mouse.y, nDuration);
+				}
+				else {
+					szAppend.sprintf("send_event(CONST_EVENT_MOUSE, %d, %d, CONST_EVENT_ACTION_RUP, %d)",
+									 event1.o.mouse.x, event1.o.mouse.y, _INVISOX_DEFAULT_EVENT_DURATION);
+					script.append("\r\n").append(szAppend);
+
+					szAppend.sprintf("wait(%d)", nDuration - (2 * _INVISOX_DEFAULT_EVENT_DURATION));
+				}
+				break;
+			case _INVISOX_EVENT_ACTION_MOUSEMOVE:
+				if (_INVISOX_DEFAULT_EVENT_DURATION >= nDuration) {
+					szAppend.sprintf("send_event(CONST_EVENT_MOUSE, %d, %d, CONST_EVENT_ACTION_MOVE, %d)",
+									 event1.o.mouse.x, event1.o.mouse.y, nDuration);
+				}
+				else {
+					szAppend.sprintf("send_event(CONST_EVENT_MOUSE, %d, %d, CONST_EVENT_ACTION_MOVE, %d)",
+									 event1.o.mouse.x, event1.o.mouse.y, _INVISOX_DEFAULT_EVENT_DURATION);
+					script.append("\r\n").append(szAppend);
+
+					szAppend.sprintf("wait(%d)", nDuration - (2 * _INVISOX_DEFAULT_EVENT_DURATION));
+				}
+				break;
+		}
+		script.append("\r\n").append(szAppend);
+		return 1;
+	}
+#if 0
+	// event1 < event2 is x,y different
+	else if (event1 < event2) {
 
 	}
-	return 0;
+	// event1 != event2 is type and others are different
+	else if (event1 != event2) {
+
+	}
+#endif
+	return 1;
 }
