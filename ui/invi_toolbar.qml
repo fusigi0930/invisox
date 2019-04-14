@@ -11,6 +11,7 @@ ToolBar {
 	signal sigClickRun()
 	signal sigClickStop()
 	signal sigClickSettings(var text)
+	signal sigClickRec(var type)
 	signal sigClickTest()
 
 	RowLayout {
@@ -61,6 +62,33 @@ ToolBar {
 			iconSource: "/image/res/png/setting.png"
 			tooltip: qsTr("settings")
 			onSigClicked: rootBar.sigClickSettings(buttonText)
+		}
+
+		InviToolButton {
+			width: 48
+			height: 40
+			buttonText: qsTr("record")
+			labelText: qsTr("record")
+			iconSource: "/image/res/png/recording.png"
+			tooltip: qsTr("record")
+			onSigClicked: {
+				if (iconSource == "qrc:/image/res/png/recording.png") {
+					buttonText=qsTr("stop record");
+					labelText=qsTr("stop record");
+					tooltip=qsTr("stop record");
+					iconSource="/image/res/png/stop_rec.png"
+					rootBar.sigClickRec("record")
+					console.log("change mode to stop rec");
+				}
+				else {
+					buttonText=qsTr("record");
+					labelText=qsTr("record");
+					tooltip=qsTr("record");
+					iconSource="/image/res/png/recording.png";
+					rootBar.sigClickRec("stop-record")
+					console.log("change mode to record");
+				}
+			}
 		}
 
 		InviToolButton {

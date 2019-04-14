@@ -4,6 +4,7 @@
 #include "debug.h"
 #include "invisox_common.h"
 #include "chookthread.h"
+#include "crecordthread.h"
 #include <QDateTime>
 
 /*
@@ -660,10 +661,33 @@ int CScriptStore::slotEngineRecReady() {
 	}
 
 	::recStart();
+	m_vtEvents.clear();
+	m_pHookThread = new CRecordThread(this);
+	if (m_pHookThread) {
+		m_pHookThread->start();
+	}
 	return 0;
 }
 
 int CScriptStore::slotEngineRecStop() {
+	::recEnd();
+	if (nullptr != m_pHookThread) {
+		m_pHookThread->quit();
+		m_pHookThread->wait();
+		delete m_pHookThread;
+		m_pHookThread = nullptr;
+	}
+
+	// gen script
+	CBasedInterpreter *pInterp = new CLuaInterpreter();
+	QString szScript;
+	if (pInterp) {
+		szScript = pInterp->genScript(m_vtEvents);
+		delete pInterp;
+		qDebug() << szScript;
+	}
+
+	::engStart();
 	return 0;
 }
 

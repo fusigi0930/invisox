@@ -413,7 +413,7 @@ int CLuaInterpreter::genScriptKey(SEvent &event1, SEvent &event2, QString &scrip
 					szAppend.sprintf("send_event(CONST_EVENT_KEY, %s, CONST_EVENT_ACTION_KEYUP, %d)",
 									 QSZ(g_szMappingKey[event1.o.key.keyvalue]), _INVISOX_DEFAULT_EVENT_DURATION);
 					script.append("\r\n").append(szAppend);
-					szAppend.sprintf("wait(%d)", nDuration - (2 * _INVISOX_DEFAULT_EVENT_DURATION));
+					szAppend.sprintf("wait(%d)", nDuration - (_INVISOX_DEFAULT_EVENT_DURATION));
 				}
 				else {
 					szAppend.sprintf("send_event(CONST_EVENT_KEY, %s, CONST_EVENT_ACTION_KEYUP, %d)",
@@ -434,7 +434,7 @@ int CLuaInterpreter::genScriptKey(SEvent &event1, SEvent &event2, QString &scrip
 										 QSZ(g_szMappingKey[event1.o.key.keyvalue]), _INVISOX_DEFAULT_EVENT_DURATION);
 						script.append("\r\n").append(szAppend);
 
-						szAppend.sprintf("wait(%d)", nDuration - (2 * _INVISOX_DEFAULT_EVENT_DURATION));
+						szAppend.sprintf("wait(%d)", nDuration - (_INVISOX_DEFAULT_EVENT_DURATION));
 				}
 				else {
 						szAppend.sprintf("send_event(CONST_EVENT_KEY, %s, CONST_EVENT_ACTION_CLICK, %d)",
@@ -448,7 +448,7 @@ int CLuaInterpreter::genScriptKey(SEvent &event1, SEvent &event2, QString &scrip
 									 QSZ(g_szMappingKey[event1.o.key.keyvalue]), _INVISOX_DEFAULT_EVENT_DURATION);
 					script.append("\r\n").append(szAppend);
 
-					szAppend.sprintf("wait(%d)", nDuration - (2 * _INVISOX_DEFAULT_EVENT_DURATION));
+					szAppend.sprintf("wait(%d)", nDuration - (_INVISOX_DEFAULT_EVENT_DURATION));
 				}
 				else {
 					szAppend.sprintf("send_event(CONST_EVENT_KEY, %s, CONST_EVENT_ACTION_KEYUP, %d)",
@@ -529,7 +529,7 @@ int CLuaInterpreter::genScriptMouse(SEvent &event1, SEvent &event2, QString &scr
 										 event1.o.mouse.x, event1.o.mouse.y, _INVISOX_DEFAULT_EVENT_DURATION);
 						script.append("\r\n").append(szAppend);
 
-						szAppend.sprintf("wait(%d)", nDuration - (2 * _INVISOX_DEFAULT_EVENT_DURATION));
+						szAppend.sprintf("wait(%d)", nDuration - (_INVISOX_DEFAULT_EVENT_DURATION));
 					}
 				}
 				break;
@@ -566,7 +566,7 @@ int CLuaInterpreter::genScriptMouse(SEvent &event1, SEvent &event2, QString &scr
 										 event1.o.mouse.x, event1.o.mouse.y, _INVISOX_DEFAULT_EVENT_DURATION);
 						script.append("\r\n").append(szAppend);
 
-						szAppend.sprintf("wait(%d)", nDuration - (2 * _INVISOX_DEFAULT_EVENT_DURATION));
+						szAppend.sprintf("wait(%d)", nDuration - (_INVISOX_DEFAULT_EVENT_DURATION));
 					}
 				}
 				break;
@@ -580,7 +580,7 @@ int CLuaInterpreter::genScriptMouse(SEvent &event1, SEvent &event2, QString &scr
 									 event1.o.mouse.x, event1.o.mouse.y, _INVISOX_DEFAULT_EVENT_DURATION);
 					script.append("\r\n").append(szAppend);
 
-					szAppend.sprintf("wait(%d)", nDuration - (2 * _INVISOX_DEFAULT_EVENT_DURATION));
+					szAppend.sprintf("wait(%d)", nDuration - (_INVISOX_DEFAULT_EVENT_DURATION));
 				}
 				break;
 			case _INVISOX_EVENT_ACTION_RBUP:
@@ -593,7 +593,7 @@ int CLuaInterpreter::genScriptMouse(SEvent &event1, SEvent &event2, QString &scr
 									 event1.o.mouse.x, event1.o.mouse.y, _INVISOX_DEFAULT_EVENT_DURATION);
 					script.append("\r\n").append(szAppend);
 
-					szAppend.sprintf("wait(%d)", nDuration - (2 * _INVISOX_DEFAULT_EVENT_DURATION));
+					szAppend.sprintf("wait(%d)", nDuration - (_INVISOX_DEFAULT_EVENT_DURATION));
 				}
 				break;
 			case _INVISOX_EVENT_ACTION_MOUSEMOVE:
@@ -606,7 +606,7 @@ int CLuaInterpreter::genScriptMouse(SEvent &event1, SEvent &event2, QString &scr
 									 event1.o.mouse.x, event1.o.mouse.y, _INVISOX_DEFAULT_EVENT_DURATION);
 					script.append("\r\n").append(szAppend);
 
-					szAppend.sprintf("wait(%d)", nDuration - (2 * _INVISOX_DEFAULT_EVENT_DURATION));
+					szAppend.sprintf("wait(%d)", nDuration - (_INVISOX_DEFAULT_EVENT_DURATION));
 				}
 				break;
 		}

@@ -143,6 +143,18 @@ ApplicationWindow {
 			invisScripts.slotRunItem(info);
 		}
 
+		onSigClickRec: {
+			console.log("rec type: ", type);
+			if (type === "record") {
+				console.log("start record script");
+				invisScripts.slotEngineRecReady();
+			}
+			else if (type === "stop-record") {
+				console.log("stop record script");
+				invisScripts.slotEngineRecStop();
+			}
+		}
+
 		onSigClickTest: {
 			invisScripts.testcling();
 		}
