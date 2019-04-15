@@ -145,6 +145,7 @@ CScriptStore::CScriptStore(QObject *parent) :
 	CEnvStore(parent)
 {
 	m_pHookThread = nullptr;
+	::engInit();
 }
 
 CScriptStore::~CScriptStore() {
@@ -627,6 +628,7 @@ int CScriptStore::slotRunItem(QVariant item) {
 }
 
 int CScriptStore::slotEngineReady() {
+	::engClearSharedMemory();
 	::engStart();
 	if (nullptr != m_pHookThread) {
 		delete m_pHookThread;
@@ -660,6 +662,7 @@ int CScriptStore::slotEngineRecReady() {
 		m_pHookThread = nullptr;
 	}
 
+	::engClearSharedMemory();
 	::recStart();
 	m_vtEvents.clear();
 	m_szGenScript.clear();
@@ -690,7 +693,6 @@ int CScriptStore::slotEngineRecStop() {
 		m_szGenScript.clear();
 	}
 
-	::engStart();
 	return 0;
 }
 

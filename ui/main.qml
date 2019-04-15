@@ -155,6 +155,7 @@ ApplicationWindow {
 			else if (type === "stop-record") {
 				console.log("stop record script");
 				invisScripts.slotEngineRecStop();
+				invisScripts.slotEngineReady();
 			}
 		}
 

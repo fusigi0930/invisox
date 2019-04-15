@@ -177,6 +177,13 @@ static LRESULT CALLBACK monitorMouseEventProc(int nCode, WPARAM wParam, LPARAM l
 	return ::CallNextHookEx(g_hHookMouse, nCode, wParam, lParam);
 }
 
+int engInit() {
+	_DMSG("create share memory");
+	g_hSharedMem = ::CreateFileMappingA(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE, 0, _INVISOX_SHARED_MEM_SIZE, _INVISOX_SHARED_MEM_NAME);
+	_DMSG("create global event");
+	g_hReadEvent = ::CreateEventA(nullptr, FALSE, FALSE, _INVISOX_SHARED_EVENT_NAME);
+}
+
 int engStart() {
 	if (hooking != nullptr && g_hInst != nullptr) {
 		_DMSG("start hooking");
@@ -185,11 +192,6 @@ int engStart() {
 
 	if (nullptr == g_hHookKey)
 		return -1;
-
-	_DMSG("create share memory");
-	g_hSharedMem = ::CreateFileMappingA(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE, 0, _INVISOX_SHARED_MEM_SIZE, _INVISOX_SHARED_MEM_NAME);
-	_DMSG("create global event");
-	g_hReadEvent = ::CreateEventA(nullptr, FALSE, FALSE, _INVISOX_SHARED_EVENT_NAME);
 
 	_DMSG("exit");
 	return 0;
@@ -202,12 +204,13 @@ int engEnd() {
 	}
 
 	char *buffer = reinterpret_cast<char *>(::MapViewOfFile(g_hSharedMem, FILE_MAP_ALL_ACCESS, 0, 0, _INVISOX_SHARED_MEM_SIZE));
+	HANDLE hReadEvent = ::OpenEventA(EVENT_ALL_ACCESS, FALSE, _INVISOX_SHARED_EVENT_NAME);
 	if (buffer && g_hReadEvent) {
 		buffer[_INVISOX_SHARED_MEM_SIZE - 1] = static_cast<char>(_INVISOX_EXIT_CODE_HOOING);
 		_DMSG("trigger the write event for ready to exist");
-		::SetEvent(g_hReadEvent);
+		::SetEvent(hReadEvent);
 	}
-
+	::CloseHandle(hReadEvent);
 	_DMSG("exit");
 	return 0;
 }
@@ -235,12 +238,13 @@ int recEnd() {
 	}
 
 	char *buffer = reinterpret_cast<char *>(::MapViewOfFile(g_hSharedMem, FILE_MAP_ALL_ACCESS, 0, 0, _INVISOX_SHARED_MEM_SIZE));
+	HANDLE hReadEvent = ::OpenEventA(EVENT_ALL_ACCESS, FALSE, _INVISOX_SHARED_EVENT_NAME);
 	if (buffer && g_hReadEvent) {
 		buffer[_INVISOX_SHARED_MEM_SIZE - 1] = static_cast<char>(_INVISOX_EXIT_CODE_HOOING);
 		_DMSG("trigger the write event for ready to exist");
-		::SetEvent(g_hReadEvent);
+		::SetEvent(hReadEvent);
 	}
-
+	::CloseHandle(hReadEvent);
 	_DMSG("exit");
 	return 0;
 }
@@ -251,6 +255,7 @@ int engReadSharedMemory(char *buffer, int nLeng) {
 
 	HANDLE hReadEvent = ::OpenEventA(EVENT_ALL_ACCESS, FALSE, _INVISOX_SHARED_EVENT_NAME);
 	if (hReadEvent) {
+		::ResetEvent(hReadEvent);
 		_DMSG("get event and wait for event signal");
 		::WaitForSingleObject(hReadEvent, INFINITE);
 		_DMSG("wait for read event");
@@ -274,6 +279,11 @@ int engWriteSharedMemory(char *buffer, int nLeng) {
 		::CloseHandle(hReadEvent);
 	}
 	return 0;
+}
+
+int engClearSharedMemory() {
+	char *shareMem = reinterpret_cast<char *>(::MapViewOfFile(g_hSharedMem, FILE_MAP_ALL_ACCESS, 0, 0, _INVISOX_SHARED_MEM_SIZE));
+	memset(shareMem, 0, _INVISOX_SHARED_MEM_SIZE);
 }
 
 CEngine::CEngine()
