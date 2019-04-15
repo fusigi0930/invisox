@@ -365,6 +365,10 @@ static QString g_szMappingKey[] = {
 };
 
 int CLuaInterpreter::genScriptKey(SEvent &event1, SEvent &event2, QString &script) {
+	if (event1.o.key.keyvalue < 0 || event1.o.key.keyvalue > sizeof(g_szMappingKey)) {
+		_DMSG("not support key");
+		return 1;
+	}
 	if (g_szMappingKey[event1.o.key.keyvalue].isEmpty()) {
 		_DMSG("not support key");
 		return 1;

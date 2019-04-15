@@ -662,6 +662,7 @@ int CScriptStore::slotEngineRecReady() {
 
 	::recStart();
 	m_vtEvents.clear();
+	m_szGenScript.clear();
 	m_pHookThread = new CRecordThread(this);
 	if (m_pHookThread) {
 		m_pHookThread->start();
@@ -680,11 +681,13 @@ int CScriptStore::slotEngineRecStop() {
 
 	// gen script
 	CBasedInterpreter *pInterp = new CLuaInterpreter();
-	QString szScript;
 	if (pInterp) {
-		szScript = pInterp->genScript(m_vtEvents);
+		m_szGenScript = pInterp->genScript(m_vtEvents);
 		delete pInterp;
-		qDebug() << szScript;
+		emit sigUpdateGenScript();
+	}
+	else {
+		m_szGenScript.clear();
 	}
 
 	::engStart();
@@ -773,6 +776,7 @@ void CScriptStore::processRecordingSignal() {
 			event.o.key.keyvalue = static_cast<int>(pData[0]);
 			event.o.key.multiple = static_cast<int>(pData[1]);
 			event.o.key.keyAction = static_cast<int>(pData[2]);
+			_DMSG("kv: 0x%x, action: %d", event.o.key.keyvalue, event.o.key.keyAction);
 			event.timeTick = static_cast<unsigned long long>(QDateTime::currentMSecsSinceEpoch());
 			m_vtEvents.push_back(event);
 		}
@@ -832,4 +836,8 @@ void CScriptStore::slotSetStopKey(QString szKey) {
 
 QString CScriptStore::slotGetStopKey() {
 	return m_szStopKey;
+}
+
+QString CScriptStore::slotGetGenScript() {
+	return m_szGenScript;
 }

@@ -116,26 +116,6 @@ static LRESULT CALLBACK monitorKeyEventProc(int nCode, WPARAM wParam, LPARAM lPa
 static LRESULT CALLBACK recMonitorKeyEventProc(int nCode, WPARAM wParam, LPARAM lParam) {
 	//_DMSG("enter hooking process");
 
-	if (wParam == VK_LSHIFT || wParam == VK_RSHIFT ||
-		wParam == VK_LCONTROL || wParam == VK_RCONTROL ||
-			wParam == VK_LMENU || wParam == VK_RMENU ||
-			wParam == VK_CONTROL || wParam == VK_MENU || wParam == VK_SHIFT) {
-
-		//_DMSG("unnecessary hooking keys");
-		return ::CallNextHookEx(g_hHookKey, nCode, wParam, lParam);
-	}
-
-	LPARAM lp = 0;
-	if (0 != ::GetAsyncKeyState(VK_LSHIFT) || 0 != ::GetAsyncKeyState(VK_RSHIFT)) {
-		lp |= _INVISOX_KF_SHIFT;
-	}
-	if (0 != ::GetAsyncKeyState(VK_LCONTROL) || 0 != ::GetAsyncKeyState(VK_RCONTROL)) {
-		lp |= _INVISOX_KF_CTRL;
-	}
-	if (0 != ::GetAsyncKeyState(VK_LMENU) || 0 != ::GetAsyncKeyState(VK_RMENU)) {
-		lp |= _INVISOX_KF_ALT;
-	}
-
 	// send information to invisox ui
 	HANDLE hSharedMem = ::OpenFileMappingA(FILE_MAP_ALL_ACCESS, FALSE, _INVISOX_SHARED_MEM_NAME);
 	char *buffer = reinterpret_cast<char *>(::MapViewOfFile(hSharedMem, FILE_MAP_ALL_ACCESS, 0, 0, _INVISOX_SHARED_MEM_SIZE));
@@ -144,7 +124,7 @@ static LRESULT CALLBACK recMonitorKeyEventProc(int nCode, WPARAM wParam, LPARAM 
 	if (buffer && g_hReadEvent) {
 		unsigned long long keyData[3];
 		keyData[0] = wParam;
-		keyData[1] = static_cast<unsigned long long>(lp);
+		keyData[1] = static_cast<unsigned long long>(lParam);
 		keyData[2] = ((lParam & 0x80000000) == 0x80000000 ? _INVISOX_EVENT_ACTION_KEYUP : _INVISOX_EVENT_ACTION_KEYDOWN);
 		memcpy(buffer, reinterpret_cast<char*>(keyData), sizeof(keyData));
 

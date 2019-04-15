@@ -81,6 +81,9 @@ ApplicationWindow {
 		onSigAddListItem: listScriptItems.addItem();
 		onSigUpdateItemStatus: listScriptItems.updateItemStatus(updateItem)
 		stopKey: invisSettings.xml_stopKey
+		onSigUpdateGenScript:  {
+			console.log(gen_script);
+		}
 	}
 
 	SettingStore {
