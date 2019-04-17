@@ -124,7 +124,7 @@ static LRESULT CALLBACK recMonitorKeyEventProc(int nCode, WPARAM wParam, LPARAM 
 	if (buffer && g_hReadEvent) {
 		unsigned long long keyData[3];
 		keyData[0] = wParam;
-		keyData[1] = static_cast<unsigned long long>(lParam);
+		keyData[1] = static_cast<unsigned long long>(0);
 		keyData[2] = ((lParam & 0x80000000) == 0x80000000 ? _INVISOX_EVENT_ACTION_KEYUP : _INVISOX_EVENT_ACTION_KEYDOWN);
 		memcpy(buffer, reinterpret_cast<char*>(keyData), sizeof(keyData));
 

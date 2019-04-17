@@ -770,6 +770,11 @@ void CScriptStore::processRecordingSignal() {
 			break;
 		}
 
+		// dpulication detect
+		SEvent preEvent;
+		if (0 != m_vtEvents.size()) {
+			preEvent = m_vtEvents.at(m_vtEvents.size() - 1);
+		}
 		// get key data
 		unsigned long long *pData = reinterpret_cast<unsigned long long *>(buffer + _INVISOX_SHARED_MEM_KEY_INDEX);
 		if (0 != pData[0]) {
@@ -780,7 +785,11 @@ void CScriptStore::processRecordingSignal() {
 			event.o.key.keyAction = static_cast<int>(pData[2]);
 			_DMSG("kv: 0x%x, action: %d", event.o.key.keyvalue, event.o.key.keyAction);
 			event.timeTick = static_cast<unsigned long long>(QDateTime::currentMSecsSinceEpoch());
+			if (0 == memcmp(&event.o, &preEvent.o, sizeof(event.o)) && event.type == preEvent.type) {
+				continue;
+			}
 			m_vtEvents.push_back(event);
+			continue;
 		}
 
 		// get mouse data
@@ -792,7 +801,15 @@ void CScriptStore::processRecordingSignal() {
 			event.o.mouse.x = static_cast<int>(pData[1]);
 			event.o.mouse.y = static_cast<int>(pData[2]);
 			event.timeTick = static_cast<unsigned long long>(QDateTime::currentMSecsSinceEpoch());
+			if (0 == memcmp(&event.o, &preEvent.o, sizeof(event.o)) && event.type == preEvent.type) {
+				continue;
+			}
+			else if (event.type == preEvent.type && event.o.mouse.mouseEvent == preEvent.o.mouse.mouseEvent &&
+					 (abs(event.o.mouse.x - preEvent.o.mouse.x) < 5) && (abs(event.o.mouse.y - preEvent.o.mouse.y)) < 5) {
+				continue;
+			}
 			m_vtEvents.push_back(event);
+			continue;
 		}
 	}
 	_DMSG("exit the process hooking");

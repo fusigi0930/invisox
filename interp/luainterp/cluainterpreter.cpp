@@ -80,9 +80,10 @@ QString CLuaInterpreter::genScript(std::vector<SEvent> &events) {
 	QString szScript;
 	std::vector<SEvent>::iterator pEvent = events.begin();
 	std::vector<SEvent>::iterator pPreEvent;
+	_DMSG("event count: %d", events.size());
 	while (pEvent != events.end()) {
 		pPreEvent = pEvent++;
-		switch (pEvent->type) {
+		switch (pPreEvent->type) {
 			case _INVISOX_EVENT_TYPE_KEY:
 				if (pEvent == events.end()) {
 					genScriptKey(*pPreEvent, *pPreEvent, szScript);
@@ -375,6 +376,7 @@ int CLuaInterpreter::genScriptKey(SEvent &event1, SEvent &event2, QString &scrip
 	}
 	unsigned long long nDuration = event2.timeTick - event1.timeTick;
 	// last action
+	_DMSG("key: 0x%x, multi: 0x%x", event1.o.key.keyvalue, event1.o.key.multiple);
 	QString szAppend;
 	if (event1 == event2) {
 		switch (event1.o.key.keyAction) {
@@ -408,7 +410,7 @@ int CLuaInterpreter::genScriptKey(SEvent &event1, SEvent &event2, QString &scrip
 				}
 				else {
 						szAppend.sprintf("send_event(CONST_EVENT_KEY, %s, CONST_EVENT_ACTION_CLICK, %d)",
-										 QSZ(g_szMappingKey[event2.o.key.keyvalue]), nDuration);
+										 QSZ(g_szMappingKey[event1.o.key.keyvalue]), nDuration);
 						script.append("\r\n").append(szAppend);
 				}
 				return 0;
@@ -441,9 +443,8 @@ int CLuaInterpreter::genScriptKey(SEvent &event1, SEvent &event2, QString &scrip
 						szAppend.sprintf("wait(%d)", nDuration - (_INVISOX_DEFAULT_EVENT_DURATION));
 				}
 				else {
-						szAppend.sprintf("send_event(CONST_EVENT_KEY, %s, CONST_EVENT_ACTION_CLICK, %d)",
-										 QSZ(g_szMappingKey[event2.o.key.keyvalue]), nDuration);
-						script.append("\r\n").append(szAppend);
+						szAppend.sprintf("send_event(CONST_EVENT_KEY, %s, CONST_EVENT_ACTION_KEYDOWN, %d)",
+										 QSZ(g_szMappingKey[event1.o.key.keyvalue]), nDuration);
 				}
 				break;
 			case _INVISOX_EVENT_ACTION_KEYUP:
