@@ -1,6 +1,7 @@
-#include "copencv.h"
+
 #include <windows.h>
 #include <QFile>
+#include "copencv.h"
 #include <opencv2/highgui/highgui_c.h>
 #include "debug.h"
 #include "invisox_common.h"
