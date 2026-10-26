@@ -48,6 +48,7 @@ CONFIG(debug, debug|release) {
 
 win32 | win64 {
     CONFIG += dll warn_off
+    LIBS += -lcomctl32
     QMAKE_POST_LINK += $$_PRO_FILE_PWD_/post_build.bat $$replace(_PRO_FILE_PWD_, /, \\) $$replace(DESTDIR, /, \\)
 }
 

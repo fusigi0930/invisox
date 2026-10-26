@@ -2,6 +2,7 @@
 #include "invisox_common.h"
 #include <windows.h>
 #include <cstdio>
+#include <commctrl.h>
 
 #define _DMSG(e,...) \
 { \
@@ -17,11 +18,8 @@ __attribute__((section("invisox_shared"), shared)) HHOOK g_hHookMouse = nullptr;
 __attribute__((section("invisox_shared"), shared)) HANDLE g_hSharedMem = nullptr;
 __attribute__((section("invisox_shared"), shared)) HANDLE g_hReadEvent = nullptr;
 
-typedef HHOOK (*fnHooking)(int, HOOKPROC, HINSTANCE, DWORD);
-typedef BOOL (*fnUnHooking)(HHOOK);
-
-static fnHooking hooking = nullptr;
-static fnUnHooking unHooking = nullptr;
+static const UINT_PTR SUBCLS_ID = 50666;
+static bool bRecording = false;
 
 extern "C" BOOL WINAPI DllMain(
   HANDLE hinstDLL,
@@ -33,12 +31,6 @@ extern "C" BOOL WINAPI DllMain(
 	{
 		case DLL_PROCESS_ATTACH:
 			_DMSG("%s dll attached", __FILE__);
-			g_hInst = reinterpret_cast<HINSTANCE>(hinstDLL);
-			g_hLib = ::LoadLibraryW(L"user32.dll");
-			if (g_hLib) {
-				hooking = reinterpret_cast<fnHooking>(GetProcAddress(g_hLib, "SetWindowsHookExW"));
-				unHooking = reinterpret_cast<fnUnHooking>(GetProcAddress(g_hLib, "UnhookWindowsHookEx"));
-			}
 			break;
 		case DLL_THREAD_ATTACH:
 			break;
@@ -47,12 +39,6 @@ extern "C" BOOL WINAPI DllMain(
 		case DLL_PROCESS_DETACH:
 			_DMSG("%s dll deattached", __FILE__);
 			engEnd();
-			if (g_hLib) {
-				::FreeLibrary(g_hLib);
-				g_hLib = nullptr;
-				hooking = nullptr;
-				unHooking = nullptr;
-			}
 			if (g_hReadEvent) {
 				::CloseHandle(g_hReadEvent);
 				g_hReadEvent = nullptr;
@@ -67,116 +53,6 @@ extern "C" BOOL WINAPI DllMain(
 	return true;
 }
 
-static LRESULT CALLBACK monitorKeyEventProc(int nCode, WPARAM wParam, LPARAM lParam) {
-	//_DMSG("enter hooking process");
-
-	if (wParam == VK_LSHIFT || wParam == VK_RSHIFT ||
-		wParam == VK_LCONTROL || wParam == VK_RCONTROL ||
-			wParam == VK_LMENU || wParam == VK_RMENU ||
-			wParam == VK_CONTROL || wParam == VK_MENU || wParam == VK_SHIFT) {
-
-		//_DMSG("unnecessary hooking keys");
-		return ::CallNextHookEx(g_hHookKey, nCode, wParam, lParam);
-	}
-
-	if (lParam & 0x80000000) {
-		LPARAM lp = 0;
-		if (0 != ::GetAsyncKeyState(VK_LSHIFT) || 0 != ::GetAsyncKeyState(VK_RSHIFT)) {
-			lp |= _INVISOX_KF_SHIFT;
-		}
-		if (0 != ::GetAsyncKeyState(VK_LCONTROL) || 0 != ::GetAsyncKeyState(VK_RCONTROL)) {
-			lp |= _INVISOX_KF_CTRL;
-		}
-		if (0 != ::GetAsyncKeyState(VK_LMENU) || 0 != ::GetAsyncKeyState(VK_RMENU)) {
-			lp |= _INVISOX_KF_ALT;
-		}
-
-		// send information to invisox ui
-		HANDLE hSharedMem = ::OpenFileMappingA(FILE_MAP_ALL_ACCESS, FALSE, _INVISOX_SHARED_MEM_NAME);
-		char *buffer = reinterpret_cast<char *>(::MapViewOfFile(hSharedMem, FILE_MAP_ALL_ACCESS, 0, 0, _INVISOX_SHARED_MEM_SIZE));
-		HANDLE hReadEvent = ::OpenEventA(EVENT_ALL_ACCESS, FALSE, _INVISOX_SHARED_EVENT_NAME);
-
-		if (buffer && g_hReadEvent) {
-			unsigned long long keyData[2];
-			keyData[0] = wParam;
-			keyData[1] = static_cast<unsigned long long>(lp);
-			memcpy(buffer, reinterpret_cast<char*>(keyData), sizeof(keyData));
-
-			//_DMSG("trigger the write event");
-			::SetEvent(hReadEvent);
-		}
-		::CloseHandle(hReadEvent);
-		::CloseHandle(hSharedMem);
-	}
-
-	//_DMSG("exit hooking process");
-	return ::CallNextHookEx(g_hHookKey, nCode, wParam, lParam);
-}
-
-static LRESULT CALLBACK recMonitorKeyEventProc(int nCode, WPARAM wParam, LPARAM lParam) {
-	//_DMSG("enter hooking process");
-
-	// send information to invisox ui
-	HANDLE hSharedMem = ::OpenFileMappingA(FILE_MAP_ALL_ACCESS, FALSE, _INVISOX_SHARED_MEM_NAME);
-	char *buffer = reinterpret_cast<char *>(::MapViewOfFile(hSharedMem, FILE_MAP_ALL_ACCESS, 0, 0, _INVISOX_SHARED_MEM_SIZE));
-	HANDLE hReadEvent = ::OpenEventA(EVENT_ALL_ACCESS, FALSE, _INVISOX_SHARED_EVENT_NAME);
-
-	if (buffer && g_hReadEvent) {
-		unsigned long long keyData[3];
-		keyData[0] = wParam;
-		keyData[1] = static_cast<unsigned long long>(0);
-		keyData[2] = ((lParam & 0x80000000) == 0x80000000 ? _INVISOX_EVENT_ACTION_KEYUP : _INVISOX_EVENT_ACTION_KEYDOWN);
-		memcpy(buffer, reinterpret_cast<char*>(keyData), sizeof(keyData));
-
-		//_DMSG("trigger the write event");
-		::SetEvent(hReadEvent);
-	}
-	::CloseHandle(hReadEvent);
-	::CloseHandle(hSharedMem);
-
-
-	//_DMSG("exit hooking process");
-	return ::CallNextHookEx(g_hHookKey, nCode, wParam, lParam);
-}
-
-static LRESULT CALLBACK monitorMouseEventProc(int nCode, WPARAM wParam, LPARAM lParam) {
-	MOUSEHOOKSTRUCT *pMouse = reinterpret_cast<MOUSEHOOKSTRUCT*>(lParam);
-	HANDLE hSharedMem = ::OpenFileMappingA(FILE_MAP_ALL_ACCESS, FALSE, _INVISOX_SHARED_MEM_NAME);
-	char *buffer = reinterpret_cast<char *>(::MapViewOfFile(hSharedMem, FILE_MAP_ALL_ACCESS, 0, 0, _INVISOX_SHARED_MEM_SIZE));
-	HANDLE hReadEvent = ::OpenEventA(EVENT_ALL_ACCESS, FALSE, _INVISOX_SHARED_EVENT_NAME);
-
-	if (buffer && g_hReadEvent) {
-		unsigned long long mouseData[3];
-		switch(wParam) {
-			default:
-			case WM_MOUSEMOVE:
-				mouseData[0] = _INVISOX_EVENT_ACTION_MOUSEMOVE;
-				break;
-			case WM_LBUTTONDOWN:
-				mouseData[0] = _INVISOX_EVENT_ACTION_LBDOWN;
-				break;
-			case WM_LBUTTONUP:
-				mouseData[0] = _INVISOX_EVENT_ACTION_LBUP;
-				break;
-			case WM_RBUTTONDOWN:
-				mouseData[0] = _INVISOX_EVENT_ACTION_RBDOWN;
-				break;
-			case WM_RBUTTONUP:
-				mouseData[0] = _INVISOX_EVENT_ACTION_RBUP;
-				break;
-		}
-		mouseData[1] = static_cast<unsigned long long>(pMouse->pt.x);
-		mouseData[2] = static_cast<unsigned long long>(pMouse->pt.y);
-		memcpy(buffer + _INVISOX_SHARED_MEM_MOUES_INDEX, reinterpret_cast<char*>(mouseData), sizeof(mouseData));
-
-		::SetEvent(hReadEvent);
-		::CloseHandle(hReadEvent);
-		::CloseHandle(hSharedMem);
-	}
-
-	return ::CallNextHookEx(g_hHookMouse, nCode, wParam, lParam);
-}
-
 int engInit() {
 	_DMSG("create share memory");
 	g_hSharedMem = ::CreateFileMappingA(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE, 0, _INVISOX_SHARED_MEM_SIZE, _INVISOX_SHARED_MEM_NAME);
@@ -184,25 +60,136 @@ int engInit() {
 	g_hReadEvent = ::CreateEventA(nullptr, FALSE, FALSE, _INVISOX_SHARED_EVENT_NAME);
 }
 
+static void rawKeyProc(RAWINPUT *raw) {
+    if (bRecording) {
+        unsigned long long keyData[3] = {0};
+        keyData[0] = static_cast<unsigned long long>(raw->data.keyboard.VKey);
+        keyData[1] = static_cast<unsigned long long>(0);
+        keyData[2] = ((raw->data.keyboard.Flags & RI_KEY_BREAK) == RI_KEY_BREAK ? _INVISOX_EVENT_ACTION_KEYUP : _INVISOX_EVENT_ACTION_KEYDOWN);
+        engWriteSharedMemory(reinterpret_cast<char*>(keyData), sizeof(keyData));
+    }
+    else {
+        USHORT vKey = static_cast<USHORT>(raw->data.keyboard.VKey);
+        switch(vKey) {
+        default: break;
+        case VK_LSHIFT: case VK_RSHIFT: case VK_LCONTROL: case VK_RCONTROL: case VK_LMENU: case VK_RMENU:
+        case VK_CONTROL: case VK_MENU: case VK_SHIFT:
+            return;
+        }
+
+        if (raw->data.keyboard.Flags & RI_KEY_BREAK) {
+            unsigned long long keyData[2] = {0};
+            if (0 != ::GetAsyncKeyState(VK_LSHIFT) || 0 != ::GetAsyncKeyState(VK_RSHIFT)) {
+                keyData[1] |= _INVISOX_KF_SHIFT;
+            }
+            if (0 != ::GetAsyncKeyState(VK_LCONTROL) || 0 != ::GetAsyncKeyState(VK_RCONTROL)) {
+                keyData[1] |= _INVISOX_KF_CTRL;
+            }
+            if (0 != ::GetAsyncKeyState(VK_LMENU) || 0 != ::GetAsyncKeyState(VK_RMENU)) {
+                keyData[1] |= _INVISOX_KF_ALT;
+            }
+            keyData[0] = raw->data.keyboard.VKey;
+            engWriteSharedMemory(reinterpret_cast<char*>(keyData), sizeof(keyData));
+        }
+    }
+}
+
+static void rawMouseProc(RAWINPUT *raw) {
+    if (bRecording) {
+        unsigned long long mouseData[3] = {0};
+        POINT pt;
+        GetCursorPos(&pt);
+        if (raw->data.mouse.usFlags & MOUSE_MOVE_RELATIVE || raw->data.mouse.usFlags & MOUSE_MOVE_ABSOLUTE) {
+            mouseData[0] = _INVISOX_EVENT_ACTION_MOUSEMOVE;
+        }
+        else if (raw->data.mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_DOWN) {
+            mouseData[0] = _INVISOX_EVENT_ACTION_LBDOWN;
+        }
+        else if (raw->data.mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_UP) {
+            mouseData[0] = _INVISOX_EVENT_ACTION_LBUP;
+        }
+        else if (raw->data.mouse.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_DOWN) {
+            mouseData[0] = _INVISOX_EVENT_ACTION_RBDOWN;
+        }
+        else if (raw->data.mouse.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_UP) {
+            mouseData[0] = _INVISOX_EVENT_ACTION_RBUP;
+        }
+        else {
+           mouseData[0] = _INVISOX_EVENT_ACTION_MOUSEMOVE;
+        }
+        mouseData[1] = static_cast<unsigned long long>(pt.x);
+        mouseData[2] = static_cast<unsigned long long>(pt.y);
+        engWriteSharedMemory(reinterpret_cast<char*>(mouseData), sizeof(mouseData), _INVISOX_SHARED_MEM_MOUES_INDEX);
+    }
+
+}
+
+static LRESULT CALLBACK rawInputSubClassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
+    if (uMsg == WM_INPUT) {
+        UINT dwSize = 0;
+        GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, NULL, &dwSize, sizeof(RAWINPUTHEADER));
+        if (0 < dwSize) {
+            BYTE *buf = new BYTE[dwSize];
+            if (dwSize == GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, buf, &dwSize, sizeof(RAWINPUTHEADER))) {
+                RAWINPUT *raw = reinterpret_cast<RAWINPUT*>(buf);
+                switch(raw->header.dwType) {
+                case RIM_TYPEKEYBOARD:
+                    rawKeyProc(raw);
+                    break;
+                case RIM_TYPEMOUSE:
+                    rawMouseProc(raw);
+                    break;
+                }
+
+            }
+            delete [] buf;
+        }
+        return 0;
+    }
+    return DefSubclassProc(hWnd, uMsg, wParam, lParam);
+}
+
+int engRegisterClass(void* hwnd) {
+    if (nullptr == hwnd) {
+        _DMSG("hwnd is null");
+        return 1;
+    }
+    _DMSG("register sub class: %p", hwnd);
+    HWND hWnd = reinterpret_cast<HWND>(hwnd);
+    int ret = SetWindowSubclass(hWnd, rawInputSubClassProc, SUBCLS_ID, 0) != FALSE ? 0 : 1;
+
+    RAWINPUTDEVICE rd[2];
+    rd[0].usUsagePage = 0x01;
+    rd[0].usUsage = 0x06; //keyboard
+    rd[0].dwFlags = RIDEV_INPUTSINK;
+    rd[0].hwndTarget = hWnd;
+
+    rd[1].usUsagePage = 0x01;
+    rd[1].usUsage = 0x02; //mouse
+    rd[1].dwFlags = RIDEV_INPUTSINK;
+    rd[1].hwndTarget = hWnd;
+
+    RegisterRawInputDevices(rd, 2, sizeof(RAWINPUTDEVICE));
+
+    return ret;
+}
+
+void engUnregisterClass(void* hwnd) {
+    if (nullptr == hwnd) {
+        _DMSG("hwnd is null");
+        return;
+    }
+    _DMSG("unregister sub class")
+    HWND hWnd = reinterpret_cast<HWND>(hwnd);
+    RemoveWindowSubclass(hWnd, rawInputSubClassProc, SUBCLS_ID);
+}
+
 int engStart() {
-	if (hooking != nullptr && g_hInst != nullptr) {
-		_DMSG("start hooking");
-		g_hHookKey = hooking(WH_KEYBOARD, monitorKeyEventProc, g_hInst, 0);
-	}
-
-	if (nullptr == g_hHookKey)
-		return -1;
-
 	_DMSG("exit");
 	return 0;
 }
 
 int engEnd() {
-	if (unHooking != nullptr && g_hHookKey != nullptr) {
-		unHooking(g_hHookKey);
-		g_hHookKey = nullptr;
-	}
-
 	char *buffer = reinterpret_cast<char *>(::MapViewOfFile(g_hSharedMem, FILE_MAP_ALL_ACCESS, 0, 0, _INVISOX_SHARED_MEM_SIZE));
 	HANDLE hReadEvent = ::OpenEventA(EVENT_ALL_ACCESS, FALSE, _INVISOX_SHARED_EVENT_NAME);
 	if (buffer && g_hReadEvent) {
@@ -216,27 +203,13 @@ int engEnd() {
 }
 
 int recStart() {
-	if (hooking != nullptr && g_hInst != nullptr) {
-		_DMSG("start hooking");
-		g_hHookKey = hooking(WH_KEYBOARD, recMonitorKeyEventProc, g_hInst, 0);
-		g_hHookMouse = hooking(WH_MOUSE, monitorMouseEventProc, g_hInst, 0);
-	}
-
-	if (nullptr == g_hHookKey || nullptr == g_hHookMouse)
-		return -1;
-
+    bRecording = true;
 	_DMSG("exit");
 	return 0;
 }
 
 int recEnd() {
-	if (unHooking != nullptr && g_hHookKey != nullptr && g_hHookMouse != nullptr) {
-		unHooking(g_hHookKey);
-		g_hHookKey = nullptr;
-		unHooking(g_hHookMouse);
-		g_hHookMouse = nullptr;
-	}
-
+    bRecording = false;
 	char *buffer = reinterpret_cast<char *>(::MapViewOfFile(g_hSharedMem, FILE_MAP_ALL_ACCESS, 0, 0, _INVISOX_SHARED_MEM_SIZE));
 	HANDLE hReadEvent = ::OpenEventA(EVENT_ALL_ACCESS, FALSE, _INVISOX_SHARED_EVENT_NAME);
 	if (buffer && g_hReadEvent) {
@@ -267,14 +240,14 @@ int engReadSharedMemory(char *buffer, int nLeng) {
 	}
 	return 0;
 }
-int engWriteSharedMemory(char *buffer, int nLeng) {
+int engWriteSharedMemory(char *buffer, int nLeng, int offset) {
 	if (nullptr == buffer || 0 >= nLeng)
 		return -1;
 
 	HANDLE hReadEvent = ::OpenEventA(EVENT_ALL_ACCESS, FALSE, _INVISOX_SHARED_EVENT_NAME);
 	if (hReadEvent) {
 		char *shareMem = reinterpret_cast<char *>(::MapViewOfFile(g_hSharedMem, FILE_MAP_ALL_ACCESS, 0, 0, _INVISOX_SHARED_MEM_SIZE));
-		memcpy(shareMem, buffer, (nLeng > _INVISOX_SHARED_MEM_SIZE ? _INVISOX_SHARED_MEM_SIZE : nLeng));
+        memcpy(shareMem + offset, buffer, (nLeng > _INVISOX_SHARED_MEM_SIZE ? _INVISOX_SHARED_MEM_SIZE : nLeng));
 		::SetEvent(hReadEvent);
 		::CloseHandle(hReadEvent);
 	}

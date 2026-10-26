@@ -17,6 +17,8 @@
 #	include <stdlib.h>
 #endif
 
+#include "engine.h"
+
 int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
@@ -32,8 +34,16 @@ int main(int argc, char *argv[])
 
 	QQmlApplicationEngine engine;
 	engine.load(QUrl(QStringLiteral("qrc:///qml/main.qml")));
+    QQuickWindow *wnd = qobject_cast<QQuickWindow*>(engine.rootObjects().first());
+    HWND hwnd;
+    if (nullptr != wnd) {
+        hwnd = reinterpret_cast<HWND>(wnd->winId());
+        engRegisterClass(hwnd);
+    }
 
 	app.setWindowIcon(QIcon("qrc:///image/res/png/mainicon.png"));
 
-	return app.exec();
+    int result = app.exec();
+    engUnregisterClass(hwnd);
+    return result;
 }

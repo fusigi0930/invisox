@@ -752,6 +752,7 @@ void CScriptStore::processHookingSignal() {
 			forceStopAll();
 		}
 		else {
+            QThread::msleep(250);
 			runItem(actionKey);
 		}
 	}

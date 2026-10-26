@@ -4,10 +4,12 @@
 #include "engine_global.h"
 
 ENGINESHARED_EXPORT int engInit();
+ENGINESHARED_EXPORT int engRegisterClass(void* hwnd);
+ENGINESHARED_EXPORT void engUnregisterClass(void* hwnd);
 ENGINESHARED_EXPORT int engStart();
 ENGINESHARED_EXPORT int engEnd();
 ENGINESHARED_EXPORT int engReadSharedMemory(char *buffer, int nLeng);
-ENGINESHARED_EXPORT int engWriteSharedMemory(char *buffer, int nLeng);
+ENGINESHARED_EXPORT int engWriteSharedMemory(char *buffer, int nLeng, int offset=0);
 ENGINESHARED_EXPORT int engClearSharedMemory();
 
 ENGINESHARED_EXPORT int recStart();
