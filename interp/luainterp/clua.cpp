@@ -4,6 +4,7 @@
 #include "debug.h"
 #include <QFileInfo>
 #include "invisox_common.h"
+#include <QThread>
 
 CLua::CLua()
 {
@@ -30,6 +31,13 @@ void CLua::init() {
 }
 
 void CLua::close() {
+	for (std::map<QString, QThread*>::iterator p = m_mapLuaThread.begin(); p != m_mapLuaThread.end(); p++) {
+		p->second->terminate();
+		p->second->wait(3000);
+		delete p->second;
+	}
+	m_mapLuaThread.clear();
+
 	if (mLua) {
 		lua_close(mLua);
 		mLua=NULL;

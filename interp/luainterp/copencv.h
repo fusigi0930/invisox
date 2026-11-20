@@ -1,7 +1,6 @@
 #ifndef __COPENCV_H__
 #define __COPENCV_H__
 
-#include "opencv2/opencv.hpp"
 #include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"
@@ -10,12 +9,15 @@
 
 class COpenCV
 {
+#ifdef TESTCODE
+public:
+#else
 private:
+#endif
 	lua_State *m_LuaState;
-	cv::Mat m_matScreen;
 	QString m_szPattern;
-
-	void getScreen(int x=0, int y=0, int w=0, int h=0);
+    void *m_capScreen;
+    void getScreen();
 
 public:
 	static char className[];

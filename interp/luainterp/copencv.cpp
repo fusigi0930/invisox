@@ -2,9 +2,12 @@
 #include <windows.h>
 #include <QFile>
 #include "copencv.h"
-#include <opencv2/highgui/highgui_c.h>
 #include "debug.h"
 #include "invisox_common.h"
+#include "cluainterpreter.h"
+#include "interp_comm.h"
+
+#include <QRect>
 
 #define TEST_CV_WIN "__CVWin__"
 
@@ -23,6 +26,7 @@ Luna<COpenCV>::PropertyType COpenCV::properties[] = {
 	{ nullptr, nullptr, nullptr }
 };
 
+#if 0
 static HBITMAP CreateBMP(int nBit, int nWidth, int nHeight) {
 	HDC hdc=::GetDC(nullptr);
 	HBITMAP hBmp=nullptr;
@@ -40,18 +44,23 @@ static HBITMAP CreateBMP(int nBit, int nWidth, int nHeight) {
 	::ReleaseDC(nullptr, hdc);
 	return hBmp;
 }
+#endif
 
 COpenCV::COpenCV(lua_State *L) {
-	_DMSG("");
+    //_DMSG("");
 	m_LuaState=L;
-
+    m_capScreen = nullptr;
 }
 
 COpenCV::~COpenCV() {
 #if defined(DEBUG)
 	cv::destroyAllWindows();
 #endif
-	_DMSG("");
+    if (m_capScreen) {
+        cmCvFreeMem(m_capScreen);
+        m_capScreen = nullptr;
+    }
+    //_DMSG("");
 }
 
 int COpenCV::getProp(lua_State *L) {
@@ -73,29 +82,13 @@ int COpenCV::setPattern(lua_State *L) {
 	return 0;
 }
 
-void COpenCV::getScreen(int x, int y, int w, int h) {
-	_DMSG("");
-	HDC hdc=::GetDC(nullptr);
-	if (nullptr == hdc) return;
-
-	DEVMODE devMode={0};
-	EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &devMode);
-
-	_DMSG("bits: %d", devMode.dmBitsPerPel);
-	HDC hCompDC=::CreateCompatibleDC(hdc);
-	HBITMAP hDestBmp=CreateBMP(24 /*devMode.dmBitsPerPel*/, w, h);
-	HBITMAP hOldBmp=reinterpret_cast<HBITMAP>(::SelectObject(hCompDC, hDestBmp));
-
-	::BitBlt(hCompDC, 0, 0, w, h, hdc, x, y, SRCCOPY);
-	m_matScreen.create(h, w, CV_8UC3 /*(devMode.dmBitsPerPel/8)*/);
-
-	BITMAP bmp;
-	::GetObject(hDestBmp, sizeof(BITMAP), &bmp);
-	::GetBitmapBits(hDestBmp, bmp.bmWidthBytes * bmp.bmHeight, m_matScreen.data);
-
-	if (hOldBmp && hCompDC) ::SelectObject(hCompDC, hOldBmp);
-	if (hCompDC) ::DeleteDC(hCompDC);
-	if (hdc) ::ReleaseDC(nullptr, hdc);
+void COpenCV::getScreen() {
+    //_DMSG("");
+    if (m_capScreen) {
+        cmCvFreeMem(m_capScreen);
+        m_capScreen = nullptr;
+    }
+    m_capScreen = cmCvCapScreen();
 }
 
 int COpenCV::captureScreen(lua_State *L) {
@@ -112,7 +105,7 @@ int COpenCV::captureScreen(lua_State *L) {
 
 	_DMSG("%d, %d, %d, %d", x, y, width, height);
 
-	getScreen(x, y, width, height);
+    getScreen();
 
 	return 0;
 }
@@ -123,14 +116,11 @@ int COpenCV::showScreen(lua_State *L) {
 		return 0;
 	}
 
-	if (!m_matScreen.data) {
+    if (nullptr == m_capScreen) {
 		return 0;
 	}
 
-	cv::namedWindow(TEST_CV_WIN, cv::WINDOW_AUTOSIZE);
-
-	cv::imshow(TEST_CV_WIN, m_matScreen);
-	cv::waitKey(0);
+    cmCvShow("show window", m_capScreen);
 
 	return 0;
 }
@@ -157,51 +147,13 @@ int COpenCV::match(lua_State *L) {
 	// get argument 2
 	m_szPattern=lua_tostring(L, 2);
 	_DMSG("pattern file: %s", QSZ(m_szPattern));
+    SMatchData data = {0};
+    cmCvMatch("", m_szPattern, x, y, w, h, &data);
 
-	// get arguments 1
-	if (LUA_TNIL == lua_type(L, 1)) {
-		getScreen(x, y, w, h);
-	}
-	else {
-		if (!QFile::exists(lua_tostring(L, 1))) {
-			DMSG("file file is not exist");
-			return 0;
-		}
-		m_matScreen=cv::imread(lua_tostring(L, 1), CV_LOAD_IMAGE_COLOR);
-	}
-
-	// detect matrix data
-	if (!m_matScreen.data) {
-		return 0;
-	}
-
-	if (!QFile::exists(m_szPattern)) {
-		DMSG("pattern file is not exist");
-		return 0;
-	}
-	cv::Mat matPattern=cv::imread(QSZ(m_szPattern), CV_LOAD_IMAGE_ANYCOLOR | CV_LOAD_IMAGE_ANYDEPTH);
-	//cv::Mat matPattern;
-
-
-	DMSG("screen: %d,%d, pattern: %d,%d -- %d %d ", m_matScreen.depth(), m_matScreen.type(), matPattern.depth(), matPattern.type(),
-												CV_8UC3, CV_8UC4);
-
-	cv::Mat cvImgResult;
-	cvImgResult.create(m_matScreen.rows - matPattern.rows +1,
-					   m_matScreen.cols - matPattern.cols + 1, m_matScreen.channels());
-
-	cv::matchTemplate(m_matScreen, matPattern, cvImgResult, CV_TM_CCOEFF);
-
-	cv::Point minPos, maxPos;
-	double fMin, fMax;
-	cv::minMaxLoc(cvImgResult, &fMin, &fMax, &minPos, &maxPos, cv::Mat());
-	cvImgResult.release();
-	matPattern.release();
-	//mat.release();
-
-	lua_pushinteger(L, maxPos.x);
-	lua_pushinteger(L, maxPos.y);
-	return 2;
+    _DMSG("match out: %d %d", data.x, data.y);
+    lua_pushinteger(L, data.x);
+    lua_pushinteger(L, data.y);
+    return 2;
 }
 
 int COpenCV::rect(lua_State *L) {
@@ -213,15 +165,19 @@ int COpenCV::rect(lua_State *L) {
 
 	lua_gettop(L);
 	// get argument
-	cv::Rect rect;
-	rect.x=lua_tointeger(L, 1);
-	rect.y=lua_tointeger(L, 2);
-	rect.width=lua_tointeger(L, 3);
-	rect.height=lua_tointeger(L, 4);
+    QRect rect;
+    rect.setX(lua_tointeger(L, 1));
+    rect.setY(lua_tointeger(L, 2));
+    rect.setWidth(lua_tointeger(L, 3));
+    rect.setHeight(lua_tointeger(L, 4));
 
-	if (!m_matScreen.data) return 0;
+    if (nullptr == m_capScreen) return 0;
 
-	cv::rectangle(m_matScreen, rect, cvScalar(70,70,200), 2, 8, 0);
+    cmCvRect(m_capScreen, rect);
 
 	return 0;
+}
+
+void luaTest() {
+
 }

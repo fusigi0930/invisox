@@ -32,7 +32,7 @@ Dialog {
 		y: rectAction.y
 		currentIndex: 0
 
-		model: [qsTr("Hotkey"), qsTr("Net command")]
+        model: [qsTr("Hotkey"), qsTr("Net command")]
 		onCurrentIndexChanged: {
 			initFoucs();
 		}
@@ -157,7 +157,7 @@ Dialog {
 			selectExisting: true
 			title: qsTr("Select a script file...")
 
-			nameFilters: [ "lua file (*.lua)", "All files (*)" ]
+			nameFilters: [ "lua file (*.lua)", "cpp file (*.cpp)", "All files (*)" ]
 
 			onAccepted: {
 				editFile.text=fileDlg.fileUrl.toString();
@@ -186,7 +186,7 @@ Dialog {
 		y: labelInterp.y-3
 		currentIndex: 0
 
-		model: [qsTr("Lua")]
+		model: [qsTr("Lua"), qsTr("cpp")]
 		onCurrentIndexChanged: {
 			initFoucs();
 		}
@@ -298,6 +298,9 @@ Dialog {
 				case 0: // lua
 					interpreterCmd="lua";
 					break;
+				case 1: // c/cpp
+					interpreterCmd="cpp";
+					break;				
 			}
 
 			if(!m_isEdit) {
@@ -337,6 +340,9 @@ Dialog {
 			else if ("lang" === prop) {
 				if ("lua" === info[prop]) {
 					comboInterp.currentIndex=0;
+				}
+				else if ("cpp" === info[prop]) {
+					comboInterp.currentIndex=1;
 				}
 			}
 		}

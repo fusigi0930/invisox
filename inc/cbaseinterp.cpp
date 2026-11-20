@@ -2,18 +2,19 @@
 #include "debug.h"
 #include <QtConcurrent/QtConcurrent>
 
-CBasedRunThread::CBasedRunThread() {
+CBasedRunThread::CBasedRunThread() : QThread() {
 	m_interp = NULL;
 #ifdef Q_OS_WIN
 	m_hThread = NULL;
 #endif
 }
 
-CBasedRunThread::CBasedRunThread(CBasedInterpreter *p) {
+CBasedRunThread::CBasedRunThread(CBasedInterpreter *p) : QThread() {
 	m_interp = p;
 #ifdef Q_OS_WIN
 	m_hThread = NULL;
 #endif
+	QThread::setTerminationEnabled();
 }
 
 CBasedRunThread::~CBasedRunThread() {

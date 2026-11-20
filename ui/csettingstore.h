@@ -18,6 +18,7 @@ public:
 	enum EActionMethod {
 		_METHOD_NORMAL,
 		_METHOD_SENDMESSAGE,
+        _METHOD_RPI,
 	};
 
 	struct SSettingInfo {

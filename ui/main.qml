@@ -160,7 +160,7 @@ ApplicationWindow {
 		}
 
 		onSigClickTest: {
-			invisScripts.testcling();
+			invisScripts.slotTest();
 		}
 	}
 

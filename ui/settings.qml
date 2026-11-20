@@ -126,7 +126,7 @@ Dialog {
 		y: labelMethod.y-3
 		currentIndex: 0
 
-		model: [qsTr("Normal"), qsTr("Send Message")]
+        model: [qsTr("Normal"), qsTr("Send Message"), qsTr("Raspberry pi")]
 		onCurrentIndexChanged: {
 			initFocus();
 		}

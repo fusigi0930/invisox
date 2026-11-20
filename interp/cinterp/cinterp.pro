@@ -16,43 +16,21 @@ INCLUDEPATH += ../../inc
 DEFINES += CINTERP_LIBRARY
 
 SOURCES += ccinterpreter.cpp \
-    ../../inc/cbaseinterp.cpp
+    ../../inc/cbaseinterp.cpp \
+    ccxx.cpp
 
 HEADERS += ccinterpreter.h\
+	ccxx.h \
         cinterp_global.h \
     ../../inc/cbaseinterp.h
 
-# cling environment
-CLING_ROOT = $$_PRO_FILE_PWD_/../../lib/cling
-CLING_INC = $${CLING_ROOT}/include
-CLING_LIB = $${CLING_ROOT}/lib
-CLING_BIN = $${CLING_ROOT}/bin
-CLING_LIBS = -L$${CLING_LIB} \
-			-lclingUserInterface \
-			-lclingMetaProcessor \
-			-lclingInterpreter \
-			-lclingUITextInput \
-			-lclingUtils \
-			-lclangFrontend \
-			-lclangSerialization \
-			-lclangDriver \
-			-lclangCodeGen \
-			-lclangParse \
-			-lclangSema \
-			-lclangEdit \
-			-lclangAnalysis \
-			-lclangAST \
-			-lclangLex \
-			-lclangBasic
-
-# llvm environment
-LLVM_LIB = $$system($${CLING_BIN}/llvm-config --libs) \
-		   $$system($${CLING_BIN}/llvm-config --system-libs)
-
-LLVM_CXXFLAGS = $$system($${CLING_BIN}/llvm-config --cxxflags) -Wno-unused-parameter -Wno-strict-aliasing
-
-# clang environment
-CLANG_INC = #$${CLING_LIB}/clang/3.6.0/include
+# angelscript environment
+AS_ROOT = $$_PRO_FILE_PWD_/angelscript
+AS_INC = $${AS_ROOT}
+AS_LIB = $${AS_ROOT}
+AS_BIN = $${AS_ROOT}
+AS_LIBS = -L$${AS_LIB} \
+			-langelscript
 
 unix {
     target.path = /usr/lib
@@ -67,17 +45,27 @@ win32 {
 CONFIG(debug, debug|release) {
 	DESTDIR = $$_PRO_FILE_PWD_/../../out/debug
 	MOC_DIR = $$_PRO_FILE_PWD_/../../out/obj/moc
-	OBJECTS_DIR = $$_PRO_FILE_PWD_/../../out/obj/debug
+	OBJECTS_DIR = $$_PRO_FILE_PWD_/../../out/obj/cinterp/debug
 } else {
 	DESTDIR = $$_PRO_FILE_PWD_/../../out/release
 	MOC_DIR = $$_PRO_FILE_PWD_/../../out/obj/moc
-	OBJECTS_DIR = $$_PRO_FILE_PWD_/../../out/obj/release
+	OBJECTS_DIR = $$_PRO_FILE_PWD_/../../out/obj/cinterp/release
 }
 
-INCLUDEPATH += $${CLANG_INC} \
-				$${CLING_INC}
+INCLUDEPATH += $${AS_INC}
+LIBS += $${AS_LIBS}
 
-QMAKE_CXXFLAGS += $${LLVM_CXXFLAGS}
+GITVER = $$system("genver.bat")
+GITVER = $$replace(GITVER, "v", "")
+GITVER = $$replace(GITVER, "-", ".")
+GITVER = $$split(GITVER, .)
+GITVER = $$member(GITVER, 0).$$member(GITVER, 1).$$member(GITVER, 2).$$member(GITVER, 3)
 
-LIBS += $${CLING_LIBS}
-LIBS += $${LLVM_LIB}
+VERSION = $$GITVER
+CONFIG += skip_target_version_ext
+QMAKE_TARGET_PRODUCT = "invisOX"
+QMAKE_TARGET_DESCRIPTION = "invisOX - C++ interpreter"
+QMAKE_TARGET_COPYRIGHT = "Copyright(c) 2026 ChuYuan Chiang. All rights reserved"
+QMAKE_TARGET_COMPANY = "ChuYuan Chiang Personal."
+
+QMAKE_POST_LINK += $$_PRO_FILE_PWD_/post_build.bat $$replace(_PRO_FILE_PWD_, /, \\) $$replace(DESTDIR, /, \\)

@@ -4,6 +4,7 @@
 
 CRunLuaThread::CRunLuaThread(lua_State *L)
 {
+	QThread::setTerminationEnabled();
 	mLua=L;
 }
 

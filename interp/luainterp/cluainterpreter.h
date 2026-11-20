@@ -31,4 +31,12 @@ public:
 
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+LUAINTERPSHARED_EXPORT void luaTest();
+#ifdef __cplusplus
+}
+#endif
+
 #endif // CCINTERPRETER_H

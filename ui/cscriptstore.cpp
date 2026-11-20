@@ -7,6 +7,9 @@
 #include "crecordthread.h"
 #include <QDateTime>
 
+#include "interp_comm.h"
+#include <chrono>
+
 /*
  * <?xml version="1.0" encoding="utf-8"?>
  * <scripts>
@@ -639,6 +642,8 @@ int CScriptStore::slotEngineReady() {
 	if (m_pHookThread) {
 		m_pHookThread->start();
 	}
+
+    cmInitCV();
 	return 0;
 }
 
@@ -697,6 +702,24 @@ int CScriptStore::slotEngineRecStop() {
 }
 
 int CScriptStore::slotTest() {
+#ifdef DXGI_GUI_TEST
+    auto start = std::chrono::steady_clock::now();
+    for (int i=0; i<=500; i++) {
+        cmTest();
+    }
+    auto end = std::chrono::steady_clock::now();
+    auto runtime = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    _DMSG("new dxgi get screen time: %lld", runtime.count());
+
+    start = std::chrono::steady_clock::now();
+    for (int i=0; i<=500; i++) {
+        luaTest();
+    }
+    end = std::chrono::steady_clock::now();
+    runtime = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    _DMSG("old gui get screen time: %lld", runtime.count());
+#endif
+    cmTest();
 	return 0;
 }
 
@@ -753,7 +776,7 @@ void CScriptStore::processHookingSignal() {
 		}
 		else {
             QThread::msleep(250);
-			runItem(actionKey);
+                runItem(actionKey);
 		}
 	}
 	_DMSG("exit the process hooking");

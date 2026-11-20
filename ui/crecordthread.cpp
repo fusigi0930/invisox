@@ -2,7 +2,7 @@
 
 CRecordThread::CRecordThread() : QThread()
 {
-
+	QThread::setTerminationEnabled();
 }
 
 CRecordThread::CRecordThread(CScriptStore *store) :

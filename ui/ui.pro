@@ -59,3 +59,4 @@ QMAKE_TARGET_COMPANY = "ChuYuan Chiang Personal."
 
 LIBS += $${INTERP_LIB}
 LIBS += -lluainterp -lengine
+LIBS += -linterp_comm

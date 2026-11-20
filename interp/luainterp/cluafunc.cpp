@@ -5,6 +5,7 @@
 #include <typeinfo>
 #include "copencv.h"
 #include "luna_four_code.h"
+#include "interp_comm.h"
 
 #ifdef Q_OS_WIN
 #	include <windows.h>
@@ -24,6 +25,7 @@
 
 #define MODE_EVENT_WM	1
 #define MODE_EVENT_FUNC	0
+#define MODE_EVENT_RASPBERRY 2
 
 #define VAR_EVENT_MODE "__var_event_mode__"
 #define VAR_TERMINATE_LUA "__var_terminate_lua__"
@@ -443,6 +445,7 @@ void CLua::sendInputFuncEvent(std::vector<int> *vt) {
 					in.ki.dwFlags=KEYEVENTF_KEYUP;
 					::SendInput(1, &in, sizeof(in));
 					QThread::msleep((*vt)[3]);
+                    _DMSG("keyup: %d", (*vt)[1]);
 					break;
 				case EVENT_ACTION_CLICK:
 					for(int i=0; i<(*vt)[3]; i++) {
@@ -540,16 +543,28 @@ int CLua::luaSendEvent(lua_State *L) {
 	int nEventMode=lua_tointeger(L, -1);
 
 	_DMSG("event mode: %d", nEventMode);
+    int nType = vtArgu[0];
+    switch (nType) {
+        case _TYPE_EVENT_KEY: {
+            SKeyEvent e;
+            e.key = vtArgu[1];
+            e.action = vtArgu[2];
+            e.miniSec = vtArgu[3];
+            cmSendEvent(nType, nEventMode, &e);
+        } break;
+        case _TYPE_EVENT_MOUSE: {
+            SMouseEvent e;
+            e.x = vtArgu[1];
+            e.y = vtArgu[2];
+            e.action = vtArgu[3];
+            e.miniSec = vtArgu[4];
+            cmSendEvent(nType, nEventMode, &e);
+        } break;
+        case _TYPE_EVENT_RPIHID: {
+            _DMSG("coming soon");
+        } break;
 
-	switch (nEventMode) {
-		default: break;
-		case MODE_EVENT_FUNC:
-			sendInputFuncEvent(&vtArgu);
-			break;
-		case MODE_EVENT_WM:
-			sendInputWmEvent(&vtArgu);
-			break;
-	}
+    }
 
 	return 0;
 }

@@ -4,18 +4,6 @@
 #include <iostream>
 #include <sstream>
 
-#include <cling/Interpreter/Interpreter.h>
-#include <cling/MetaProcessor/MetaProcessor.h>
-#include <cling/UserInterface/UserInterface.h>
-
-#include <clang/Basic/LangOptions.h>
-#include <clang/Frontend/CompilerInstance.h>
-
-#include <llvm/Support/Signals.h>
-#include <llvm/Support/PrettyStackTrace.h>
-#include <llvm/Support/ManagedStatic.h>
-#include <llvm/ExecutionEngine/ExecutionEngine.h>
-
 #ifdef Q_OS_WIN
 #include <windows.h>
 
@@ -46,9 +34,9 @@ static void initStdOut(bool bInit) {
 }
 
 extern "C" BOOL WINAPI DllMain(
-  HANDLE hinstDLL,
-  DWORD fdwReason,
-  LPVOID lpvReserved
+  [[maybe_unused]] HANDLE hinstDLL,
+  [[maybe_unused]] DWORD fdwReason,
+  [[maybe_unused]] LPVOID lpvReserved
 )
 {
 	switch (fdwReason)
@@ -87,31 +75,6 @@ int CCInterpreter::run(QString szFile) {
 	if (szFile.isEmpty()) {
 		return -3;
 	}
-
-	cling::Interpreter interp(1, g_value);
-	clang::CompilerInstance *compiler;
-	clang::DiagnosticConsumer *client;
-
-	compiler=interp.getCI();
-
-	if (NULL == compiler) {
-		_DMSG("get compiler failed");
-		return -3;
-	}
-
-	interp.AddIncludePath(".");
-	client=compiler->getDiagnostics().getClient();
-
-	if (cling::Interpreter::kSuccess != interp.loadFile(szFile.toLocal8Bit().data())) {
-		return -2;
-	}
-
-	cling::Interpreter::CompilationResult compResult;
-	// for the windows version isssue;
-#ifdef Q_OS_WIN
-	compResult=interp.execute("printf(\"%d\\n\", 100);");
-#endif
-	compResult=interp.execute("main(0, 0)");
 
 	return 0;
 }

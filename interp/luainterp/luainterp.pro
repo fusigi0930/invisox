@@ -13,7 +13,8 @@ TEMPLATE = lib
 
 INCLUDEPATH += ../../inc \
         $$_PRO_FILE_PWD_/lua-5.3.2/src \
-        $$_PRO_FILE_PWD_/opencv/inc
+		../../auto/inc
+
 
 DEFINES += LUAINTERP_LIBRARY
 
@@ -30,10 +31,6 @@ HEADERS += cluainterpreter.h\
     clua.h \
     crunluathread.h \
     copencv.h
-
-INCLUDEPATH += \
-    $$_PRO_FILE_PWD_/lua-5.3.2/src \
-    $$_PRO_FILE_PWD_/opencv/inc
 
 QMAKE_CXXFLAGS += \
     -fpermissive
@@ -59,17 +56,8 @@ win32 | win64 {
 #	QMAKE_LFLAGS+=-Wl,-e,_DllMainCRTStartup@12
 	LIBS += \
     -L$$_PRO_FILE_PWD_/lua-5.3.2/src \
-    -L$$_PRO_FILE_PWD_/opencv/lib64 \
     -L$$DESTDIR \
     -llua
-
-	LIBS += \
-		-llibpng \
-		-llibjpeg \
-		-lzlib \
-		-llibjasper \
-		-llibtiff \
-		-lIlmImf \
 
 # remove 32 bits libraries
 #	LIBS += \
@@ -78,16 +66,7 @@ win32 | win64 {
 #		-lopencv_imgproc2413.dll \
 #		-lopencv_objdetect2413.dll
 
-# add 64 bits
-    LIBS += \
-        -lopencv_core243.dll \
-        -lopencv_highgui243.dll \
-        -lopencv_imgproc243.dll \
-        -lopencv_objdetect243.dll
-
-
-	LIBS += \
-		-lgdi32
+	LIBS += -linterp_comm
 
 	QMAKE_POST_LINK += $$_PRO_FILE_PWD_/post_build.bat $$replace(_PRO_FILE_PWD_, /, \\) $$replace(DESTDIR, /, \\)
     lua_src.commands = mingw32-make -C $$_PRO_FILE_PWD_/lua-5.3.2 mingw

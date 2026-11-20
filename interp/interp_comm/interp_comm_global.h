@@ -1,0 +1,12 @@
+#ifndef INTERP_COMM_GLOBAL_H
+#define INTERP_COMM_GLOBAL_H
+
+#include <QtCore/qglobal.h>
+
+#if defined(INTERP_COMM_LIBRARY)
+#  define INTERP_COMMSHARED_EXPORT Q_DECL_EXPORT
+#else
+#  define INTERP_COMMSHARED_EXPORT Q_DECL_IMPORT
+#endif
+
+#endif // CINTERP_GLOBAL_H
